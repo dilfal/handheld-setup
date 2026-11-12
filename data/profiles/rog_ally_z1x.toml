@@ -1,0 +1,16 @@
+id = "rogallyz1x"
+nome = "ASUS ROG Ally (Z1 Extreme)"
+descrizione = "ROG Ally del 2023 con AMD Ryzen Z1 Extreme, schermo 1080p a 120 Hz."
+note = [
+  "Profilo non ancora verificato su un dispositivo reale.",
+  "Secondo una segnalazione (Bazzite #5555) le versioni recenti di Bazzite non usano più hhd: TDP e limite di carica passerebbero dal menu rapido di Steam. Da verificare sul dispositivo.",
+  "Il limite di carica all'80% è consigliato per allungare la vita della batteria.",
+]
+
+[match]
+fornitori = ["ASUS"]
+prodotti = ["RC71L"]   # RC71L = Z1 Extreme; la Ally X è RC72LA e non deve abbinarsi
+
+[tweak]
+consigliati = ["tema_scuro", "scala_display_125", "tastiera_schermo", "limite_carica_80"]
+avanzati = ["scala_display_150", "blocca_versione", "aria2_conf", "mullvad_vpn", "aggiorna_sistema"]

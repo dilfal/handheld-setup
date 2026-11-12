@@ -1,0 +1,202 @@
+# Catalogo delle app candidate.
+# tipo: "flatpak" (rif = ID Flathub) | "brew" (rif = pacchetto Homebrew) | "ujust" (rif = ricetta) | "manuale" (rif = URL, nessuna installazione automatica)
+# verificato = false: ID/ricetta scritti a memoria, da controllare sul dispositivo (flatpak remote-info flathub <ID>).
+
+# ── Launcher di giochi ──────────────────────────────────────────────
+[[app]]
+id = "heroic"
+nome = "Heroic Games Launcher"
+descrizione = "Giochi di Epic, GOG e Amazon Games."
+categoria = "launcher"
+tipo = "flatpak"
+rif = "com.heroicgameslauncher.hgl"
+
+[[app]]
+id = "lutris"
+nome = "Lutris"
+descrizione = "Gestore di giochi per Windows, emulatori e altri launcher."
+categoria = "launcher"
+tipo = "flatpak"
+rif = "net.lutris.Lutris"
+
+[[app]]
+id = "bottles"
+nome = "Bottles"
+descrizione = "Ambienti Wine separati per programmi e giochi Windows."
+categoria = "launcher"
+tipo = "flatpak"
+rif = "com.usebottles.bottles"
+
+[[app]]
+id = "prism"
+nome = "Prism Launcher"
+descrizione = "Launcher per Minecraft con più istanze."
+categoria = "launcher"
+tipo = "flatpak"
+rif = "org.prismlauncher.PrismLauncher"
+
+[[app]]
+id = "srm"
+nome = "Steam ROM Manager"
+descrizione = "Aggiunge giochi ed emulatori alla libreria di Steam, con le copertine."
+categoria = "launcher"
+tipo = "flatpak"
+rif = "com.steamgriddb.steam-rom-manager"
+
+# ── Emulazione ──────────────────────────────────────────────────────
+[[app]]
+id = "emudeck"
+nome = "EmuDeck"
+descrizione = "Configura in un colpo solo emulatori, cartelle e frontend."
+categoria = "emulazione"
+tipo = "manuale"
+rif = "https://www.emudeck.com/"
+verificato = false
+
+[[app]]
+id = "retrodeck"
+nome = "RetroDECK"
+descrizione = "Alternativa a EmuDeck: tutto in un unico Flatpak."
+categoria = "emulazione"
+tipo = "flatpak"
+rif = "net.retrodeck.retrodeck"
+
+[[app]]
+id = "retroarch"
+nome = "RetroArch"
+descrizione = "Frontend con moltissimi core per console classiche."
+categoria = "emulazione"
+tipo = "flatpak"
+rif = "org.libretro.RetroArch"
+
+[[app]]
+id = "pcsx2"
+nome = "PCSX2"
+descrizione = "Emulatore di PlayStation 2."
+categoria = "emulazione"
+tipo = "flatpak"
+rif = "net.pcsx2.PCSX2"
+
+[[app]]
+id = "dolphin"
+nome = "Dolphin"
+descrizione = "Emulatore di GameCube e Wii."
+categoria = "emulazione"
+tipo = "flatpak"
+rif = "org.DolphinEmu.dolphin-emu"
+
+[[app]]
+id = "azahar"
+nome = "Azahar"
+descrizione = "Emulatore di Nintendo 3DS."
+categoria = "emulazione"
+tipo = "flatpak"
+rif = "org.azahar_emu.Azahar"
+
+# ── Strumenti per l'handheld ────────────────────────────────────────
+[[app]]
+id = "decky"
+nome = "Decky Loader"
+descrizione = "Plugin per il menu di Steam in Game Mode."
+categoria = "handheld"
+tipo = "ujust"
+rif = "setup-decky"
+rileva = "~/homebrew/services/PluginLoader"
+
+[[app]]
+id = "protonup"
+nome = "ProtonUp-Qt"
+descrizione = "Installa versioni aggiornate di Proton-GE e Wine-GE."
+categoria = "handheld"
+tipo = "flatpak"
+rif = "net.davidotek.pupgui2"
+
+[[app]]
+id = "protonplus"
+nome = "ProtonPlus"
+descrizione = "Alternativa a ProtonUp-Qt per gestire versioni di Proton e Wine."
+categoria = "handheld"
+tipo = "flatpak"
+rif = "com.vysp3r.ProtonPlus"
+
+[[app]]
+id = "goverlay"
+nome = "GOverlay"
+descrizione = "Configura MangoHud (FPS, temperature) con un'interfaccia grafica."
+categoria = "handheld"
+tipo = "flatpak"
+rif = "io.github.benjamimgois.goverlay"
+
+# ── Utilità e multimedia ────────────────────────────────────────────
+[[app]]
+id = "discord"
+nome = "Discord"
+descrizione = "Chat vocale e testuale."
+categoria = "utilita"
+tipo = "flatpak"
+rif = "com.discordapp.Discord"
+
+[[app]]
+id = "firefox"
+nome = "Firefox"
+descrizione = "Browser web."
+categoria = "utilita"
+tipo = "flatpak"
+rif = "org.mozilla.firefox"
+
+[[app]]
+id = "vlc"
+nome = "VLC"
+descrizione = "Lettore di video e musica."
+categoria = "utilita"
+tipo = "flatpak"
+rif = "org.videolan.VLC"
+
+[[app]]
+id = "obs"
+nome = "OBS Studio"
+descrizione = "Registrazione dello schermo e dirette."
+categoria = "utilita"
+tipo = "flatpak"
+rif = "com.obsproject.Studio"
+
+[[app]]
+id = "flatseal"
+nome = "Flatseal"
+descrizione = "Gestisce i permessi delle app Flatpak."
+categoria = "utilita"
+tipo = "flatpak"
+rif = "com.github.tchx84.Flatseal"
+
+[[app]]
+id = "warehouse"
+nome = "Warehouse"
+descrizione = "Gestisce le app Flatpak installate."
+categoria = "utilita"
+tipo = "flatpak"
+rif = "io.github.flattool.Warehouse"
+
+[[app]]
+id = "gearlever"
+nome = "Gear Lever"
+descrizione = "Gestisce le AppImage e le integra nel menu."
+categoria = "utilita"
+tipo = "flatpak"
+rif = "it.mijorus.gearlever"
+
+[[app]]
+id = "aria2"
+nome = "aria2"
+descrizione = "Downloader da terminale a più connessioni (comando aria2c). Si installa con Homebrew, senza toccare il sistema."
+categoria = "utilita"
+tipo = "brew"
+rif = "aria2"
+rileva_cmd = "aria2c"
+
+[[app]]
+id = "spotify"
+nome = "Spotify"
+descrizione = "Musica in streaming."
+categoria = "utilita"
+tipo = "flatpak"
+rif = "com.spotify.Client"

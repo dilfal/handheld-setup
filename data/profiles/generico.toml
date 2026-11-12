@@ -1,0 +1,10 @@
+id = "generico"
+nome = "Altro handheld (generico)"
+descrizione = "Dispositivo non riconosciuto: solo le impostazioni sicure per qualsiasi handheld."
+note = [
+  "Questo profilo non si abbina da solo: serve a chi ha un altro dispositivo o vuole scegliere a mano.",
+]
+
+[tweak]
+consigliati = ["tema_scuro", "scala_display_125", "tastiera_schermo"]
+avanzati = ["scala_display_150", "blocca_versione", "aria2_conf", "mullvad_vpn", "aggiorna_sistema"]

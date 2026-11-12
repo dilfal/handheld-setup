@@ -1,0 +1,21 @@
+id = "onexplayer1s"
+nome = "OneXPlayer 1S (8,4\", i7-1195G7)"
+descrizione = "OneXPlayer 1S con Intel Tiger Lake (Iris Xe), 16 GB di RAM e SSD da 1 TB. Bazzite non lo supporta ufficialmente."
+note = [
+  "Senza la correzione INTEL_DEBUG=norbc la Gaming Mode parte con lo schermo nero: è tra le impostazioni consigliate e verificata su questo dispositivo (Bazzite #6240).",
+  "Il pannello è montato in verticale: Bazzite lo ruota da solo. Se hai già lo schermo nero, applica la correzione da console (Ctrl+Alt+F3) con `python3 -m bhs --applica intel_norbc`.",
+  "«Passa al desktop» dal menu rapido di Steam avvia la sessione KDE Plasma.",
+  "I controlli sono gestiti da InputPlumber (non da hhd). Il funzionamento di tutti i tasti non è ancora verificato.",
+  "Ventola: il driver del kernel non supporta le schede OneXPlayer Intel, quindi niente curve personalizzate.",
+  "Se un gioco va in crash sulla Iris Xe (VK_ERROR_DEVICE_LOST), prova l'opzione di avvio Steam `INTEL_DEBUG=stall %command%` (Bazzite #6110, non confermata).",
+]
+
+# Fonte: guida di Retro Think sul OneXPlayer 1S (7 novembre 2026), verificata su un dispositivo reale:
+# product_name = "ONE XPLAYER".
+[match]
+fornitori = ["ONE-NETBOOK"]
+prodotti = ["ONE XPLAYER"]
+
+[tweak]
+consigliati = ["tema_scuro", "scala_display_150", "tastiera_schermo", "intel_norbc"]
+avanzati = ["scala_display_125", "luminosita_game_mode", "blocca_versione", "aria2_conf", "mullvad_vpn", "aggiorna_sistema"]

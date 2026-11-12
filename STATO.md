@@ -2,7 +2,7 @@
 
 Aggiornato il 12 novembre 2026 (sera), dopo la revisione degli errori.
 
-## Fatto in questa sessione (NON ancora in un commit, NON ancora pubblicato)
+## Fatto in questa sessione (pubblicato: commit `85fbec6` su `dilfal/bazzite-handheld-setup`, `dffff34` su `dilfal/070293`)
 - **Git riparato**: 82 `desktop.ini` di Google Drive dentro `.git` (anche in `.git/refs`) facevano fallire `git fetch` e `git fsck`. Tolti: ora entrambi puliti.
 - **ROG Ally: immagine sbagliata**. `bazzite-ally` non esiste più (la ISO dà 404; in `ublue-os/bazzite` restano solo `bazzite`, `bazzite-deck` e varianti). Corretto in `bazzite-deck` in guide (`index.html`, `installazione_rog_ally.html`), README, profilo Ally, PROSSIMI_PASSI.
 - **Decky**: `ujust setup-decky` senza argomento apre un menu a scelta, impossibile dalla finestra. Ora il catalogo usa `setup-decky install` (ricetta e argomenti separati in `catalog.py`).
@@ -16,7 +16,6 @@ Aggiornato il 12 novembre 2026 (sera), dopo la revisione degli errori.
 - **Test**: 70 verdi su Windows (5 saltati) e in Fedora 44 WSL (nessuno saltato).
 
 ## Manca
-- Commit e push di questo repository, poi `python tools/pubblica_070293.py` e commit e push di `C:\Users\df\Dev\GitHub\siti-web\070293`: finché non si fa, online resta la versione con gli errori.
 - Prove sui due dispositivi (elenco in `PROSSIMI_PASSI.md`, sezione 4).
 
 ## Non verificabile senza i dispositivi
@@ -29,4 +28,4 @@ Aggiornato il 12 novembre 2026 (sera), dopo la revisione degli errori.
 - WSL da Git Bash: `MSYS_NO_PATHCONV=1 wsl -d FedoraLinux-44 --cd /mnt/c/… -- comando`; per comandi con `$` o virgolette, scrivere uno script e lanciarlo.
 
 ## Prossimo passo
-- Pubblicare (se l'utente dà l'ok), poi prove sul campo con `curl -L 070293.xyz/oxp | sh` e `curl -L 070293.xyz/ally | sh`.
+- Prove sul campo con `curl -L 070293.xyz/oxp | sh` e `curl -L 070293.xyz/ally | sh`.

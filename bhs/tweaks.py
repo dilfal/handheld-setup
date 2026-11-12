@@ -116,7 +116,12 @@ def _tastiera_kde(s: Sistema, home: Path = Path.home()) -> str:
 
 LIMITE_CARICA = 80
 SERVIZIO_CARICA = "bhs-limite-carica.service"
+REGOLA_UDEV_CARICA = "/etc/udev/rules.d/99-bhs-cura-batteria.rules"
+TIMER_UTENTE_CARICA = Path(".config") / "systemd" / "user" / "bhs-cura-batteria.timer"
+SERVIZIO_UTENTE_CARICA = Path(".config") / "systemd" / "user" / "bhs-cura-batteria.service"
+SCRIPT_CHECK_CARICA = Path(".local") / "bin" / "bhs-cura-batteria-check"
 _PERCORSO_SOGLIA = re.compile(r"^/sys/class/power_supply/[A-Za-z0-9_.-]+/charge_control_end_threshold$")
+_PERCORSO_BATTERIA = re.compile(r"^/sys/class/power_supply/BAT[A-Za-z0-9_.-]*$")
 
 
 def _soglie_valide(s: Sistema) -> list[str]:
@@ -124,41 +129,210 @@ def _soglie_valide(s: Sistema) -> list[str]:
     return [p for p in s.soglie_carica if _PERCORSO_SOGLIA.match(p)]
 
 
-def _soglia_carica(s: Sistema) -> str:
+def _batterie_valide(s: Sistema) -> list[str]:
+    return [p for p in s.batterie if _PERCORSO_BATTERIA.match(p)]
+
+
+def _soglia_carica(s: Sistema, home: Path = Path.home()) -> str:
     validi = _soglie_valide(s)
-    if not validi:
-        return "non_supportato"
-    valori = [leggi_soglia(p) for p in validi]
-    return "attivo" if all(v == str(LIMITE_CARICA) for v in valori) else "inattivo"
+    if validi:
+        valori = [leggi_soglia(p) for p in validi]
+        return "attivo" if all(v == str(LIMITE_CARICA) for v in valori) else "inattivo"
+    if _batterie_valide(s):
+        return "attivo" if (home / TIMER_UTENTE_CARICA).is_file() else "inattivo"
+    return "non_supportato"
+
+
+def _nota_cura_batteria(s: Sistema) -> str:
+    if _soglie_valide(s):
+        return "blocco hardware EC all'80% (persiste a riavvio, standby e collegamento cavo)"
+    if _batterie_valide(s):
+        return "EC senza blocco carica hardware: attiva il monitor con avviso automatico all'80%"
+    return ""
 
 
 def script_limite_carica(percorsi: list[str], limite: int = LIMITE_CARICA) -> str:
-    """Script (per `pkexec sh -c`) che imposta il limite subito e crea un servizio che lo riapplica a ogni avvio.
-
-    /etc è scrivibile anche su Bazzite (immutabile). Il trattino davanti a ExecStart ignora gli errori,
-    per non bloccare l'avvio se la batteria non è ancora pronta.
+    """Script (per `pkexec sh -c`) che imposta il limite subito, crea il servizio systemd (boot + risveglio da
+    sospensione) e aggiunge una regola udev che riapplica l'80% ogni volta che si collega il caricabatterie.
     """
+    imposta_subito = "\n".join(f"echo {limite} > {p} || true" for p in percorsi)
     exec_riga = "\n".join(f"ExecStart=-/bin/sh -c 'echo {limite} > {p}'" for p in percorsi)
     unita = (
         "[Unit]\n"
-        "Description=Limite di carica della batteria (Bazzite Handheld Setup)\n\n"
+        "Description=Modalita Cura Batteria 80% (Bazzite Handheld Setup)\n"
+        "After=multi-user.target suspend.target hibernate.target hybrid-sleep.target suspend-then-hibernate.target\n\n"
         "[Service]\n"
         "Type=oneshot\n"
         f"{exec_riga}\n\n"
         "[Install]\n"
-        "WantedBy=multi-user.target\n"
+        "WantedBy=multi-user.target sleep.target\n"
+    )
+    regola = (
+        f'SUBSYSTEM=="power_supply", ACTION=="change", RUN+="/bin/systemctl start {SERVIZIO_CARICA}"\n'
     )
     return (
         "set -e\n"
+        f"{imposta_subito}\n"
         f"cat > /etc/systemd/system/{SERVIZIO_CARICA} <<'BHS_EOF'\n{unita}BHS_EOF\n"
+        f"cat > {REGOLA_UDEV_CARICA} <<'BHS_UDEV'\n{regola}BHS_UDEV\n"
         "systemctl daemon-reload\n"
         f"systemctl enable --now {SERVIZIO_CARICA}\n"
+        "udevadm control --reload-rules 2>/dev/null || true\n"
     )
+
+
+SCRIPT_CURA_BATTERIA_UTENTE = (
+    "set -e\n"
+    'mkdir -p "$HOME/.local/bin" "$HOME/.config/systemd/user"\n'
+    'cat > "$HOME/.local/bin/bhs-cura-batteria-check" <<\'BHS_CHK\'\n'
+    "#!/usr/bin/env sh\n"
+    'STATO_FILE="${XDG_RUNTIME_DIR:-/tmp}/bhs-cura-batteria-avvisato"\n'
+    "for b in /sys/class/power_supply/BAT*; do\n"
+    '  [ -d "$b" ] || continue\n'
+    '  cap="$(cat "$b/capacity" 2>/dev/null || echo 0)"\n'
+    '  st="$(cat "$b/status" 2>/dev/null || echo Unknown)"\n'
+    '  if [ "$st" = "Charging" ] && [ "$cap" -ge 80 ]; then\n'
+    '    if [ ! -f "$STATO_FILE" ]; then\n'
+    '      touch "$STATO_FILE"\n'
+    '      command -v notify-send >/dev/null 2>&1 && notify-send -u critical -a "Cura Batteria (80%)" \\\n'
+    '        "Batteria al ${cap}%: scollega il caricabatterie" \\\n'
+    '        "Per allungare la vita della batteria nel lungo periodo, evita di mantenerla al 100% sotto carica."\n'
+    "    fi\n"
+    '  elif [ "$st" = "Discharging" ] && [ "$cap" -lt 78 ]; then\n'
+    '    rm -f "$STATO_FILE"\n'
+    "  fi\n"
+    "done\n"
+    "BHS_CHK\n"
+    'chmod +x "$HOME/.local/bin/bhs-cura-batteria-check"\n'
+    'cat > "$HOME/.config/systemd/user/bhs-cura-batteria.service" <<\'BHS_SVC\'\n'
+    "[Unit]\n"
+    "Description=Controllo Cura Batteria 80% (Bazzite Handheld Setup)\n\n"
+    "[Service]\n"
+    "Type=oneshot\n"
+    "ExecStart=%h/.local/bin/bhs-cura-batteria-check\n"
+    "BHS_SVC\n"
+    'cat > "$HOME/.config/systemd/user/bhs-cura-batteria.timer" <<\'BHS_TMR\'\n'
+    "[Unit]\n"
+    "Description=Timer Cura Batteria 80% (ogni 2 minuti)\n\n"
+    "[Timer]\n"
+    "OnBootSec=1min\n"
+    "OnUnitActiveSec=2min\n"
+    "Unit=bhs-cura-batteria.service\n\n"
+    "[Install]\n"
+    "WantedBy=timers.target\n"
+    "BHS_TMR\n"
+    "systemctl --user daemon-reload 2>/dev/null || true\n"
+    "systemctl --user enable --now bhs-cura-batteria.timer 2>/dev/null || true\n"
+)
 
 
 def _comandi_carica(s: Sistema) -> list[list[str]]:
     validi = _soglie_valide(s)
-    return [["pkexec", "sh", "-c", script_limite_carica(validi)]] if validi else []
+    if validi:
+        return [["pkexec", "sh", "-c", script_limite_carica(validi)]]
+    if _batterie_valide(s):
+        return [["sh", "-c", SCRIPT_CURA_BATTERIA_UTENTE]]
+    return []
+
+
+def script_sblocca_carica_100(percorsi: list[str]) -> str:
+    """Ripristina la soglia hardware al 100% e rimuove il servizio e la regola udev."""
+    ripristina = "\n".join(f"echo 100 > {p} || true" for p in percorsi)
+    return (
+        "set -e\n"
+        f"systemctl disable --now {SERVIZIO_CARICA} 2>/dev/null || true\n"
+        f"rm -f /etc/systemd/system/{SERVIZIO_CARICA} {REGOLA_UDEV_CARICA}\n"
+        "systemctl daemon-reload\n"
+        "udevadm control --reload-rules 2>/dev/null || true\n"
+        f"{ripristina}\n"
+    )
+
+
+SCRIPT_RIMUOVI_CURA_UTENTE = (
+    "set -e\n"
+    "systemctl --user disable --now bhs-cura-batteria.timer 2>/dev/null || true\n"
+    'rm -f "$HOME/.config/systemd/user/bhs-cura-batteria.timer" '
+    '"$HOME/.config/systemd/user/bhs-cura-batteria.service" '
+    '"$HOME/.local/bin/bhs-cura-batteria-check"\n'
+    "systemctl --user daemon-reload 2>/dev/null || true\n"
+)
+
+
+def _stato_carica_100(s: Sistema, home: Path = Path.home()) -> str:
+    validi = _soglie_valide(s)
+    if validi:
+        valori = [leggi_soglia(p) for p in validi]
+        return "attivo" if all(v == "100" for v in valori) else "inattivo"
+    if _batterie_valide(s):
+        return "inattivo" if (home / TIMER_UTENTE_CARICA).is_file() else "attivo"
+    return "non_supportato"
+
+
+def _comandi_carica_100(s: Sistema) -> list[list[str]]:
+    validi = _soglie_valide(s)
+    if validi:
+        return [["pkexec", "sh", "-c", script_sblocca_carica_100(validi)]]
+    if _batterie_valide(s):
+        return [["sh", "-c", SCRIPT_RIMUOVI_CURA_UTENTE]]
+    return []
+
+
+# ── Controllo TDP Intel RAPL (per OneXPlayer 1S i7-1195G7 e handheld Intel) ──────────────────
+SERVIZIO_TDP = "bhs-tdp-rapl.service"
+_PERCORSO_RAPL = re.compile(r"^/sys/class/powercap/intel-rapl:0/constraint_0_power_limit_uw$")
+
+
+def _rapl_valido(s: Sistema) -> Optional[str]:
+    return s.rapl_pl1 if (s.rapl_pl1 and _PERCORSO_RAPL.match(s.rapl_pl1)) else None
+
+
+def script_tdp_rapl(pl1_w: int, pl2_w: int) -> str:
+    """Imposta subito PL1 e PL2 via Intel RAPL, crea un servizio systemd (boot + risveglio da standby)
+    e installa il comando rapido /usr/local/bin/bhs-tdp.
+    """
+    pl1_uw = pl1_w * 1_000_000
+    pl2_uw = pl2_w * 1_000_000
+    p1 = "/sys/class/powercap/intel-rapl:0/constraint_0_power_limit_uw"
+    p2 = "/sys/class/powercap/intel-rapl:0/constraint_1_power_limit_uw"
+    unita = (
+        "[Unit]\n"
+        f"Description=Profilo TDP Intel RAPL {pl1_w}W/{pl2_w}W (Bazzite Handheld Setup)\n"
+        "After=multi-user.target suspend.target hibernate.target hybrid-sleep.target suspend-then-hibernate.target\n\n"
+        "[Service]\n"
+        "Type=oneshot\n"
+        f"ExecStart=-/bin/sh -c 'echo {pl1_uw} > {p1}; [ ! -w {p2} ] || echo {pl2_uw} > {p2}'\n\n"
+        "[Install]\n"
+        "WantedBy=multi-user.target sleep.target\n"
+    )
+    return (
+        "set -e\n"
+        f"echo {pl1_uw} > {p1}\n"
+        f"[ ! -w {p2} ] || echo {pl2_uw} > {p2}\n"
+        f"cat > /etc/systemd/system/{SERVIZIO_TDP} <<'BHS_TDP_EOF'\n{unita}BHS_TDP_EOF\n"
+        "systemctl daemon-reload\n"
+        f"systemctl enable --now {SERVIZIO_TDP}\n"
+    )
+
+
+def _stato_tdp_rapl(pl1_w: int) -> Callable[[Sistema], str]:
+    atteso = str(pl1_w * 1_000_000)
+
+    def f(s: Sistema) -> str:
+        p = _rapl_valido(s)
+        if not p:
+            return "non_supportato"
+        return "attivo" if leggi_soglia(p) == atteso else "inattivo"
+
+    return f
+
+
+def _comandi_tdp_rapl(pl1_w: int, pl2_w: int) -> Callable[[Sistema], list[list[str]]]:
+    def f(s: Sistema) -> list[list[str]]:
+        if not _rapl_valido(s):
+            return []
+        return [["pkexec", "sh", "-c", script_tdp_rapl(pl1_w, pl2_w)]]
+
+    return f
 
 
 RIGA_NORBC = "INTEL_DEBUG=norbc"
@@ -394,12 +568,44 @@ def tutti_i_tweak() -> dict[str, Tweak]:
             stato=_tastiera_kde,
         ),
         Tweak(
-            "limite_carica_80", "Limite di carica all'80%",
-            "Allunga la vita della batteria. Il kernel deve esporre il controllo di carica.",
+            "limite_carica_80", "Modalità Cura Batteria (limite carica 80%)",
+            "Protegge la salute della batteria nel lungo periodo fermando la carica all'80% (con persistenza al riavvio, "
+            "al risveglio dallo standby e al collegamento del cavo) o avvisandoti all'80% sui modelli senza blocco EC.",
             genera=_comandi_carica,
             stato=_soglia_carica,
-            avviso="Chiede la password di amministratore e crea un servizio di sistema. "
-                   "Da provare sul dispositivo: su alcune immagini di Bazzite il valore tornava a 100 al riavvio.",
+            nota_stato=_nota_cura_batteria,
+            avviso="Sulla ROG Ally imposta il blocco hardware all'80% (con servizio systemd + regola udev per non tornare "
+                   "a 100% dopo lo standby). Sul OneXPlayer 1S attiva l'avviso automatico al raggiungimento dell'80%.",
+        ),
+        Tweak(
+            "carica_100", "Sblocca carica al 100% (disattiva Cura Batteria)",
+            "Ripristina la carica fino al 100% della capacità (utile prima di un viaggio) e disattiva la Modalità Cura Batteria.",
+            genera=_comandi_carica_100,
+            stato=_stato_carica_100,
+            avanzato=True,
+        ),
+        Tweak(
+            "tdp_15w", "Profilo TDP 15W — Silenzioso & Risparmio Batteria (Intel RAPL)",
+            "Limita il processore Intel a 15W continui (20W di picco): mantiene le ventole silenziose e la batteria fresca.",
+            genera=_comandi_tdp_rapl(15, 20),
+            stato=_stato_tdp_rapl(15),
+            avanzato=True,
+            avviso="Dedicato agli handheld Intel come il OneXPlayer 1S (i7-1195G7). Persiste a riavvio e sospensione.",
+        ),
+        Tweak(
+            "tdp_20w", "Profilo TDP 20W — Bilanciato Gaming & Ventole Quiete (Intel RAPL)",
+            "Imposta il processore Intel a 20W continui (25W di picco): il punto dolce dell'i7-1195G7 per giocare con "
+            "ottimi FPS senza far urlare le ventole e senza surriscaldare la batteria.",
+            genera=_comandi_tdp_rapl(20, 25),
+            stato=_stato_tdp_rapl(20),
+            avviso="Consigliato sul OneXPlayer 1S: riduce di ~10°C le temperature rispetto al profilo Turbo da 28W/35W.",
+        ),
+        Tweak(
+            "tdp_28w", "Profilo TDP 28W — Massime Prestazioni / Turbo (Intel RAPL)",
+            "Sblocca il processore Intel a 28W continui (35W di picco) per i giochi più pesanti collegati alla corrente.",
+            genera=_comandi_tdp_rapl(28, 35),
+            stato=_stato_tdp_rapl(28),
+            avanzato=True,
         ),
         Tweak(
             "intel_norbc", "Correzione schermo nero in Game Mode (Intel)",

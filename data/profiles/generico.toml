@@ -3,8 +3,9 @@ nome = "Altro handheld (generico)"
 descrizione = "Dispositivo non riconosciuto: solo le impostazioni sicure per qualsiasi handheld."
 note = [
   "Questo profilo non si abbina da solo: serve a chi ha un altro dispositivo o vuole scegliere a mano.",
+  "Include la Modalità Cura Batteria all'80% (con blocco hardware se supportato dal kernel o avviso automatico all'80%).",
 ]
 
 [tweak]
-consigliati = ["tema_scuro", "scala_display_125", "tastiera_schermo"]
-avanzati = ["scala_display_150", "blocca_versione", "aria2_conf", "mullvad_vpn", "aggiorna_sistema"]
+consigliati = ["tema_scuro", "scala_display_125", "tastiera_schermo", "limite_carica_80"]
+avanzati = ["scala_display_150", "carica_100", "tdp_15w", "tdp_20w", "tdp_28w", "blocca_versione", "aria2_conf", "mullvad_vpn", "aggiorna_sistema"]

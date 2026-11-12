@@ -258,6 +258,59 @@ class TestLimiteCarica(unittest.TestCase):
             f.write_text("80\n")
             self.assertEqual(detect.leggi_soglia(str(f)), "80")
 
+    def test_persistenza_standby_e_udev(self):
+        s = tweaks.script_limite_carica([self.BAT])
+        self.assertIn("sleep.target", s)
+        self.assertIn("suspend.target", s)
+        self.assertIn(tweaks.REGOLA_UDEV_CARICA, s)
+        s100 = tweaks.script_sblocca_carica_100([self.BAT])
+        self.assertIn(f"echo 100 > {self.BAT}", s100)
+        self.assertIn(tweaks.REGOLA_UDEV_CARICA, s100)
+
+    @unittest.skipUnless(shutil.which("sh"), "serve una shell POSIX")
+    def test_modalita_utente_senza_soglia_hardware(self):
+        # Sul OneXPlayer 1S l'EC non espone charge_control_end_threshold, ma BAT0 esiste:
+        # la Cura Batteria attiva il timer utente con avviso all'80% senza pkexec.
+        with tempfile.TemporaryDirectory() as d:
+            home = Path(d)
+            sist = detect.Sistema(batterie=["/sys/class/power_supply/BAT0"])
+            t80 = tweaks.tutti_i_tweak()["limite_carica_80"]
+            t100 = tweaks.tutti_i_tweak()["carica_100"]
+            cmd = t80.comandi_per(sist)
+            self.assertEqual(cmd[0][:2], ["sh", "-c"])
+            self.assertEqual(tweaks._soglia_carica(sist, home=home), "inattivo")
+            env = {**os.environ, "HOME": d}
+            r = subprocess.run(["sh", "-c", tweaks.SCRIPT_CURA_BATTERIA_UTENTE], env=env, capture_output=True, text=True)
+            self.assertEqual(r.returncode, 0, r.stderr)
+            self.assertTrue((home / tweaks.TIMER_UTENTE_CARICA).is_file())
+            self.assertTrue((home / tweaks.SCRIPT_CHECK_CARICA).is_file())
+            self.assertEqual(tweaks._soglia_carica(sist, home=home), "attivo")
+            self.assertEqual(tweaks._stato_carica_100(sist, home=home), "inattivo")
+            r2 = subprocess.run(["sh", "-c", tweaks.SCRIPT_RIMUOVI_CURA_UTENTE], env=env, capture_output=True, text=True)
+            self.assertEqual(r2.returncode, 0, r2.stderr)
+            self.assertEqual(tweaks._soglia_carica(sist, home=home), "inattivo")
+            self.assertEqual(tweaks._stato_carica_100(sist, home=home), "attivo")
+
+
+class TestTdpRapl(unittest.TestCase):
+    RAPL = "/sys/class/powercap/intel-rapl:0/constraint_0_power_limit_uw"
+
+    def test_script_tdp(self):
+        s = tweaks.script_tdp_rapl(20, 25)
+        self.assertIn("echo 20000000 > /sys/class/powercap/intel-rapl:0/constraint_0_power_limit_uw", s)
+        self.assertIn("echo 25000000 > /sys/class/powercap/intel-rapl:0/constraint_1_power_limit_uw", s)
+        self.assertIn("systemctl enable --now bhs-tdp-rapl.service", s)
+        self.assertIn("sleep.target", s)
+
+    def test_comandi_e_validazione_percorso(self):
+        t20 = tweaks.tutti_i_tweak()["tdp_20w"]
+        self.assertEqual(t20.stato(detect.Sistema()), "non_supportato")
+        self.assertEqual(t20.comandi_per(detect.Sistema()), [])
+        cattivo = "/sys/class/powercap/intel-rapl:0/constraint_0_power_limit_uw; rm -rf /"
+        self.assertEqual(t20.comandi_per(detect.Sistema(rapl_pl1=cattivo)), [])
+        cmd = t20.comandi_per(detect.Sistema(rapl_pl1=self.RAPL))
+        self.assertEqual(cmd[0][:3], ["pkexec", "sh", "-c"])
+
 
 class TestProfiloFisso(unittest.TestCase):
     ALLY = {"fornitore": "ASUSTeK COMPUTER INC.", "prodotto": "ROG Ally RC71L_RC71L"}

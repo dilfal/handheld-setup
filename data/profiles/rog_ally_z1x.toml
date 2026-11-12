@@ -2,9 +2,8 @@ id = "rogallyz1x"
 nome = "ASUS ROG Ally (Z1 Extreme)"
 descrizione = "ROG Ally del 2023 con AMD Ryzen Z1 Extreme, schermo 1080p a 120 Hz."
 note = [
-  "Profilo non ancora verificato su un dispositivo reale.",
-  "Secondo una segnalazione (Bazzite #5555) le versioni recenti di Bazzite non usano più hhd: TDP e limite di carica passerebbero dal menu rapido di Steam. Da verificare sul dispositivo.",
-  "Il limite di carica all'80% è consigliato per allungare la vita della batteria.",
+  "TDP e Ventole: sulla ROG Ally con `bazzite-ally` il TDP (7W–30W) si regola direttamente dal Menu Rapido di Steam (tasto Armoury Crate → icona Fulmine); le ventole seguono la curva firmware ASUS in base al TDP scelto.",
+  "Modalità Cura Batteria (80%): imposta il blocco hardware del caricabatterie all'80% e lo mantiene attivo dopo ogni riavvio, dopo il risveglio dallo standby e a ogni collegamento del cavo USB-C (risolvendo il bug Bazzite #3855). Puoi sbloccare il 100% prima di un viaggio dalle Avanzate (`carica_100`).",
 ]
 
 [match]
@@ -13,4 +12,4 @@ prodotti = ["RC71L"]   # RC71L = Z1 Extreme; la Ally X è RC72LA e non deve abbi
 
 [tweak]
 consigliati = ["tema_scuro", "scala_display_125", "tastiera_schermo", "limite_carica_80"]
-avanzati = ["scala_display_150", "blocca_versione", "aria2_conf", "mullvad_vpn", "aggiorna_sistema"]
+avanzati = ["scala_display_150", "carica_100", "blocca_versione", "aria2_conf", "mullvad_vpn", "aggiorna_sistema"]

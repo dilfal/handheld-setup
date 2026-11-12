@@ -76,6 +76,29 @@ def soglie_carica(root: Path = Path("/")) -> list[str]:
     return sorted(glob.glob(modello))
 
 
+def batterie_presenti(root: Path = Path("/")) -> list[str]:
+    """Cartelle delle batterie in /sys/class/power_supply/BAT* (anche quando non espongono la soglia di carica)."""
+    modello = str(root / "sys" / "class" / "power_supply" / "BAT*")
+    return sorted(p for p in glob.glob(modello) if Path(p).is_dir())
+
+
+def rapl_pl1_percorso(root: Path = Path("/")) -> Optional[str]:
+    """Percorso sysfs del limite TDP PL1 Intel RAPL (se presente sul sistema)."""
+    p = root / "sys" / "class" / "powercap" / "intel-rapl:0" / "constraint_0_power_limit_uw"
+    return str(p) if p.is_file() else None
+
+
+def ventole_hwmon(root: Path = Path("/")) -> list[str]:
+    """Sensori ventole in /sys/class/hwmon/*/fan*_input, come «nome (RPM)»."""
+    voci = []
+    for f in sorted(glob.glob(str(root / "sys" / "class" / "hwmon" / "*" / "fan*_input"))):
+        p = Path(f)
+        nome = _leggi(p.parent / "name") or p.parent.name
+        rpm = _leggi(p) or "?"
+        voci.append(f"{nome}/{p.name}: {rpm} RPM")
+    return voci
+
+
 def leggi_soglia(percorso: str) -> Optional[str]:
     return _leggi(Path(percorso))
 
@@ -189,6 +212,9 @@ class Sistema:
     flatpak: set[str] = field(default_factory=set)
     param_kernel: list[str] = field(default_factory=list)
     soglie_carica: list[str] = field(default_factory=list)
+    batterie: list[str] = field(default_factory=list)
+    rapl_pl1: Optional[str] = None
+    ventole: list[str] = field(default_factory=list)
     brew: Optional[str] = None                      # comando per Homebrew ("brew" o il percorso completo)
     layer: set[str] = field(default_factory=set)    # pacchetti aggiunti con rpm-ostree
     mullvad_servizio: bool = False                  # mullvad-daemon.service abilitato
@@ -224,6 +250,9 @@ def raccogli(root: Path = Path("/"), esegui: Esegui = esegui_semplice,
         flatpak=flatpak_installati(esegui),
         param_kernel=parametri_kernel(root),
         soglie_carica=soglie_carica(root),
+        batterie=batterie_presenti(root),
+        rapl_pl1=rapl_pl1_percorso(root),
+        ventole=ventole_hwmon(root),
         brew="brew" if esiste("brew") else (BREW_BIN if (root / BREW_BIN.lstrip("/")).exists() else None),
         layer=pacchetti_aggiunti(esegui),
         mullvad_servizio=servizio_attivo("mullvad-daemon.service", esegui),
@@ -249,7 +278,9 @@ def testo_diagnosi(s: Sistema) -> str:
         f"Pannello:     quirk di gamescope = {s.quirk_pannello or 'nessuno trovato'}"
         f" · scelta utente (PANEL_TYPE) = {pannello_utente(Path.home()) or 'nessuna'}",
         "Limite carica: " + (", ".join(f"{p} = {leggi_soglia(p) or '?'}" for p in s.soglie_carica)
-                             if s.soglie_carica else "non esposto dal kernel"),
+                             if s.soglie_carica else ("non esposto dal kernel (batteria presente)" if s.batterie else "non esposto dal kernel")),
+        "TDP RAPL:     " + (f"{s.rapl_pl1} = {leggi_soglia(s.rapl_pl1) or '?'} uW" if s.rapl_pl1 else "non presente (non Intel o non esposto)"),
+        "Ventole:      " + ("; ".join(s.ventole) if s.ventole else "nessun sensore hwmon esposto (gestione automatica EC)"),
         "Strumenti:    " + ", ".join(f"{k}={'sì' if v else 'no'}" for k, v in s.strumenti.items()),
         f"Flatpak installati: {len(s.flatpak)}",
         f"Homebrew:     {s.brew or 'non trovato'}",

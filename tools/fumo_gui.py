@@ -39,7 +39,7 @@ DMI = {
 def sistema_finto(*a, **k):
     return detect.Sistema(
         os={"ID": "bazzite", "PRETTY_NAME": "Bazzite 44 (KDE Plasma - finto per la prova)"},
-        dmi=DMI, kernel="6.18-prova", immagine="ghcr.io/ublue-os/bazzite-ally:stable",
+        dmi=DMI, kernel="6.18-prova", immagine="ghcr.io/ublue-os/bazzite-deck:stable",
         gpu=["AMD Radeon Graphics (finto)"],
         strumenti={"plasma-apply-colorscheme": True, "kscreen-doctor": True, "kwriteconfig6": True,
                    "flatpak": True, "pkexec": True, "rpm-ostree": True, "curl": True,
@@ -47,10 +47,14 @@ def sistema_finto(*a, **k):
         brew="brew" if quale == "ally" else None,
         flatpak={"com.discordapp.Discord", "org.mozilla.firefox"},
         soglie_carica=[BAT] if quale == "ally" else [],
+        batterie=["/sys/class/power_supply/BAT0"],
+        rapl_pl1="/sys/class/powercap/intel-rapl:0/constraint_0_power_limit_uw" if quale == "oxp" else None,
     )
 
 
+# gui.py importa `raccogli` per nome: va sostituito anche lì, altrimenti la finestra rileva il PC su cui gira la prova.
 detect.raccogli = sistema_finto
+gui.raccogli = sistema_finto
 errori = []
 
 

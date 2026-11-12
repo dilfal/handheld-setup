@@ -1,4 +1,4 @@
-"""Test della logica (senza GTK). Eseguire da `bazzite-handheld-setup`: python -I -m unittest discover -s tests"""
+"""Test della logica (senza interfaccia Qt). Eseguire da `bazzite-handheld-setup`: python -I -m unittest discover -s tests"""
 
 import os
 import shutil
@@ -81,6 +81,12 @@ class TestCatalogo(unittest.TestCase):
     def test_manuale_senza_comando(self):
         a = next(v for v in catalog.carica_catalogo() if v.id == "emudeck")
         self.assertIsNone(a.comando())
+
+    def test_decky_senza_menu_interattivo(self):
+        # «ujust setup-decky» senza argomento apre un menu a scelta: dalla finestra (stdin vuoto) non può
+        # funzionare. Con «install» la ricetta procede da sola; ricetta e argomento sono due parole distinte.
+        a = next(v for v in catalog.carica_catalogo() if v.id == "decky")
+        self.assertEqual(a.comando(), ["ujust", "setup-decky", "install"])
 
 
 class TestRilevamento(unittest.TestCase):
@@ -214,6 +220,14 @@ class TestCli(unittest.TestCase):
         for tid in ("intel_norbc", "scala_display_125", "limite_carica_80"):
             self.assertIn(tid, t)
 
+    def test_elenco_allineato(self):
+        # Lo stato comincia alla stessa colonna in ogni riga, anche per l'ID più lungo.
+        righe = cli.testo_elenco(detect.Sistema()).splitlines()[1:]
+        largo = max(len(i) for i in tweaks.tutti_i_tweak())
+        for r in righe:
+            self.assertEqual(r[2 + largo], " ", r)
+            self.assertNotEqual(r[3 + largo], " ", r)
+
     def test_sconosciuto(self):
         righe = []
         self.assertEqual(cli.applica(["non_esiste"], True, detect.Sistema(), righe.append), 2)
@@ -266,6 +280,49 @@ class TestLimiteCarica(unittest.TestCase):
         s100 = tweaks.script_sblocca_carica_100([self.BAT])
         self.assertIn(f"echo 100 > {self.BAT}", s100)
         self.assertIn(tweaks.REGOLA_UDEV_CARICA, s100)
+
+    def test_servizio_non_riscrive_e_udev_non_blocca(self):
+        # La regola udev rilancia il servizio a ogni evento della batteria: non deve bloccare udev e il
+        # servizio non deve riscrivere un valore già giusto (una scrittura può generare un altro evento).
+        s = tweaks.script_limite_carica([self.BAT])
+        self.assertIn("systemctl start --no-block bhs-limite-carica.service", s)
+        self.assertIn(f"ExecStart=-/bin/sh -c '[ \"$$(cat {self.BAT} 2>/dev/null)\" = 80 ] || echo 80 > {self.BAT}'", s)
+
+    @unittest.skipUnless(shutil.which("sh") and os.name == "posix", "serve ambiente POSIX per lo script")
+    def test_avviso_riprova_se_la_notifica_fallisce(self):
+        # In Game Mode nessuno mostra le notifiche: l'avviso non va segnato come dato, così riparte al giro dopo.
+        with tempfile.TemporaryDirectory() as d:
+            base = Path(d)
+            home, bat, cestino, run = base / "home", base / "ps" / "BAT0", base / "bin", base / "run"
+            for c in (home, bat, cestino, run):
+                c.mkdir(parents=True)
+            finto = cestino / "notify-send"
+            finto.write_text('#!/bin/sh\necho x >> "$BHS_CONTA"\nexit "$BHS_RC"\n', encoding="utf-8")
+            finto.chmod(0o755)
+            conta = base / "conta"
+            env = {**os.environ, "HOME": str(home), "XDG_RUNTIME_DIR": str(run), "BHS_BATTERIE": str(base / "ps"),
+                   "BHS_CONTA": str(conta), "PATH": f"{cestino}{os.pathsep}{os.environ['PATH']}"}
+            r = subprocess.run(["sh", "-c", tweaks.SCRIPT_CURA_BATTERIA_UTENTE], env=env, capture_output=True, text=True)
+            self.assertEqual(r.returncode, 0, r.stderr)
+            controllo = home / tweaks.SCRIPT_CHECK_CARICA
+            segno = run / "bhs-cura-batteria-avvisato"
+
+            def giro(stato, carica, rc):
+                (bat / "status").write_text(stato + "\n")
+                (bat / "capacity").write_text(f"{carica}\n")
+                esito = subprocess.run(["sh", str(controllo)], env={**env, "BHS_RC": str(rc)}, capture_output=True)
+                self.assertEqual(esito.returncode, 0)   # il servizio non deve mai risultare fallito
+                return len(conta.read_text().splitlines()) if conta.exists() else 0
+
+            self.assertEqual(giro("Charging", 70, 0), 0)
+            self.assertEqual(giro("Charging", 80, 1), 1)      # notifica fallita…
+            self.assertFalse(segno.exists())                  # …quindi non segnata
+            self.assertEqual(giro("Charging", 81, 0), 2)      # riprova e riesce
+            self.assertTrue(segno.exists())
+            self.assertEqual(giro("Charging", 90, 0), 2)      # non ripete l'avviso
+            self.assertEqual(giro("Discharging", 77, 0), 2)
+            self.assertFalse(segno.exists())                  # pronto per la prossima carica
+            self.assertEqual(giro("Charging", 80, 0), 3)
 
     @unittest.skipUnless(shutil.which("sh"), "serve una shell POSIX")
     def test_modalita_utente_senza_soglia_hardware(self):
@@ -422,6 +479,37 @@ class TestInstallatoriDedicati(unittest.TestCase):
             norbc = home / ".config/environment.d/10-gamescope-session.conf"
             self.assertTrue(norbc.is_file())
             self.assertIn("INTEL_DEBUG=norbc", norbc.read_text(encoding="utf-8").splitlines())
+
+    @unittest.skipUnless(shutil.which("sh") and shutil.which("curl") and os.name == "posix",
+                         "servono ambiente POSIX e curl")
+    def test_aggiornamento_via_pipe_conserva_il_venv(self):
+        # Come «curl … | sh»: lo script arriva da stdin, scarica l'archivio e sostituisce l'installazione.
+        # L'ambiente Qt (.venv con PySide6) non sta nell'archivio e non va riscaricato a ogni aggiornamento.
+        import tarfile
+        with tempfile.TemporaryDirectory() as d:
+            base = Path(d)
+            archivio = base / "src.tar.gz"
+            with tarfile.open(archivio, "w:gz") as tar:
+                for nome in ("bhs", "data", "install.sh", "install-onexplayer.sh", "install-rog-ally.sh"):
+                    tar.add(self.RADICE / nome, arcname=f"bazzite-handheld-setup-main/{nome}",
+                            filter=lambda i: None if "__pycache__" in i.name else i)
+            home = base / "home"
+            dest = home / ".local/share/bazzite-handheld-setup"
+            (dest / ".venv").mkdir(parents=True)
+            (dest / ".venv" / "segno").write_text("x")
+            (dest / "vecchio.txt").write_text("x")
+            env = {k: v for k, v in os.environ.items() if not k.startswith("XDG_")}
+            env.update(HOME=str(home), DISPLAY=":9", BHS_FORCE="1", BHS_SKIP_VENV="1",
+                       BHS_URL=archivio.as_uri())
+            with (self.RADICE / "install.sh").open("rb") as script:
+                r = subprocess.run(["sh", "-s", "--", "--elenco"], stdin=script, env=env, cwd=d,
+                                   capture_output=True, text=True)
+            self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+            self.assertIn("intel_norbc", r.stdout)
+            self.assertTrue((dest / "bhs/__main__.py").is_file())
+            self.assertFalse((dest / "vecchio.txt").exists(), "la versione precedente non è stata sostituita")
+            self.assertTrue((dest / ".venv/segno").is_file(), "l'ambiente Qt è andato perso con l'aggiornamento")
+            self.assertEqual(list(dest.parent.glob("bazzite-handheld-setup.*")), [])
 
     @unittest.skipUnless(shutil.which("sh") and os.name == "posix", "serve ambiente POSIX per lo script")
     def test_live_usb_sysimage_onexplayer(self):

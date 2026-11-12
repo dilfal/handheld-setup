@@ -1,5 +1,5 @@
 # Catalogo delle app candidate.
-# tipo: "flatpak" (rif = ID Flathub) | "brew" (rif = pacchetto Homebrew) | "ujust" (rif = ricetta) | "manuale" (rif = URL, nessuna installazione automatica)
+# tipo: "flatpak" (rif = ID Flathub) | "brew" (rif = pacchetto Homebrew) | "ujust" (rif = ricetta ed eventuali argomenti) | "manuale" (rif = URL, nessuna installazione automatica)
 # verificato = false: ID/ricetta scritti a memoria, da controllare sul dispositivo (flatpak remote-info flathub <ID>).
 
 # ── Launcher di giochi ──────────────────────────────────────────────
@@ -100,7 +100,8 @@ nome = "Decky Loader"
 descrizione = "Plugin per il menu di Steam in Game Mode."
 categoria = "handheld"
 tipo = "ujust"
-rif = "setup-decky"
+# Con «install» la ricetta non apre il menu a scelta (che senza terminale non può funzionare).
+rif = "setup-decky install"
 rileva = "~/homebrew/services/PluginLoader"
 
 [[app]]

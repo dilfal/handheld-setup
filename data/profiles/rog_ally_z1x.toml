@@ -2,7 +2,7 @@ id = "rogallyz1x"
 nome = "ASUS ROG Ally (Z1 Extreme)"
 descrizione = "ROG Ally del 2023 con AMD Ryzen Z1 Extreme, schermo 1080p a 120 Hz."
 note = [
-  "TDP e Ventole: sulla ROG Ally con `bazzite-ally` il TDP (7W–30W) si regola direttamente dal Menu Rapido di Steam (tasto Armoury Crate → icona Fulmine); le ventole seguono la curva firmware ASUS in base al TDP scelto.",
+  "TDP e Ventole: sulla ROG Ally con `bazzite-deck` il TDP (7W–30W) si regola direttamente dal Menu Rapido di Steam (tasto Armoury Crate → icona Fulmine); le ventole seguono la curva firmware ASUS in base al TDP scelto.",
   "Modalità Cura Batteria (80%): imposta il blocco hardware del caricabatterie all'80% e lo mantiene attivo dopo ogni riavvio, dopo il risveglio dallo standby e a ogni collegamento del cavo USB-C (risolvendo il bug Bazzite #3855). Puoi sbloccare il 100% prima di un viaggio dalle Avanzate (`carica_100`).",
 ]
 

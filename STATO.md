@@ -1,29 +1,32 @@
 # STATO: Bazzite Handheld Setup (v0.6.0)
 
-Aggiornato il 12 novembre 2026.
+Aggiornato il 12 novembre 2026 (sera), dopo la revisione degli errori.
 
-## Fatto
-- **Pubblicazione su GitHub (`dilfal/bazzite-handheld-setup`) e sul dominio `070293.xyz` (`dilfal/070293`)**:
-  - Scorciatoie da terminale ultra-corte attive in HTTPS:
-    - OneXPlayer 1S: `curl -L 070293.xyz/oxp | sh` (o senza pipe: `curl -Lo f 070293.xyz/oxp && sh f`)
-    - ASUS ROG Ally: `curl -L 070293.xyz/ally | sh`
-    - Generico: `curl -L 070293.xyz/bhs | sh`
-  - Guide interattive HTML pubblicate online su `https://070293.xyz/` (e `/guide/`).
-- **Modalità «Cura Batteria (80%)» (`limite_carica_80`) + Sblocco al 100% (`carica_100`)**:
-  - **Con soglia hardware EC (ROG Ally)**: imposta `80%`, crea `bhs-limite-carica.service` agganciato sia al boot (`multi-user.target`) sia al risveglio dallo standby (`sleep.target` / `After=suspend.target...`) e scrive la regola udev `/etc/udev/rules.d/99-bhs-cura-batteria.rules` al collegamento del cavo USB-C (risolve il bug Bazzite #3855).
-  - **Senza soglia hardware EC (OneXPlayer 1S Intel)**: attiva un timer utente (`bhs-cura-batteria.timer` + script `~/.local/bin/bhs-cura-batteria-check`) che avvisa automaticamente con una notifica appena la batteria in carica raggiunge l'80%.
-  - **`carica_100` (nelle Avanzate)**: disattiva la Cura Batteria e riporta la carica al 100% (utile prima di un viaggio).
-- **Controllo TDP (Intel RAPL per OneXPlayer 1S) e Ventole**:
-  - Rilevamento in `detect.py` (`--diagnosi`) di Intel RAPL (`constraint_0_power_limit_uw`) e sensori ventole `hwmon`.
-  - Nuovi tweak TDP persistenti a riavvio e standby per processori Intel: `tdp_20w` (consigliato su OneXPlayer 1S: 20W PL1 / 25W PL2, ~10°C in meno e ventole quiete), `tdp_15w` (15W/20W silenzioso/batteria) e `tdp_28w` (28W/35W Turbo).
-  - Documentato nelle guide e nel profilo OneXPlayer 1S anche il tasto fisico **MUTE** sul retro (tenuto premuto 2 secondi) per attivare la Modalità Silenziosa (Night Mode) hardware delle ventole.
-- **Installatore intelligente a 3 modalità** (Console `Ctrl+Alt+F3` con fix automatico + Autostart KDE, Live USB `/mnt/sysimage`, Desktop KDE).
-- **Test unitari**: 65 test passati al 100% in Fedora 44 WSL.
+## Fatto in questa sessione (NON ancora in un commit, NON ancora pubblicato)
+- **Git riparato**: 82 `desktop.ini` di Google Drive dentro `.git` (anche in `.git/refs`) facevano fallire `git fetch` e `git fsck`. Tolti: ora entrambi puliti.
+- **ROG Ally: immagine sbagliata**. `bazzite-ally` non esiste più (la ISO dà 404; in `ublue-os/bazzite` restano solo `bazzite`, `bazzite-deck` e varianti). Corretto in `bazzite-deck` in guide (`index.html`, `installazione_rog_ally.html`), README, profilo Ally, PROSSIMI_PASSI.
+- **Decky**: `ujust setup-decky` senza argomento apre un menu a scelta, impossibile dalla finestra. Ora il catalogo usa `setup-decky install` (ricetta e argomenti separati in `catalog.py`).
+- **Avviso batteria 80% (OneXPlayer)**: se la notifica falliva (Game Mode) l'avviso veniva comunque segnato come dato e non ripartiva più; ora si segna solo se la notifica parte, e lo script esce sempre con 0.
+- **Limite di carica (Ally)**: la regola udev usa `systemctl start --no-block`; il servizio scrive solo se il valore è diverso da 80 (niente cicli di eventi). Provato con systemd vero in Fedora WSL.
+- **Installatore**: l'aggiornamento via `curl | sh` conserva `.venv` (prima riscaricava PySide6 ogni volta). Dedicati rigenerati.
+- **Finestra**: testi secondari con colore preso dal tema (con tema chiaro il benvenuto era quasi invisibile). `--elenco` allineato.
+- **`tools/fumo_gui.py`**: sostituiva `detect.raccogli` ma non `gui.raccogli`, quindi provava il PC reale e non il sistema finto. Corretto; tre profili senza errori (PySide6 6.12 su Windows, offscreen).
+- **Documenti**: README e PROSSIMI_PASSI allineati (18 tweak, 70 test, voci completate, prove nuove per TDP e Cura Batteria).
+- **Verificato e a posto**: scorciatoie online `/oxp`, `/ally`, `/bhs` identiche ai file locali; archivio GitHub scaricabile; 21 ID Flathub esistenti; `.repo` di Mullvad accettato; `ujust update`, `regenerate-grub`, `setup-boot-windows-steam`, `bios`, `enroll-secure-boot-key` esistono.
+- **Test**: 70 verdi su Windows (5 saltati) e in Fedora 44 WSL (nessuno saltato).
 
-## File toccati
-- `bhs/detect.py`, `bhs/tweaks.py`, `data/profiles/*.toml`, `tests/test_core.py`
-- `guide/installazione_onexplayer_1s.html`, `guide/installazione_rog_ally.html`, `STATO.md`
-- Sincronizzato `C:\Users\df\Dev\GitHub\siti-web\070293` (`070293.xyz`)
+## Manca
+- Commit e push di questo repository, poi `python tools/pubblica_070293.py` e commit e push di `C:\Users\df\Dev\GitHub\siti-web\070293`: finché non si fa, online resta la versione con gli errori.
+- Prove sui due dispositivi (elenco in `PROSSIMI_PASSI.md`, sezione 4).
+
+## Non verificabile senza i dispositivi
+- `sudo -A` di `setup-decky install` (serve la finestra della password di Bazzite).
+- Limiti RAPL: il BIOS del OneXPlayer può imporre un proprio tetto.
+- `/mnt/sysimage` e utente già creato nella Live USB attuale di Bazzite.
+- `kscreen-doctor output.1.scale.…` (numero dell'uscita) e tastiera Maliit su Plasma 6.
+
+## Note d'uso
+- WSL da Git Bash: `MSYS_NO_PATHCONV=1 wsl -d FedoraLinux-44 --cd /mnt/c/… -- comando`; per comandi con `$` o virgolette, scrivere uno script e lanciarlo.
 
 ## Prossimo passo
-- Test sul campo sui due dispositivi fisici usando `curl -L 070293.xyz/oxp | sh` e `curl -L 070293.xyz/ally | sh`.
+- Pubblicare (se l'utente dà l'ok), poi prove sul campo con `curl -L 070293.xyz/oxp | sh` e `curl -L 070293.xyz/ally | sh`.

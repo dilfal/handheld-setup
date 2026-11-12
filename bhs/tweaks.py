@@ -156,7 +156,12 @@ def script_limite_carica(percorsi: list[str], limite: int = LIMITE_CARICA) -> st
     sospensione) e aggiunge una regola udev che riapplica l'80% ogni volta che si collega il caricabatterie.
     """
     imposta_subito = "\n".join(f"echo {limite} > {p} || true" for p in percorsi)
-    exec_riga = "\n".join(f"ExecStart=-/bin/sh -c 'echo {limite} > {p}'" for p in percorsi)
+    # Scrive solo se il valore è diverso: la regola udev rilancia il servizio a ogni evento della batteria e,
+    # se una scrittura generasse a sua volta un evento, senza questo controllo si entrerebbe in un ciclo.
+    # In un'unità systemd «$$» è il dollaro letterale.
+    exec_riga = "\n".join(
+        f"ExecStart=-/bin/sh -c '[ \"$$(cat {p} 2>/dev/null)\" = {limite} ] || echo {limite} > {p}'"
+        for p in percorsi)
     unita = (
         "[Unit]\n"
         "Description=Modalita Cura Batteria 80% (Bazzite Handheld Setup)\n"
@@ -168,7 +173,7 @@ def script_limite_carica(percorsi: list[str], limite: int = LIMITE_CARICA) -> st
         "WantedBy=multi-user.target sleep.target\n"
     )
     regola = (
-        f'SUBSYSTEM=="power_supply", ACTION=="change", RUN+="/bin/systemctl start {SERVIZIO_CARICA}"\n'
+        f'SUBSYSTEM=="power_supply", ACTION=="change", RUN+="/bin/systemctl start --no-block {SERVIZIO_CARICA}"\n'
     )
     return (
         "set -e\n"
@@ -187,21 +192,24 @@ SCRIPT_CURA_BATTERIA_UTENTE = (
     'cat > "$HOME/.local/bin/bhs-cura-batteria-check" <<\'BHS_CHK\'\n'
     "#!/usr/bin/env sh\n"
     'STATO_FILE="${XDG_RUNTIME_DIR:-/tmp}/bhs-cura-batteria-avvisato"\n'
-    "for b in /sys/class/power_supply/BAT*; do\n"
+    'for b in "${BHS_BATTERIE:-/sys/class/power_supply}"/BAT*; do\n'
     '  [ -d "$b" ] || continue\n'
     '  cap="$(cat "$b/capacity" 2>/dev/null || echo 0)"\n'
     '  st="$(cat "$b/status" 2>/dev/null || echo Unknown)"\n'
     '  if [ "$st" = "Charging" ] && [ "$cap" -ge 80 ]; then\n'
-    '    if [ ! -f "$STATO_FILE" ]; then\n'
-    '      touch "$STATO_FILE"\n'
-    '      command -v notify-send >/dev/null 2>&1 && notify-send -u critical -a "Cura Batteria (80%)" \\\n'
+    # L'avviso si segna come dato solo se la notifica è partita davvero: in Game Mode non c'è chi la
+    # mostra, e così il controllo riprova al giro successivo (per esempio appena si passa al Desktop).
+    '    if [ ! -f "$STATO_FILE" ] && command -v notify-send >/dev/null 2>&1 \\\n'
+    '      && notify-send -u critical -a "Cura Batteria (80%)" \\\n'
     '        "Batteria al ${cap}%: scollega il caricabatterie" \\\n'
-    '        "Per allungare la vita della batteria nel lungo periodo, evita di mantenerla al 100% sotto carica."\n'
+    '        "Per allungare la vita della batteria nel lungo periodo, evita di mantenerla al 100% sotto carica."; then\n'
+    '      touch "$STATO_FILE"\n'
     "    fi\n"
     '  elif [ "$st" = "Discharging" ] && [ "$cap" -lt 78 ]; then\n'
     '    rm -f "$STATO_FILE"\n'
     "  fi\n"
     "done\n"
+    "exit 0\n"
     "BHS_CHK\n"
     'chmod +x "$HOME/.local/bin/bhs-cura-batteria-check"\n'
     'cat > "$HOME/.config/systemd/user/bhs-cura-batteria.service" <<\'BHS_SVC\'\n'
@@ -287,8 +295,8 @@ def _rapl_valido(s: Sistema) -> Optional[str]:
 
 
 def script_tdp_rapl(pl1_w: int, pl2_w: int) -> str:
-    """Imposta subito PL1 e PL2 via Intel RAPL, crea un servizio systemd (boot + risveglio da standby)
-    e installa il comando rapido /usr/local/bin/bhs-tdp.
+    """Imposta subito PL1 e PL2 via Intel RAPL e crea un servizio systemd che li riapplica all'avvio
+    e al risveglio dallo standby. I tre profili usano lo stesso servizio: vale l'ultimo applicato.
     """
     pl1_uw = pl1_w * 1_000_000
     pl2_uw = pl2_w * 1_000_000

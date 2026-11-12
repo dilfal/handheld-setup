@@ -26,7 +26,7 @@ class App:
     descrizione: str
     categoria: str
     tipo: str            # "flatpak" | "brew" | "ujust" | "manuale"
-    rif: str             # ID Flatpak, pacchetto Homebrew, ricetta ujust o URL
+    rif: str             # ID Flatpak, pacchetto Homebrew, ricetta ujust (con argomenti) o URL
     rileva: Optional[str] = None      # percorso (con ~) che prova che è già installata
     rileva_cmd: Optional[str] = None  # comando che prova che è già installata (per i pacchetti Homebrew)
     verificato: bool = True
@@ -49,7 +49,7 @@ class App:
             brew = sistema.brew if sistema is not None else "brew"
             return [brew, "install", self.rif] if brew else None   # senza Homebrew: istruzioni a mano
         if self.tipo == "ujust":
-            return ["ujust", self.rif]
+            return ["ujust", *self.rif.split()]   # ricetta più eventuali argomenti (es. «setup-decky install»)
         return None  # "manuale": nessun comando, lo script mostra il link
 
 

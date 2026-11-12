@@ -6,7 +6,7 @@ Due script separati, uno per dispositivo, che condividono lo stesso codice:
 | Dispositivo | Scorciatoia | Script | Profilo | Immagine Bazzite raccomandata |
 |---|---|---|---|---|
 | OneXPlayer 1S (8,4", i7-1195G7) | `070293.xyz/oxp` | `install-onexplayer.sh` | `onexplayer1s` | `bazzite-deck` (KDE Plasma 6) |
-| ASUS ROG Ally (Z1 Extreme) | `070293.xyz/ally` | `install-rog-ally.sh` | `rogallyz1x` | `bazzite-ally` (KDE Plasma 6) |
+| ASUS ROG Ally (Z1 Extreme) | `070293.xyz/ally` | `install-rog-ally.sh` | `rogallyz1x` | `bazzite-deck` (KDE Plasma 6) |
 | Altro handheld | `070293.xyz/bhs` | `install.sh` | `generico` | `bazzite-deck` (KDE Plasma 6) |
 
 ## Avvio Rapido (Desktop, Console `Ctrl+Alt+F3` o Live USB)
@@ -49,7 +49,7 @@ Se lo script dedicato gira su un dispositivo diverso, la finestra lo segnala con
 - **Dalla Live USB di Bazzite a fine installazione (`/mnt/sysimage`):** se lanciato prima del primo riavvio della chiavetta USB, pre-configura direttamente l'SSD appena installato (`INTEL_DEBUG=norbc` + app + Autostart KDE), evitando del tutto che si verifichi lo schermo nero al primo avvio.
 - Gli script dedicati sono **generati** da `install.sh` con `python3 tools/genera_installatori.py`: dopo ogni modifica a `install.sh` va rilanciato (`--verifica` controlla che non si disallineino).
 - Non usa `sudo` sul sistema installato. Di norma non installa pacchetti di sistema: solo Flatpak, Homebrew, `ujust`, `steamosctl` e impostazioni KDE (`plasma-apply-colorscheme`, `kscreen-doctor`, `kwriteconfig6`). L'unica eccezione è Mullvad (`rpm-ostree`), facoltativa e in «Avanzate».
-- Alcune azioni facoltative chiedono la password di amministratore con `pkexec`: limite di carica (crea un servizio systemd), blocco della versione (`ostree admin pin 0`) e Mullvad.
+- Alcune azioni facoltative chiedono la password di amministratore con `pkexec`: limite di carica (crea un servizio systemd e una regola udev), profili TDP Intel (servizio systemd), blocco della versione (`ostree admin pin 0`) e Mullvad.
 - Rileva dispositivo, immagine e app già installate; quelle presenti compaiono spuntate e bloccate. Nulla cambia nella finestra grafica finché non premi «Installa» nel riepilogo.
 
 ## Strumenti aggiuntivi (tutti facoltativi, nelle «Avanzate» o tra le app)
@@ -71,5 +71,5 @@ Le quattro guide HTML interattive (con pulsanti per copiare i comandi in un clic
   - **[guide/ottimizzazione_rog_ally.html](file:///C:/Users/df/Dev/Scripts/bazzite-handheld-setup/guide/ottimizzazione_rog_ally.html)** (*Parte 2 — Ottimizzazione Giochi .exe Locali*): GE-Proton, aggiunta degli `.exe` a Steam, display 120Hz VRR + risoluzione 900p (1600×900) e script automatici per *Red Dead Redemption 2*, *The Witcher 3 Remastered* e *Skyrim Special Edition* (fisica Havok 120Hz).
 
 ## Stato (v0.6.0)
-Fatto e provato con test (61): rilevamento, profili, profilo fisso, installatori (inclusi modalità console automatica e pre-configurazione Live USB `/mnt/sysimage`), tweak KDE Plasma 6 ed esecuzione con simulazione (`python -I -m unittest discover -s tests`). Gli installatori dedicati sono verificati con `tools/genera_installatori.py --verifica`.
+Fatto e provato con test (70): rilevamento, profili, profilo fisso, installatori (inclusi modalità console automatica e pre-configurazione Live USB `/mnt/sysimage`), tweak KDE Plasma 6 ed esecuzione con simulazione (`python -I -m unittest discover -s tests`). Gli installatori dedicati sono verificati con `tools/genera_installatori.py --verifica`.
 Pubblicato su GitHub (`dilfal/bazzite-handheld-setup`) e servito con scorciatoie e guide online su `https://070293.xyz`.

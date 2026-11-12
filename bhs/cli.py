@@ -14,10 +14,12 @@ ETICHETTE = {"attivo": "già attivo", "inattivo": "da applicare", "non_supportat
 
 def testo_elenco(s: Sistema) -> str:
     righe = ["Tweak disponibili (usa l'ID con --applica):"]
-    for t in tutti_i_tweak().values():
+    tweaks = tutti_i_tweak()
+    largo = max(len(i) for i in tweaks)   # colonne allineate anche con gli ID più lunghi
+    for t in tweaks.values():
         stato = ETICHETTE.get(t.stato(s), "?")
         extra = "  [riavvio]" if t.richiede_riavvio else ""
-        righe.append(f"  {t.id:<18} {stato:<20} {t.titolo}{extra}")
+        righe.append(f"  {t.id:<{largo}} {stato:<20} {t.titolo}{extra}")
     return "\n".join(righe)
 
 

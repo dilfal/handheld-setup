@@ -6,7 +6,7 @@ import subprocess
 from typing import Optional
 
 from PySide6.QtCore import QObject, Qt, QThread, Signal
-from PySide6.QtGui import QFont, QGuiApplication
+from PySide6.QtGui import QFont, QGuiApplication, QPalette
 from PySide6.QtWidgets import (
     QApplication,
     QCheckBox,
@@ -100,6 +100,17 @@ QPlainTextEdit.log {
 PAGINE = ["benvenuto", "dispositivo", "app", "tweak", "riepilogo", "esecuzione"]
 
 
+def colore_tenue() -> str:
+    """Colore del testo secondario: quello del tema, attenuato verso lo sfondo.
+
+    Un grigio chiaro fisso si legge solo con un tema scuro: su un tema chiaro il testo spariva.
+    """
+    pal = QGuiApplication.palette()
+    testo, sfondo = pal.color(QPalette.ColorRole.WindowText), pal.color(QPalette.ColorRole.Window)
+    canali = ((testo.red(), sfondo.red()), (testo.green(), sfondo.green()), (testo.blue(), sfondo.blue()))
+    return "#" + "".join(f"{round(t * 0.68 + s * 0.32):02x}" for t, s in canali)
+
+
 class TouchRiga(QFrame):
     """Riga touch con titolo, sottotitolo e controllo opzionale (es. checkbox o pulsante)."""
 
@@ -120,7 +131,7 @@ class TouchRiga(QFrame):
         self.lbl_sub = None
         if sottotitolo:
             self.lbl_sub = QLabel(sottotitolo)
-            self.lbl_sub.setStyleSheet("color: #aaaaaa; font-size: 13px;")
+            self.lbl_sub.setStyleSheet(f"color: {colore_tenue()}; font-size: 13px;")
             self.lbl_sub.setWordWrap(True)
             testo_layout.addWidget(self.lbl_sub)
 
@@ -265,7 +276,7 @@ class Procedura(QMainWindow):
         lbl_desc = QLabel(testo)
         lbl_desc.setWordWrap(True)
         lbl_desc.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        lbl_desc.setStyleSheet("font-size: 15px; line-height: 1.4; color: #dddddd;")
+        lbl_desc.setStyleSheet("font-size: 15px;")   # colore del tema: si legge con tema chiaro e scuro
         lay.addWidget(lbl_desc)
 
         lay.addStretch(2)
@@ -335,7 +346,7 @@ class Procedura(QMainWindow):
         self.gb_note.setTitle(f"Note per: {self.profilo.nome}")
         desc = QLabel(self.profilo.descrizione)
         desc.setWordWrap(True)
-        desc.setStyleSheet("color: #aaaaaa; font-style: italic; margin-bottom: 6px;")
+        desc.setStyleSheet(f"color: {colore_tenue()}; font-style: italic; margin-bottom: 6px;")
         self.lay_note.addWidget(desc)
         for n in self.profilo.note:
             self.lay_note.addWidget(TouchRiga(n))
@@ -359,7 +370,7 @@ class Procedura(QMainWindow):
             lay_gb = QVBoxLayout(gb)
             if cod == "launcher":
                 lbl_info = QLabel(f"Già installate nel sistema: {presenti}. Le altre sono selezionabili sotto.")
-                lbl_info.setStyleSheet("color: #aaaaaa; font-size: 13px; margin-bottom: 4px;")
+                lbl_info.setStyleSheet(f"color: {colore_tenue()}; font-size: 13px; margin-bottom: 4px;")
                 lay_gb.addWidget(lbl_info)
 
             for app in (a for a in self.catalogo if a.categoria == cod):
@@ -521,7 +532,7 @@ class Procedura(QMainWindow):
         gb = QGroupBox("Riepilogo azioni da eseguire")
         lay_gb = QVBoxLayout(gb)
         lbl_info = QLabel(desc)
-        lbl_info.setStyleSheet("color: #dddddd; font-size: 14px; margin-bottom: 8px;")
+        lbl_info.setStyleSheet("font-size: 14px; margin-bottom: 8px;")
         lay_gb.addWidget(lbl_info)
 
         for a in azioni:

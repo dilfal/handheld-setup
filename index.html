@@ -3,19 +3,286 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>bazzite-handheld-setup</title>
-  <style>
-    body { font-family: system-ui, -apple-system, sans-serif; background: #FFF6E3; color: #1B2B21; display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; text-align: center; }
-    .card { background: #fff; border: 3px solid #1B2B21; padding: 40px; border-radius: 22px; max-width: 500px; box-shadow: 6px 6px 0 #1B2B21; }
-    h1 { color: #1F883D; margin-top: 0; }
-    p { color: #5C6A5F; line-height: 1.6; }
-  </style>
+  <title>Bazzite Handheld Setup — Configurazione guidata per OneXPlayer 1S e ROG Ally</title>
+  <meta name="description" content="Configurazione guidata Qt6 per Bazzite KDE Plasma 6 su OneXPlayer 1S, ASUS ROG Ally e altri handheld: fix schermo nero, Cura Batteria 80%, app e guide passo-passo.">
+  <link rel="stylesheet" href="assets/site.css">
+  <script src="assets/site.js" defer></script>
 </head>
 <body>
-  <div class="card">
-    <h1>bazzite-handheld-setup è online! 🌱</h1>
-    <p>Questo sito è stato creato con <strong>Pagi Hub</strong>.</p>
-    <p>Per pubblicare il sito vero, trascina la tua cartella HTML nell'applicazione.</p>
+
+<header class="topbar">
+  <div class="container topbar-inner">
+    <a class="brand" href="#top">
+      <span class="brand-mark">B</span>
+      <span>Bazzite Handheld Setup</span>
+      <span class="version-pill">v0.6.0</span>
+    </a>
+    <nav class="nav-links" aria-label="Navigazione principale">
+      <a href="#configuratore">Configuratore</a>
+      <a href="#cosa-fa">Cosa fa</a>
+      <a href="#anteprima">Interfaccia</a>
+      <a href="#guide">Guide</a>
+      <a href="#faq">FAQ</a>
+      <a href="https://github.com/dilfal/bazzite-handheld-setup" target="_blank" rel="noopener">GitHub</a>
+    </nav>
   </div>
+</header>
+
+<main id="top">
+  <section class="hero">
+    <div class="container">
+      <div class="eyebrow">Bazzite KDE Plasma 6 &middot; OneXPlayer 1S &middot; ASUS ROG Ally</div>
+      <h1>Che dispositivo hai? Trova subito il comando giusto.</h1>
+      <p>
+        Configurazione guidata nativa in <strong>Qt6 (PySide6)</strong> per il post-installazione di Bazzite su handheld.
+        Seleziona il tuo modello e il punto in cui ti trovi per ottenere il comando esatto e la guida dedicata.
+      </p>
+    </div>
+  </section>
+
+  <!-- WIZARD INTERATTIVO A 2 DOMANDE -->
+  <section id="configuratore" class="wizard-section">
+    <div class="container">
+      <div class="wizard-shell">
+        <div class="wizard-step">
+          <div class="step-header">
+            <span class="step-num">1</span>
+            <h2>Che dispositivo hai?</h2>
+          </div>
+          <div class="choice-grid choice-grid-3">
+            <button type="button" class="choice-btn is-active" data-device="oxp" aria-pressed="true">
+              <span class="choice-tag">Intel Tiger Lake</span>
+              <span class="choice-title">OneXPlayer 1S</span>
+              <span class="choice-meta">8,4" 2560&times;1600 &middot; i7-1195G7 &middot; Iris Xe</span>
+            </button>
+            <button type="button" class="choice-btn" data-device="ally" aria-pressed="false">
+              <span class="choice-tag">AMD Z1 Extreme</span>
+              <span class="choice-title">ASUS ROG Ally</span>
+              <span class="choice-meta">7" 1080p 120Hz VRR &middot; Radeon 780M</span>
+            </button>
+            <button type="button" class="choice-btn" data-device="generico" aria-pressed="false">
+              <span class="choice-tag">Universale</span>
+              <span class="choice-title">Altro handheld</span>
+              <span class="choice-meta">Profilo generico con impostazioni sicure</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="wizard-step">
+          <div class="step-header">
+            <span class="step-num">2</span>
+            <h2>Dove ti trovi adesso?</h2>
+          </div>
+          <div class="choice-grid choice-grid-4">
+            <button type="button" class="choice-btn" data-situation="windows" aria-pressed="false">
+              <span class="choice-title">Su Windows</span>
+              <span class="choice-meta">Devo ancora creare la chiavetta USB e installare Bazzite</span>
+            </button>
+            <button type="button" class="choice-btn" data-situation="live" aria-pressed="false">
+              <span class="choice-title">Live USB (/mnt/sysimage)</span>
+              <span class="choice-meta">Installazione appena finita, prima di riavviare la chiavetta</span>
+            </button>
+            <button type="button" class="choice-btn" data-situation="console" aria-pressed="false">
+              <span class="choice-title">Schermo nero / Ctrl+Alt+F3</span>
+              <span class="choice-meta">Solo console testuale, nessuna finestra grafica visibile</span>
+            </button>
+            <button type="button" class="choice-btn is-active" data-situation="desktop" aria-pressed="true">
+              <span class="choice-title">Desktop KDE Plasma</span>
+              <span class="choice-meta">Voglio aprire la finestra guidata e scegliere app e tweak</span>
+            </button>
+          </div>
+        </div>
+
+        <div id="wizard-result" class="result-panel" aria-live="polite"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- COSA FA / SICUREZZA -->
+  <section id="cosa-fa" class="section">
+    <div class="container">
+      <div class="section-head">
+        <h2>Cosa include l'assistente (senza sorprese)</h2>
+        <p>Progettato per rispettare il sistema immutabile di Bazzite: nessuna modifica finché non premi «Installa» nel riepilogo.</p>
+      </div>
+
+      <div class="cards-3">
+        <article class="info-card">
+          <h3>3 modalità intelligenti</h3>
+          <p>
+            Lo stesso script si adatta all'ambiente in cui lo lanci: apre subito la GUI su <strong>KDE Plasma</strong>,
+            pre-configura l'SSD da <strong>Live USB</strong> (<code>/mnt/sysimage</code>) oppure sblocca lo schermo nero
+            in <strong>Console</strong> (<code>Ctrl+Alt+F3</code>) con Autostart al riavvio.
+          </p>
+        </article>
+
+        <article class="info-card">
+          <h3>24 app pronte da spuntare</h3>
+          <p>
+            Rileva ciò che è già installato (spuntato e bloccato). Include 21 pacchetti Flatpak verificati su Flathub,
+            <code>Decky Loader</code> (<code>ujust setup-decky install</code>), <code>aria2</code> via Homebrew e collegamento a EmuDeck.
+          </p>
+          <div class="pill-list">
+            <span class="pill">Heroic</span>
+            <span class="pill">Lutris</span>
+            <span class="pill">ProtonUp-Qt</span>
+            <span class="pill">Decky Loader</span>
+            <span class="pill">RetroDECK</span>
+            <span class="pill">Flatseal</span>
+          </div>
+        </article>
+
+        <article class="info-card">
+          <h3>18 tweak e niente <code>sudo</code> cieco</h3>
+          <p>
+            Usa strumenti nativi utente (Flatpak, Homebrew, <code>ujust</code>, <code>kwriteconfig6</code>, <code>kscreen-doctor</code>).
+            Chiede la password via <code>pkexec</code> solo su opzioni esplicite: limite carica 80%, profili TDP Intel,
+            <code>ostree admin pin 0</code> e Mullvad VPN (facoltativo in Avanzate).
+          </p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ANTEPRIMA INTERFACCIA REALE -->
+  <section id="anteprima" class="section">
+    <div class="container">
+      <div class="section-head">
+        <h2>Guarda la finestra reale Qt6</h2>
+        <p>Screenshot generati dai profili reali dell'applicazione. Clicca sull'immagine per ingrandirla.</p>
+      </div>
+
+      <div class="preview-box">
+        <div class="preview-controls">
+          <div class="seg-group" role="group" aria-label="Profilo screenshot">
+            <button type="button" class="seg-btn is-active" data-shot-device="oxp" aria-pressed="true">OneXPlayer 1S</button>
+            <button type="button" class="seg-btn" data-shot-device="ally" aria-pressed="false">ASUS ROG Ally</button>
+          </div>
+          <span style="font-size: 13px; color: var(--text-muted);">6 passaggi guidati, dalla diagnosi al riepilogo</span>
+        </div>
+
+        <div class="preview-stage">
+          <div class="shot-frame">
+            <img id="shot-img" src="shots/oxp/oxp_fisso-onexplayer1s_0_benvenuto.png" alt="Anteprima GUI Bazzite Handheld Setup">
+          </div>
+          <div>
+            <div class="shot-caption">
+              <h3 id="shot-title">0 · Benvenuto</h3>
+              <p id="shot-desc"></p>
+              <div id="shot-step-list" class="shot-step-list"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- GUIDE STEP-BY-STEP -->
+  <section id="guide" class="section">
+    <div class="container">
+      <div class="section-head">
+        <h2>Guide complete passo-passo</h2>
+        <p>Tutte le guide interattive (con pulsanti per copiare i comandi) sono consultabili online qui e offline nella cartella <code>guide/</code>.</p>
+      </div>
+
+      <div class="cards-2">
+        <a class="guide-card" href="guide/installazione_onexplayer_1s.html">
+          <div>
+            <div class="guide-kicker">OneXPlayer 1S &middot; Parte 1</div>
+            <h3>Installazione Bazzite KDE (Rufus, BIOS e Setup)</h3>
+            <p>Preparazione Windows (BitLocker, Avvio Rapido), chiavetta Rufus con <code>bazzite-deck</code>, MOK Secure Boot e sblocco automatico dello schermo nero.</p>
+          </div>
+          <span style="font-size: 13px; font-weight: 700; color: var(--oxp);">Apri la guida &rarr;</span>
+        </a>
+
+        <a class="guide-card" href="guide/ottimizzazione_onexplayer_1s.html">
+          <div>
+            <div class="guide-kicker">OneXPlayer 1S &middot; Parte 2</div>
+            <h3>Ottimizzazione Giochi .exe Locali</h3>
+            <p>GE-Proton con ProtonUp-Qt, aggiunta degli .exe a Steam, Scaling per Interi 2:1 (1280&times;800 nitido) e script per Red Dead Redemption 2, The Witcher 3 (DX11) e Skyrim SE.</p>
+          </div>
+          <span style="font-size: 13px; font-weight: 700; color: var(--oxp);">Apri la guida &rarr;</span>
+        </a>
+
+        <a class="guide-card ally" href="guide/installazione_rog_ally.html">
+          <div>
+            <div class="guide-kicker">ASUS ROG Ally &middot; Parte 1</div>
+            <h3>Installazione Bazzite KDE (Rufus, BIOS e Setup)</h3>
+            <p>BIOS/MCU, <code>powercfg /h off</code> per il Wi-Fi MediaTek, VRAM 4G/6G, Boot Override, 120Hz FreeSync VRR e limite carica 80% persistente.</p>
+          </div>
+          <span style="font-size: 13px; font-weight: 700; color: var(--ally);">Apri la guida &rarr;</span>
+        </a>
+
+        <a class="guide-card ally" href="guide/ottimizzazione_rog_ally.html">
+          <div>
+            <div class="guide-kicker">ASUS ROG Ally &middot; Parte 2</div>
+            <h3>Ottimizzazione Giochi .exe Locali</h3>
+            <p>GE-Proton, 120Hz FreeSync VRR a 900p (1600&times;900) e script per Red Dead Redemption 2, The Witcher 3 Remastered e Skyrim SE (fisica Havok 120Hz).</p>
+          </div>
+          <span style="font-size: 13px; font-weight: 700; color: var(--ally);">Apri la guida &rarr;</span>
+        </a>
+      </div>
+
+      <div style="margin-top: 14px;">
+        <a class="btn-link" href="guide/index.html">Vai all'indice completo delle guide (<code>guide/index.html</code>)</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section id="faq" class="section">
+    <div class="container">
+      <div class="section-head">
+        <h2>Domande frequenti e opzioni da terminale</h2>
+      </div>
+
+      <div class="faq-list">
+        <details class="faq-item">
+          <summary>Posso simulare tutto prima di modificare il dispositivo?</summary>
+          <div class="faq-body">
+            Sì. Aggiungendo <code>--dry-run</code> dopo <code>sh -s --</code> (o <code>bash -s --</code>) l'app mostra tutte le operazioni senza applicarle.
+            Sono disponibili anche <code>--diagnosi</code> (rapporto hardware/sistema), <code>--elenco</code> (tweak e stato attuale) e <code>--applica ID...</code> per applicare singoli tweak senza interfaccia grafica.
+          </div>
+        </details>
+
+        <details class="faq-item">
+          <summary>Cosa succede se lancio lo script di un dispositivo diverso dal mio?</summary>
+          <div class="faq-body">
+            La finestra rileva sempre l'hardware reale tramite DMI (<code>/sys/class/dmi/id</code>): se il profilo fisso dello script non coincide con il dispositivo su cui sta girando, mostra un avviso chiaro ma non si blocca.
+          </div>
+        </details>
+
+        <details class="faq-item">
+          <summary>Perché viene consigliata <code>bazzite-deck</code> anche per ASUS ROG Ally?</summary>
+          <div class="faq-body">
+            Su <code>ublue-os/bazzite</code> l'immagine separata <code>bazzite-ally</code> è stata dismessa: oggi la variante unificata per entrambi gli handheld con KDE Plasma 6 è <code>bazzite-deck</code>.
+          </div>
+        </details>
+
+        <details class="faq-item">
+          <summary>Come aggiorno o riapro l'app in un secondo momento?</summary>
+          <div class="faq-body">
+            L'installatore crea una voce nel menu Start e sul Desktop, e conserva il <code>.venv</code> già installato in <code>~/.local/share/bazzite-handheld-setup</code> quando rilanci il comando <code>curl</code> per aggiornare, evitando di riscaricare PySide6 ogni volta. Da una copia locale puoi anche usare <code>python3 -m bhs --profilo onexplayer1s</code> (oppure <code>rogallyz1x</code> / <code>generico</code>).
+          </div>
+        </details>
+      </div>
+    </div>
+  </section>
+</main>
+
+<div id="lightbox" class="lightbox" role="dialog" aria-modal="true" aria-label="Anteprima screenshot ingrandita">
+  <button type="button" id="lightbox-close" class="lightbox-close" aria-label="Chiudi anteprima">&times;</button>
+  <img id="lightbox-img" src="" alt="">
+</div>
+
+<footer>
+  <div class="container">
+    Bazzite Handheld Setup v0.6.0 &middot;
+    <a href="guide/index.html">Hub Guide</a> &middot;
+    <a href="https://070293.xyz" target="_blank" rel="noopener">070293.xyz</a> &middot;
+    <a href="https://github.com/dilfal/bazzite-handheld-setup" target="_blank" rel="noopener">GitHub (dilfal/bazzite-handheld-setup)</a>
+  </div>
+</footer>
+
 </body>
 </html>

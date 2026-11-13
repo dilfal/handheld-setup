@@ -1,30 +1,21 @@
-# STATO: Bazzite Handheld Setup (v0.7.0)
+# STATO: Handheld Setup (repository unico `dilfal/handheld-setup`)
 
-Aggiornato il 13 novembre 2026. **La v0.7.0 è in un commit, su GitHub e sul sito**: resta solo da provarla sui dispositivi.
+Aggiornato il 13 novembre 2026. Bazzite alla radice (v0.7.0), utility Windows in `windows/` (v1.0.0).
 
-## Fatto
-- **Guide ai giochi** (commit `80da79b` su `dilfal/handheld-setup`, ramo `main`): pulsante «Guide ai giochi» nell'app, un passo per schermata, passo ricordato alla riapertura. Tre giochi (Red Dead Redemption 2, The Witcher 3, Skyrim Special Edition), valori diversi per OneXPlayer 1S, ROG Ally e profilo generico.
-- **Impostazioni automatiche**: «Applica» cambia solo le chiavi elencate nel file del gioco (`system.xml`, `user.settings`/`dx12user.settings`, `SkyrimPrefs.ini`), con copia `<file>.bhs-originale` e «Ripristina».
-- **Riga di comando**: `--guide`, `--guida GIOCO`, `--imposta-gioco GIOCO` (anche con `--dry-run`), `--ripristina-gioco GIOCO`.
-- **Sito pubblicato** (commit `23768b8` su `dilfal/070293`, con `python tools/pubblica_070293.py`): script e scorciatoie `/oxp`, `/ally`, `/bhs` aggiornati, guide rigenerate, indirizzi brevi nuovi `070293.xyz/giochi-oxp` e `070293.xyz/giochi-ally`.
-- **Controlli prima del commit**: `tools/genera_guide.py --verifica` e `tools/genera_installatori.py --verifica` a 0. I test (183 verdi su Windows e in Fedora 44 WSL) sono quelli della sessione precedente, non rilanciati.
+## Fatto oggi
+- **Fusione**: `onexplayer-1s-drivers` è dentro questo repository (merge, storia conservata) nella cartella `windows/`. Repository rinominato da `bazzite-handheld-setup` a `handheld-setup` (rinvio automatico di GitHub dai vecchi indirizzi). Commit `9425092` e `2b0e327`.
+- **Driver**: 13 archivi nella Release `windows-v1.0.0` (0,9 GB); in locale in `windows/drivers/` (ignorata da git). `windows/publish-release.ps1` la ricrea.
+- **Sito**: `070293.xyz/oxp-win` serve lo script `windows/oxp1s.ps1` completo (copia byte per byte, ASCII senza BOM, LF), scritta da `python tools/pubblica_070293.py` (commit `87b94d4` su `dilfal/070293`). `/oxp`, `/ally`, `/bhs` usano `dilfal/handheld-setup`.
+- **Controlli**: installatori e guide `--verifica` a 0; 183 test OK (13 saltati su Windows); script Windows senza errori di sintassi in PS 5.1.
 
-## Decisioni prese
-- Fonti dei valori: guida ufficiale ASUS per RDR2 sulla Ally (1080p, FSR 2 Qualità); impostazioni per Steam Deck come base di RDR2 sul OneXPlayer; chiavi e intervalli controllati su file reali e sul parser `Forceflow/rdr2_settings_parser`.
-- The Witcher 3 si avvia dall'eseguibile DirectX 11 (`bin/x64/witcher3.exe`); il programma scrive solo risoluzione, HairWorks, sfocatura e sincronia verticale.
-- Skyrim resta a 60 fotogrammi anche sulla Ally (oltre, la fisica si rompe).
-- Il profilo generico eredita la qualità del OneXPlayer ma non la risoluzione.
-- `OneDrive_2026-11-13/` (archivi dei driver, 1,4 GB) è in `.gitignore`: i driver stanno nelle Release di `onexplayer-1s-drivers`.
+## Da fare
+- **Vecchio repo `dilfal/onexplayer-1s-drivers`**: ancora attivo e non archiviato. Il comando di archiviazione è stato bloccato dal sistema di permessi: va deciso dall'utente. Piano: `oxp1s.ps1` ridotto a rinvio a `irm 070293.xyz/oxp-win | iex`, README di rinvio, poi archivio.
+- **Pages di `handheld-setup`** (`dilfal.click/handheld-setup/`) ancora acceso e duplicato di 070293.xyz: spegnerlo (`gh api -X DELETE repos/dilfal/handheld-setup/pages`) quando l'utente conferma.
+- **Cloudflare**: per `070293.xyz` non serve nulla (DNS-only verso i 4 IP di GitHub Pages, `www` CNAME). Facoltativo: record AAAA IPv6.
+- **Cartella locale** `C:\Users\df\Dev\GitHub\onexplayer-1s-drivers`: da cancellare a mano dopo l'archiviazione.
+- Prove sui dispositivi: `PROSSIMI_PASSI.md` (Bazzite) e `windows/ISTRUZIONI.md` (Windows: driver, touch, rotazione).
 
-## Non verificato (serve il dispositivo: elenco in `PROSSIMI_PASSI.md`, sezione 4.F)
-- Nessuna guida è stata provata con i giochi veri: che i file vengano trovati, che i giochi accettino i valori scritti, i nomi italiani delle voci nei menu.
-- Gli obiettivi di FPS sono stime (quello di The Witcher 3 sulla Ally non ha una fonte).
-- Quali copie partono come «gioco non di Steam»: RDR2 fuori da Steam richiede il Rockstar Games Launcher.
-- Dove si regolano TDP e VRR sulla Ally; «Risoluzione di gioco» e scalatura intera in Gaming Mode sul OneXPlayer.
-- Il comando `curl -L 070293.xyz/oxp | sh` da zero su Bazzite con la versione nuova.
-
-## Manca
-- Prove sui due dispositivi (sezioni 4.A-4.F di `PROSSIMI_PASSI.md`).
-
-## Prossimo passo
-- Prima prova vera: RDR2 sul OneXPlayer, seguendo la guida dall'app. Prima `python3 -m bhs --imposta-gioco rdr2 --dry-run`, poi «Applica», poi il gioco; annotare gli esiti in 4.F e incollarli a Claude.
+## Note
+- `desktop.ini` ricompare dentro `.git` (Drive?) e rompe fetch/merge: `find .git -iname desktop.ini -delete`.
+- Push con il token di `dilfal` (vedi memoria `push-github-account-dilfal`); `GH_TOKEN="$(gh auth token --user dilfal)"` per `gh`.
+- Cartella locale e memoria del progetto restano con il vecchio nome `bazzite-handheld-setup`.

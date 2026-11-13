@@ -9,7 +9,7 @@ Aggiornato il 13 novembre 2026. Bazzite alla radice (v0.7.0), utility Windows in
 - **Controlli**: installatori e guide `--verifica` a 0; 183 test OK (13 saltati su Windows); script Windows senza errori di sintassi in PS 5.1.
 
 ## Da fare
-- **Vecchio repo `dilfal/onexplayer-1s-drivers`**: ancora attivo e non archiviato. Il comando di archiviazione è stato bloccato dal sistema di permessi: va deciso dall'utente. Piano: `oxp1s.ps1` ridotto a rinvio a `irm 070293.xyz/oxp-win | iex`, README di rinvio, poi archivio.
+- **Vecchio repo `dilfal/onexplayer-1s-drivers`**: archiviato (rinvio a `070293.xyz/oxp-win`, commit `3cd7e15`). Fatto.
 - **Pages di `handheld-setup`** (`dilfal.click/handheld-setup/`) ancora acceso e duplicato di 070293.xyz: spegnerlo (`gh api -X DELETE repos/dilfal/handheld-setup/pages`) quando l'utente conferma.
 - **Cloudflare**: per `070293.xyz` non serve nulla (DNS-only verso i 4 IP di GitHub Pages, `www` CNAME). Facoltativo: record AAAA IPv6.
 - **Cartella locale** `C:\Users\df\Dev\GitHub\onexplayer-1s-drivers`: da cancellare a mano dopo l'archiviazione.

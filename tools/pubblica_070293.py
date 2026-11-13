@@ -59,6 +59,10 @@ def sincronizza(dest: Path = SITO) -> None:
         (dest / cartella).mkdir(exist_ok=True)
         (dest / cartella / "index.html").write_text(PAGINA_RIMANDO.format(pagina=pagina), encoding="utf-8", newline="\n")
 
+    # 2c. Utility Windows (OneXPlayer 1S): 070293.xyz/oxp-win serve lo script completo, byte per byte
+    #     (ASCII senza BOM, LF: con il BOM `irm | iex` fallisce). I driver restano nelle Release di GitHub.
+    shutil.copyfile(RADICE / "windows" / "oxp1s.ps1", dest / "oxp-win")
+
     # 3. Garantisce CNAME e .nojekyll
     (dest / "CNAME").write_text("070293.xyz\n", encoding="utf-8", newline="\n")
     (dest / ".nojekyll").write_text("", encoding="utf-8", newline="\n")

@@ -219,4 +219,4 @@ Se modifichi gli script in questa cartella:
   .\publish-release.ps1
   ```
 - **`oxp1s.ps1` va salvato in ASCII puro, senza BOM, con fine riga LF** (niente lettere accentate né simboli): con il BOM in testa `irm ... | iex` si ferma con un errore di sintassi sul blocco `param`, mentre `Avvia.cmd` continua a funzionare e nasconde il problema.
-- La scorciatoia `070293.xyz/oxp-win` (nel repo `dilfal/070293`) punta sempre al ramo `main` di `dilfal/handheld-setup` (file `windows/oxp1s.ps1`), quindi non va modificata quando aggiorni `oxp1s.ps1`.
+- La scorciatoia `070293.xyz/oxp-win` (nel repo `dilfal/070293`) contiene una copia completa di `windows/oxp1s.ps1`: dopo ogni modifica allo script lancia `python tools/pubblica_070293.py` e fai commit e push del sito (`siti-web/070293`). Gli archivi dei driver (0,9 GB) restano nella Release `windows-v1.0.0` di GitHub.

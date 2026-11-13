@@ -8,7 +8,7 @@
     e Schermo (rotazione, blocco rotazione automatica e risoluzione).
 .EXAMPLE
     irm 070293.xyz/oxp-win | iex
-    irm https://raw.githubusercontent.com/dilfal/handheld-setup/main/windows/oxp1s.ps1 | iex
+    irm 070293.xyz/oxp-win | iex
 .NOTES
     Questo file va salvato in ASCII puro, SENZA BOM: con il BOM in testa `irm ... | iex`
     non riconosce piu il blocco param e si ferma con un errore di sintassi.
@@ -43,7 +43,7 @@ if (-not $isAdmin -or -not $isSta) {
             Set-Content -Path $tempLauncher -Value $scriptBody -Encoding UTF8
             $argList += @('-STA', '-File', "`"$tempLauncher`"")
         } else {
-            $cmd = "irm 'https://raw.githubusercontent.com/dilfal/handheld-setup/main/windows/oxp1s.ps1' | iex"
+            $cmd = "irm 'https://070293.xyz/oxp-win' | iex"
             $argList += @('-STA', '-Command', $cmd)
         }
     }

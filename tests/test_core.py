@@ -1,17 +1,22 @@
 """Test della logica (senza interfaccia Qt). Eseguire da `bazzite-handheld-setup`: python -I -m unittest discover -s tests"""
 
+import contextlib
+import io
 import os
+import re
 import shutil
+import stat
 import subprocess
 import sys
 import tempfile
 import unittest
 from pathlib import Path
+from unittest import mock
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from bhs import __main__ as punto_ingresso  # noqa: E402
-from bhs import catalog, cli, detect, piano, profiles, runner, tweaks  # noqa: E402
+from bhs import catalog, cli, detect, giochi, piano, profiles, runner, tweaks  # noqa: E402
 
 
 def finto_sistema(radice: Path, vendor: str, prodotto: str, os_release: str = 'ID=bazzite\nPRETTY_NAME="Bazzite"\n'):
@@ -480,6 +485,94 @@ class TestInstallatoriDedicati(unittest.TestCase):
             self.assertTrue(norbc.is_file())
             self.assertIn("INTEL_DEBUG=norbc", norbc.read_text(encoding="utf-8").splitlines())
 
+    def _avvia_in_console_senza_interfaccia(self, script, *argomenti, prima=None, dopo=None):
+        """Lancia lo script come da console (nessuna sessione grafica) su un OneXPlayer finto, con le opzioni date.
+
+        Lavora su una copia dell'app in una cartella temporanea e mette in testa al PATH un finto `systemctl` che
+        scrive un file se riceve `reboot`: se partisse il riavvio automatico, il file comparirebbe (e il computer
+        non si riavvia). `prima(app)` e `dopo(home, app)`, se date, girano prima e dopo lo script, a cartelle ancora
+        presenti.
+        Restituisce (esito, norbc scritto, autostart creato, .venv creato, riavvio partito).
+        """
+        with tempfile.TemporaryDirectory() as d:
+            base = Path(d)
+            app = base / "app"
+            shutil.copytree(self.RADICE, app, ignore=shutil.ignore_patterns(
+                "__pycache__", ".git", ".venv", "shots", "OneDrive_*", "guide", "assets"))
+            home = base / "home"
+            dmi = base / "dmi"
+            finto = base / "bin"
+            for cartella in (home, dmi, finto):
+                cartella.mkdir()
+            (dmi / "product_name").write_text("ONE XPLAYER\n", encoding="utf-8")
+            riavvio = base / "riavvio.txt"
+            systemctl = finto / "systemctl"
+            # Il rilevamento di sistema interroga systemctl per altri motivi: conta solo `systemctl reboot`.
+            systemctl.write_text(f'#!/bin/sh\n[ "$1" = reboot ] && echo reboot > "{riavvio}"\nexit 0\n',
+                                 encoding="utf-8")
+            systemctl.chmod(0o755)
+            env = {
+                **os.environ,
+                "PATH": f"{finto}{os.pathsep}{os.environ['PATH']}",
+                "HOME": str(home),
+                "XDG_DATA_HOME": str(home / ".local/share"),
+                "XDG_CONFIG_HOME": str(home / ".config"),
+                "WAYLAND_DISPLAY": "",
+                "DISPLAY": "",
+                "BHS_FORCE": "1",
+                "BHS_DMI_DIR": str(dmi),
+            }
+            env.pop("BHS_NO_REBOOT", None)
+            env.pop("BHS_SKIP_VENV", None)
+            if prima:
+                prima(app)
+            r = subprocess.run(["sh", str(app / script), *argomenti], env=env, capture_output=True, text=True,
+                               timeout=60)
+            if dopo:
+                dopo(home, app)
+            return (
+                r,
+                (home / ".config/environment.d/10-gamescope-session.conf").exists(),
+                (home / ".config/autostart/bhs-first-run.desktop").exists(),
+                (app / ".venv").exists(),
+                riavvio.exists(),
+            )
+
+    def _controlla_nessuna_modalita_automatica(self, esito):
+        r, norbc, autostart, venv, riavvio = esito
+        self.assertNotIn("configurazione automatica da console", r.stdout + r.stderr)
+        self.assertNotIn("Riavvio automatico", r.stdout + r.stderr)
+        self.assertFalse(norbc, "INTEL_DEBUG=norbc scritto senza che fosse richiesto")
+        self.assertFalse(autostart, "creato l'autostart della modalità console automatica")
+        self.assertFalse(venv, "creato l'ambiente Qt (PySide6) per un'opzione senza interfaccia")
+        self.assertFalse(riavvio, "partito il riavvio")
+
+    @unittest.skipUnless(shutil.which("sh") and shutil.which("python3") and os.name == "posix",
+                         "servono ambiente POSIX e python3")
+    def test_guida_in_console_non_avvia_la_modalita_automatica(self):
+        for script in ("install-onexplayer.sh", "install.sh"):
+            with self.subTest(script=script):
+                esito = self._avvia_in_console_senza_interfaccia(script, "--guida", "rdr2")
+                self._controlla_nessuna_modalita_automatica(esito)
+                r = esito[0]
+                self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+                self.assertIn("== Red Dead Redemption 2 ==", r.stdout)
+
+    @unittest.skipUnless(shutil.which("sh") and shutil.which("python3") and os.name == "posix",
+                         "servono ambiente POSIX e python3")
+    def test_imposta_e_ripristina_gioco_in_console_non_avviano_la_modalita_automatica(self):
+        # In una Home vuota il gioco non ha file di impostazioni: esito 1 con il messaggio dell'app, che prova
+        # che le opzioni sono arrivate a `python3 -m bhs` così come scritte (e non a una modalità automatica).
+        for script in ("install-onexplayer.sh", "install.sh"):
+            for opzioni in (("--imposta-gioco", "rdr2", "--dry-run"), ("--imposta-gioco=rdr2",),
+                            ("--ripristina-gioco", "rdr2")):
+                with self.subTest(script=script, opzioni=opzioni):
+                    esito = self._avvia_in_console_senza_interfaccia(script, *opzioni)
+                    self._controlla_nessuna_modalita_automatica(esito)
+                    r = esito[0]
+                    self.assertEqual(r.returncode, 1, r.stdout + r.stderr)
+                    self.assertIn("Non trovo i file di impostazioni di Red Dead Redemption 2", r.stderr)
+
     @unittest.skipUnless(shutil.which("sh") and shutil.which("curl") and os.name == "posix",
                          "servono ambiente POSIX e curl")
     def test_aggiornamento_via_pipe_conserva_il_venv(self):
@@ -510,6 +603,91 @@ class TestInstallatoriDedicati(unittest.TestCase):
             self.assertFalse((dest / "vecchio.txt").exists(), "la versione precedente non è stata sostituita")
             self.assertTrue((dest / ".venv/segno").is_file(), "l'ambiente Qt è andato perso con l'aggiornamento")
             self.assertEqual(list(dest.parent.glob("bazzite-handheld-setup.*")), [])
+
+    @staticmethod
+    def _testo_finto_python(con_pyside: bool = True) -> str:
+        # Risponde come un python3 con (o senza) PySide6 al controllo `-c "import PySide6"` dell'installatore.
+        return ('#!/bin/sh\nif [ "$1" = "-c" ] && [ "$2" = "import PySide6" ]; then exit '
+                f'{0 if con_pyside else 1}; fi\nexit 0\n')
+
+    @classmethod
+    def _finto_venv(cls, cartella: Path, con_pyside: bool = True) -> Path:
+        python = cartella / ".venv/bin/python3"
+        python.parent.mkdir(parents=True)
+        python.write_text(cls._testo_finto_python(con_pyside), encoding="utf-8")
+        python.chmod(0o755)
+        return python
+
+    @staticmethod
+    def _riga_exec(home: Path) -> str:
+        voci = list((home / ".local/share/applications").glob("*.desktop"))
+        assert len(voci) == 1, voci
+        return next(r for r in voci[0].read_text(encoding="utf-8").splitlines() if r.startswith("Exec="))
+
+    @unittest.skipUnless(shutil.which("sh") and shutil.which("python3") and os.name == "posix",
+                         "servono ambiente POSIX e python3")
+    def test_opzioni_senza_interfaccia_non_rompono_l_icona_di_chi_ha_gia_il_venv(self):
+        for script in ("install-onexplayer.sh", "install.sh"):
+            for opzioni in (("--guida", "rdr2"), ("--elenco",), ("--ripristina-gioco", "rdr2")):
+                with self.subTest(script=script, opzioni=opzioni):
+                    visto = {}
+
+                    def dopo(home, app):
+                        visto["exec"] = self._riga_exec(home)
+                        visto["venv"] = str(app / ".venv/bin/python3")
+                        visto["contenuto"] = (app / ".venv/bin/python3").read_text(encoding="utf-8")
+                        visto["elenco"] = sorted(p.name for p in (app / ".venv").rglob("*"))
+                    self._avvia_in_console_senza_interfaccia(
+                        script, *opzioni, prima=self._finto_venv_in_app, dopo=dopo)
+                    self.assertIn(f" {visto['venv']} -m bhs", visto["exec"])
+                    self.assertEqual(visto["contenuto"], self._testo_finto_python())     # il venv non è stato toccato
+                    self.assertEqual(visto["elenco"], ["bin", "python3"])
+
+    def _finto_venv_in_app(self, app: Path) -> None:
+        self._finto_venv(app)
+
+    @unittest.skipUnless(shutil.which("sh") and shutil.which("python3") and os.name == "posix",
+                         "servono ambiente POSIX e python3")
+    def test_opzioni_senza_interfaccia_con_venv_senza_pyside6_usano_python3(self):
+        visto = {}
+        self._avvia_in_console_senza_interfaccia(
+            "install.sh", "--guida", "rdr2", prima=lambda app: self._finto_venv(app, con_pyside=False),
+            dopo=lambda home, app: visto.update(exec=self._riga_exec(home)))
+        self.assertIn(" python3 -m bhs", visto["exec"])
+        self.assertNotIn(".venv", visto["exec"])
+
+    @unittest.skipUnless(shutil.which("sh") and shutil.which("python3") and os.name == "posix",
+                         "servono ambiente POSIX e python3")
+    def test_opzioni_senza_interfaccia_senza_venv_usano_python3(self):
+        visto = {}
+        self._avvia_in_console_senza_interfaccia(
+            "install.sh", "--guida", "rdr2", dopo=lambda home, app: visto.update(exec=self._riga_exec(home)))
+        self.assertIn(" python3 -m bhs", visto["exec"])
+        self.assertNotIn(".venv", visto["exec"])
+
+    @unittest.skipUnless(shutil.which("sh") and shutil.which("curl") and os.name == "posix",
+                         "servono ambiente POSIX e curl")
+    def test_aggiornamento_via_pipe_senza_interfaccia_tiene_il_python_del_venv(self):
+        import tarfile
+        with tempfile.TemporaryDirectory() as d:
+            base = Path(d)
+            archivio = base / "src.tar.gz"
+            with tarfile.open(archivio, "w:gz") as tar:
+                for nome in ("bhs", "data", "install.sh", "install-onexplayer.sh", "install-rog-ally.sh"):
+                    tar.add(self.RADICE / nome, arcname=f"bazzite-handheld-setup-main/{nome}",
+                            filter=lambda i: None if "__pycache__" in i.name else i)
+            home = base / "home"
+            dest = home / ".local/share/bazzite-handheld-setup"
+            self._finto_venv(dest)                  # sta nella versione vecchia e viene spostato in quella nuova
+            env = {k: v for k, v in os.environ.items() if not k.startswith("XDG_")}
+            env.update(HOME=str(home), DISPLAY=":9", BHS_FORCE="1", BHS_URL=archivio.as_uri())
+            env.pop("BHS_SKIP_VENV", None)
+            with (self.RADICE / "install.sh").open("rb") as script:
+                r = subprocess.run(["sh", "-s", "--", "--elenco"], stdin=script, env=env, cwd=d,
+                                   capture_output=True, text=True)
+            self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+            self.assertTrue((dest / ".venv/bin/python3").is_file())
+            self.assertIn(f" {dest}/.venv/bin/python3 -m bhs", self._riga_exec(home))
 
     @unittest.skipUnless(shutil.which("sh") and os.name == "posix", "serve ambiente POSIX per lo script")
     def test_live_usb_sysimage_onexplayer(self):
@@ -746,6 +924,884 @@ class TestRunner(unittest.TestCase):
                                    False, righe.append)
         self.assertEqual([r.esito for r in ris], ["ok", "errore", "errore"])
         self.assertTrue(any("ciao" in r for r in righe))
+
+
+PROFILI_GIOCHI = ("onexplayer1s", "rogallyz1x", "generico")
+
+
+def _guida(profilo: str, ident: str) -> giochi.Guida:
+    g = giochi.guida_per_id(giochi.carica_guide(profilo), ident)
+    assert g is not None, ident
+    return g
+
+
+class TestGuideDati(unittest.TestCase):
+    def test_ordine_e_contenuto_per_ogni_profilo(self):
+        for profilo in PROFILI_GIOCHI:
+            with self.subTest(profilo=profilo):
+                guide = giochi.carica_guide(profilo)
+                self.assertEqual([g.id for g in guide], ["rdr2", "witcher3", "skyrim"])
+                for g in guide:
+                    self.assertTrue(g.obiettivo.strip(), g.id)
+                    self.assertTrue(any(p.azione == "config" for p in g.passi), g.id)
+                    self.assertIsNotNone(g.config, g.id)
+
+    def test_nessun_segnaposto_rimasto(self):
+        # Un segnaposto sconosciuto resta visibile come «{nome}»: qui si controlla che non ne sia rimasto nessuno.
+        for profilo in PROFILI_GIOCHI:
+            for g in giochi.carica_guide(profilo):
+                testi = [g.obiettivo]
+                for p in g.passi:
+                    testi += [p.titolo, p.testo, p.copia, p.nota_app]
+                    testi += [t for voce in p.voci for t in voce]
+                for t in testi:
+                    with self.subTest(profilo=profilo, gioco=g.id, testo=t[:40]):
+                        self.assertNotIn("{", t)
+                        self.assertNotIn("}", t)
+
+    def test_dove_valido(self):
+        for profilo in PROFILI_GIOCHI:
+            for g in giochi.carica_guide(profilo):
+                for p in g.passi:
+                    self.assertTrue(p.dove == "" or p.dove in giochi.DOVE, f"{profilo}/{g.id}: {p.titolo} -> {p.dove}")
+
+    def test_profilo_sconosciuto_usa_generico(self):
+        ignoto = giochi.carica_guide("boh")
+        generico = giochi.carica_guide("generico")
+        self.assertEqual([g.id for g in ignoto], [g.id for g in generico])
+        for a, b in zip(ignoto, generico):
+            self.assertEqual(a.obiettivo, b.obiettivo)
+            self.assertEqual([p.titolo for p in a.passi], [p.titolo for p in b.passi])
+            self.assertEqual(a.config.valori, b.config.valori)
+
+    def test_forma_delle_chiavi_di_configurazione(self):
+        for profilo in PROFILI_GIOCHI:
+            for g in giochi.carica_guide(profilo):
+                for chiave in g.config.valori:
+                    with self.subTest(profilo=profilo, gioco=g.id, chiave=chiave):
+                        self.assertRegex(chiave, r"^[^/]+/[^/]+$")
+                        sezione, chiave_pura = chiave.split("/")
+                        self.assertTrue(sezione.strip() and chiave_pura.strip())
+
+    def test_valori_xml_senza_caratteri_speciali(self):
+        # Il valore viene scritto così com'è dentro il file: un «&», «<», «>» o «"» lo romperebbe.
+        for profilo in PROFILI_GIOCHI:
+            for g in giochi.carica_guide(profilo):
+                if g.config.tipo != "xml":
+                    continue
+                for chiave, valore in g.config.valori.items():
+                    with self.subTest(profilo=profilo, gioco=g.id, chiave=chiave):
+                        self.assertFalse(set(valore) & set('&<>"'), valore)
+
+    def test_guida_per_id(self):
+        guide = giochi.carica_guide("generico")
+        self.assertEqual(giochi.guida_per_id(guide, "skyrim").id, "skyrim")
+        self.assertIsNone(giochi.guida_per_id(guide, "boh"))
+
+
+class TestGuidePerProfilo(unittest.TestCase):
+    @staticmethod
+    def titoli(profilo, ident):
+        return [p.titolo for p in _guida(profilo, ident).passi]
+
+    def test_passo_risoluzione_solo_dove_serve(self):
+        # L'Ally ha lo schermo 1080p e non ha bisogno di abbassare la risoluzione di gioco.
+        for ident in ("rdr2", "witcher3", "skyrim"):
+            def con(profilo):
+                return any(t.startswith("Imposta la risoluzione di gioco") for t in self.titoli(profilo, ident))
+            self.assertTrue(con("onexplayer1s"), ident)
+            self.assertTrue(con("generico"), ident)
+            self.assertFalse(con("rogallyz1x"), ident)
+
+    def test_rdr2_qualita_alberi(self):
+        self.assertEqual(_guida("rogallyz1x", "rdr2").config.valori["advancedGraphics/treeQuality"], "kSettingLevel_High")
+        self.assertEqual(_guida("onexplayer1s", "rdr2").config.valori["advancedGraphics/treeQuality"], "kSettingLevel_Low")
+
+    def test_generico_eredita_la_qualita_del_onexplayer(self):
+        for ident in ("rdr2", "witcher3", "skyrim"):
+            oxp, gen = _guida("onexplayer1s", ident).config.valori, _guida("generico", ident).config.valori
+            for chiave, valore in gen.items():
+                self.assertEqual(oxp[chiave], valore, f"{ident}: {chiave}")
+            self.assertTrue(gen, ident)
+
+    def test_generico_non_eredita_le_chiavi_dello_schermo(self):
+        # Una risoluzione scritta per lo schermo di un altro dispositivo romperebbe il gioco: niente ripiego.
+        skyrim = {p: _guida(p, "skyrim").config.valori for p in PROFILI_GIOCHI}
+        self.assertEqual(skyrim["onexplayer1s"]["Display/iSize W"], "1280")
+        self.assertEqual(skyrim["rogallyz1x"]["Display/iSize W"], "1920")
+        self.assertNotIn("Display/iSize W", skyrim["generico"])
+        self.assertNotIn("Display/iSize H", skyrim["generico"])
+        witcher = {p: _guida(p, "witcher3").config.valori for p in PROFILI_GIOCHI}
+        self.assertIn("Viewport/Resolution", witcher["onexplayer1s"])
+        self.assertIn("Viewport/Resolution", witcher["rogallyz1x"])
+        self.assertNotIn("Viewport/Resolution", witcher["generico"])
+
+
+class TestValoriRdr2(unittest.TestCase):
+    AMMESSO = r"kSettingLevel_(?:Low|Medium|High|Ultra)|kSettingAPI_Vulkan|true|false|\d+(?:\.\d+)?"
+
+    def test_valori_e_sezioni(self):
+        for profilo in PROFILI_GIOCHI:
+            for chiave, valore in _guida(profilo, "rdr2").config.valori.items():
+                with self.subTest(profilo=profilo, chiave=chiave):
+                    self.assertRegex(valore, f"^(?:{self.AMMESSO})$")
+                    self.assertIn(chiave.split("/")[0], ("graphics", "advancedGraphics"))
+
+
+class TestModificaIni(unittest.TestCase):
+    def test_cambia_conservando_resto_e_crlf(self):
+        testo = "[Display]\r\niSize H=1600\r\niShadowMapResolution=4096\r\n\r\n[Grass]\r\nfGrassStartFadeDistance=7000\r\n"
+        nuovo, esiti = giochi.modifica_ini(testo, {"Display/iShadowMapResolution": "1024"})
+        self.assertEqual(nuovo, testo.replace("=4096", "=1024"))
+        self.assertEqual([(e.stato, e.prima, e.dopo) for e in esiti], [("cambiata", "4096", "1024")])
+        self.assertNotIn("\n", nuovo.replace("\r\n", ""))
+
+    def test_chiave_con_spazio(self):
+        nuovo, esiti = giochi.modifica_ini("[Display]\niSize W=2560\niSize H=1600\n", {"Display/iSize W": "1280"})
+        self.assertEqual(nuovo, "[Display]\niSize W=1280\niSize H=1600\n")
+        self.assertEqual(esiti[0].stato, "cambiata")
+
+    def test_senza_distinzione_di_maiuscole(self):
+        nuovo, esiti = giochi.modifica_ini("[display]\nISHADOWMAPRESOLUTION=4096\n", {"Display/iShadowMapResolution": "1024"})
+        self.assertEqual(nuovo, "[display]\nISHADOWMAPRESOLUTION=1024\n")
+        self.assertEqual(esiti[0].stato, "cambiata")
+
+    def test_uguale_non_cambia_il_testo(self):
+        testo = "[Display]\r\nbUseTAA=1\r\n"
+        nuovo, esiti = giochi.modifica_ini(testo, {"Display/bUseTAA": "1"})
+        self.assertEqual(nuovo, testo)
+        self.assertEqual([e.stato for e in esiti], ["uguale"])
+
+    def test_aggiunge_la_chiave_in_coda_alla_sezione(self):
+        testo = "[Display]\nbUseTAA=0\n\n[Grass]\nfGrassStartFadeDistance=7000\n"
+        nuovo, esiti = giochi.modifica_ini(testo, {"Display/iVSyncPresentInterval": "1"})
+        self.assertEqual(nuovo, "[Display]\nbUseTAA=0\niVSyncPresentInterval=1\n\n[Grass]\nfGrassStartFadeDistance=7000\n")
+        self.assertEqual([e.stato for e in esiti], ["aggiunta"])
+
+    def test_aggiunge_la_chiave_nell_ultima_sezione(self):
+        nuovo, _ = giochi.modifica_ini("[Display]\nbUseTAA=0\n", {"Display/iVSyncPresentInterval": "1"})
+        self.assertEqual(nuovo, "[Display]\nbUseTAA=0\niVSyncPresentInterval=1\n")
+
+    def test_crea_la_sezione_mancante_in_fondo(self):
+        nuovo, esiti = giochi.modifica_ini("[Display]\nbUseTAA=0\n", {"Grass/fGrassStartFadeDistance": "3500"})
+        self.assertEqual(nuovo, "[Display]\nbUseTAA=0\n[Grass]\nfGrassStartFadeDistance=3500\n")
+        self.assertEqual(esiti[0].stato, "aggiunta")
+
+    def test_senza_aggiungere_la_chiave_resta_assente(self):
+        testo = "[Display]\nbUseTAA=0\n"
+        for valori in ({"Display/iVSyncPresentInterval": "1"}, {"Grass/fGrassStartFadeDistance": "3500"}):
+            nuovo, esiti = giochi.modifica_ini(testo, valori, aggiungi=False)
+            self.assertEqual(nuovo, testo)
+            self.assertEqual([e.stato for e in esiti], ["assente"])
+
+    def test_riga_commentata_non_e_la_chiave(self):
+        testo = "[Display]\n;bUseTAA=0\n#bUseTAA=0\n"
+        nuovo, esiti = giochi.modifica_ini(testo, {"Display/bUseTAA": "1"}, aggiungi=False)
+        self.assertEqual(nuovo, testo)
+        self.assertEqual(esiti[0].stato, "assente")
+        nuovo, esiti = giochi.modifica_ini(testo, {"Display/bUseTAA": "1"})
+        self.assertEqual(nuovo, "[Display]\n;bUseTAA=0\n#bUseTAA=0\nbUseTAA=1\n")
+        self.assertEqual(esiti[0].stato, "aggiunta")
+
+    def test_chiave_omonima_in_un_altra_sezione(self):
+        testo = "[Altro]\nbUseTAA=0\n[Display]\nbUseTAA=0\n"
+        nuovo, _ = giochi.modifica_ini(testo, {"Display/bUseTAA": "1"})
+        self.assertEqual(nuovo, "[Altro]\nbUseTAA=0\n[Display]\nbUseTAA=1\n")
+        nuovo, esiti = giochi.modifica_ini("[Altro]\nbUseTAA=0\n", {"Display/bUseTAA": "1"}, aggiungi=False)
+        self.assertEqual(nuovo, "[Altro]\nbUseTAA=0\n")
+        self.assertEqual(esiti[0].stato, "assente")
+
+    def test_a_capo_misti_ogni_riga_tiene_il_suo(self):
+        testo = "[Display]\r\niShadowMapResolution=4096\nfShadowDistance=8000\r\n"
+        nuovo, esiti = giochi.modifica_ini(testo, {"Display/iShadowMapResolution": "1024",
+                                                   "Display/fShadowDistance": "4000"})
+        self.assertEqual(nuovo, "[Display]\r\niShadowMapResolution=1024\nfShadowDistance=4000\r\n")
+        self.assertEqual([e.stato for e in esiti], ["cambiata", "cambiata"])
+
+    def test_righe_nuove_usano_il_fine_riga_prevalente(self):
+        testo = "[Display]\r\na=1\r\nb=2\nc=3\r\n[Grass]\r\nd=4\r\n"
+        nuovo, _ = giochi.modifica_ini(testo, {"Display/x": "9", "Altro/y": "8"})
+        self.assertEqual(nuovo, "[Display]\r\na=1\r\nb=2\nc=3\r\nx=9\r\n[Grass]\r\nd=4\r\n[Altro]\r\ny=8\r\n")
+
+    def test_senza_a_capo_finale_resta_tale(self):
+        nuovo, _ = giochi.modifica_ini("[Display]\nbUseTAA=0", {"Display/bUseTAA": "1"})
+        self.assertEqual(nuovo, "[Display]\nbUseTAA=1")
+        nuovo, _ = giochi.modifica_ini("[Display]\nbUseTAA=1", {"Display/bUseTAA": "1"})
+        self.assertEqual(nuovo, "[Display]\nbUseTAA=1")
+
+    def test_aggiunta_in_coda_a_un_file_senza_a_capo_finale(self):
+        nuovo, _ = giochi.modifica_ini("[Display]\nbUseTAA=0", {"Display/iVSync": "1"})
+        self.assertEqual(nuovo, "[Display]\nbUseTAA=0\niVSync=1\n")
+        nuovo, _ = giochi.modifica_ini("[Display]\r\nbUseTAA=0", {"Grass/f": "1"})
+        self.assertEqual(nuovo, "[Display]\r\nbUseTAA=0\r\n[Grass]\r\nf=1\r\n")
+
+    def test_intestazione_con_commento(self):
+        testo = "[General]\nx=1\n[Display] ; nota\niSize W=2560\n[Grass]   # altra\nf=1\n"
+        nuovo, esiti = giochi.modifica_ini(testo, {"Display/iSize W": "1280", "Grass/f": "2"}, aggiungi=False)
+        self.assertEqual(nuovo, "[General]\nx=1\n[Display] ; nota\niSize W=1280\n[Grass]   # altra\nf=2\n")
+        self.assertEqual([e.stato for e in esiti], ["cambiata", "cambiata"])
+        # La sezione con commento chiude quella prima: la chiave di [General] non si confonde con [Display].
+        nuovo, esiti = giochi.modifica_ini(testo, {"General/iSize W": "1"}, aggiungi=False)
+        self.assertEqual(esiti[0].stato, "assente")
+
+    def test_chiave_senza_sezione_e_un_errore_e_il_testo_non_cambia(self):
+        for percorso in ("chiave", "/chiave", " /chiave"):
+            with self.subTest(percorso=percorso):
+                with self.assertRaisesRegex(ValueError, "^chiave senza sezione: "):
+                    giochi.modifica_ini("[Display]\na=1\n", {"Display/a": "2", percorso: "1"})
+
+    def test_aggiungere_una_sezione_non_toglie_le_righe_finali(self):
+        # Righe «vuote» per str.strip() (spazi, 0xA0, 0x85 in latin-1) fanno parte del file: non si cancellano.
+        for coda in ("\n\n", "   \n", "\xa0\n", "\x85\n", "  "):
+            with self.subTest(coda=coda):
+                testo = "[A]\nx=1\n" + coda
+                nuovo, _ = giochi.modifica_ini(testo, {"B/y": "2"})
+                self.assertEqual(nuovo, testo + ("" if coda.endswith("\n") else "\n") + "[B]\ny=2\n")
+
+    def test_commento_in_linea_si_conserva(self):
+        nuovo, esiti = giochi.modifica_ini("[A]\ny=0 ; nota\nz = 5\t;  due  spazi\n", {"A/y": "1", "A/z": "6"})
+        self.assertEqual(nuovo, "[A]\ny=1 ; nota\nz = 6\t;  due  spazi\n")
+        self.assertEqual([(e.prima, e.dopo) for e in esiti], [("0", "1"), ("5", "6")])
+        testo = "[A]\ny=1   ; nota\r\n"
+        nuovo, esiti = giochi.modifica_ini(testo, {"A/y": "1"})
+        self.assertEqual(nuovo, testo)
+        self.assertEqual([e.stato for e in esiti], ["uguale"])
+
+    def test_punto_e_virgola_senza_spazio_prima_fa_parte_del_valore(self):
+        nuovo, esiti = giochi.modifica_ini("[A]\ny=a;b\n", {"A/y": "c"})
+        self.assertEqual(nuovo, "[A]\ny=c\n")
+        self.assertEqual(esiti[0].prima, "a;b")
+
+    def test_caratteri_che_non_sono_a_capo_non_dividono_le_righe(self):
+        # In una codifica a un byte per carattere 0x85 diventa U+0085, che str.splitlines() tratterebbe da a capo.
+        testo = "[Display]\nnota=a\x85b\nbUseTAA=0\n"
+        nuovo, _ = giochi.modifica_ini(testo, {"Display/nota": "x"})
+        self.assertEqual(nuovo, "[Display]\nnota=x\nbUseTAA=0\n")
+
+
+class TestModificaXml(unittest.TestCase):
+    XML = ('<?xml version="1.0" encoding="UTF-8"?>\n<settings>\n'
+           '  <graphics>\n    <textureQuality>kSettingLevel_High</textureQuality>\n    <msaa value="2" />\n  </graphics>\n'
+           '  <advancedGraphics>\n    <textureQuality>kSettingLevel_Low</textureQuality>\n'
+           '    <locked value="true"/>\n  </advancedGraphics>\n</settings>\n')
+
+    def test_cambia_testo_e_attributo(self):
+        nuovo, esiti = giochi.modifica_xml(self.XML, {"graphics/textureQuality": "kSettingLevel_Ultra", "graphics/msaa": "0"})
+        self.assertEqual([e.stato for e in esiti], ["cambiata", "cambiata"])
+        self.assertEqual(nuovo, self.XML.replace("kSettingLevel_High", "kSettingLevel_Ultra").replace('"2"', '"0"'))
+
+    def test_chiave_omonima_in_un_altra_sezione_non_si_tocca(self):
+        nuovo, _ = giochi.modifica_xml(self.XML, {"advancedGraphics/textureQuality": "kSettingLevel_Medium"})
+        self.assertEqual(nuovo, self.XML.replace("kSettingLevel_Low", "kSettingLevel_Medium"))
+        self.assertIn("kSettingLevel_High", nuovo)
+
+    def test_attributo_con_barra_attaccata(self):
+        nuovo, esiti = giochi.modifica_xml(self.XML, {"advancedGraphics/locked": "false"})
+        self.assertIn('<locked value="false"/>', nuovo)
+        self.assertEqual(esiti[0].stato, "cambiata")
+
+    def test_uguale(self):
+        nuovo, esiti = giochi.modifica_xml(self.XML, {"graphics/msaa": "2"})
+        self.assertEqual(nuovo, self.XML)
+        self.assertEqual(esiti[0].stato, "uguale")
+
+    def test_mancante_non_aggiunge_nulla(self):
+        nuovo, esiti = giochi.modifica_xml(self.XML, {"graphics/ssao": "kSettingLevel_Low", "audio/volume": "1"})
+        self.assertEqual(nuovo, self.XML)
+        self.assertEqual([e.stato for e in esiti], ["assente", "assente"])
+
+
+class TestApplicaERipristina(unittest.TestCase):
+    def setUp(self):
+        self._tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(self._tmp.cleanup)
+        self.dir = Path(self._tmp.name)
+
+    def cfg(self, **valori):
+        return giochi.ConfigGioco(tipo="ini", cartelle=[], file=["impostazioni.ini"], valori=valori)
+
+    def file(self, contenuto: bytes) -> Path:
+        f = self.dir / "impostazioni.ini"
+        f.write_bytes(contenuto)
+        return f
+
+    def test_copia_alla_prima_modifica_e_mai_sovrascritta(self):
+        originale = b"[Display]\r\niSize W=2560\r\n"
+        f = self.file(originale)
+        copia = f.with_name("impostazioni.ini" + giochi.SUFFISSO_COPIA)
+        self.assertFalse(copia.exists())
+        r = giochi.applica_config(self.cfg(**{"Display/iSize W": "1280"}), [f])[0]
+        self.assertTrue(r.scritto)
+        self.assertEqual(copia.read_bytes(), originale)
+        self.assertEqual(f.read_bytes(), b"[Display]\r\niSize W=1280\r\n")
+        giochi.applica_config(self.cfg(**{"Display/iSize W": "999"}), [f])
+        self.assertEqual(f.read_bytes(), b"[Display]\r\niSize W=999\r\n")
+        self.assertEqual(copia.read_bytes(), originale)       # la copia resta lo stato di partenza
+
+    def test_nessuna_modifica_nessuna_copia(self):
+        f = self.file(b"[Display]\niSize W=1280\n")
+        r = giochi.applica_config(self.cfg(**{"Display/iSize W": "1280"}), [f])[0]
+        self.assertFalse(r.scritto)
+        self.assertEqual(r.conta("uguale"), 1)
+        self.assertFalse(f.with_name(f.name + giochi.SUFFISSO_COPIA).exists())
+
+    def test_simulazione_non_scrive_niente(self):
+        originale = b"[Display]\niSize W=2560\n"
+        f = self.file(originale)
+        r = giochi.applica_config(self.cfg(**{"Display/iSize W": "1280"}), [f], simulazione=True)[0]
+        self.assertFalse(r.scritto)
+        self.assertEqual(r.esiti[0].stato, "cambiata")        # il rapporto dice che cosa cambierebbe
+        self.assertEqual(f.read_bytes(), originale)
+        self.assertFalse(f.with_name(f.name + giochi.SUFFISSO_COPIA).exists())
+        self.assertIn("simulazione", giochi.testo_rapporti([r], simulazione=True))
+
+    def test_ripristina_byte_per_byte(self):
+        originale = b"[Display]\r\niSize W=2560\r\n; \xc3\xa8 commento\r\n"
+        f = self.file(originale)
+        giochi.applica_config(self.cfg(**{"Display/iSize W": "1280"}), [f])
+        self.assertNotEqual(f.read_bytes(), originale)
+        r = giochi.ripristina_config([f])[0]
+        self.assertTrue(r.scritto)
+        self.assertIsNone(r.errore)
+        self.assertEqual(f.read_bytes(), originale)
+        self.assertFalse(f.with_name(f.name + giochi.SUFFISSO_COPIA).exists())
+        # Tolta la copia, una nuova modifica ne crea un'altra.
+        giochi.applica_config(self.cfg(**{"Display/iSize W": "800"}), [f])
+        self.assertEqual(f.with_name(f.name + giochi.SUFFISSO_COPIA).read_bytes(), originale)
+
+    def test_ripristina_senza_copia_non_e_un_errore(self):
+        f = self.file(b"[Display]\n")
+        r = giochi.ripristina_config([f])[0]
+        self.assertIsNone(r.errore)
+        self.assertTrue(r.senza_copia)
+        self.assertFalse(r.scritto)
+        self.assertEqual(f.read_bytes(), b"[Display]\n")
+        testo = giochi.testo_rapporti([r])
+        self.assertNotIn("✗", testo)
+        self.assertIn("Nessuna copia salvata: non c'era niente da ripristinare", testo)
+
+    def test_ripristina_in_parte_senza_copia(self):
+        a, b = self.dir / "a.ini", self.dir / "b.ini"
+        a.write_bytes(b"[Display]\niSize W=2560\n")
+        b.write_bytes(b"[Display]\niSize W=1280\n")
+        giochi.applica_config(self.cfg(**{"Display/iSize W": "1280"}), [a, b])
+        ra, rb = giochi.ripristina_config([a, b])
+        self.assertTrue(ra.scritto and not ra.senza_copia and ra.errore is None)
+        self.assertTrue(rb.senza_copia and rb.errore is None)
+        self.assertEqual(a.read_bytes(), b"[Display]\niSize W=2560\n")
+        testo = giochi.testo_rapporti([ra, rb])
+        self.assertIn("ripristinato", testo)
+        self.assertNotIn("Nessuna copia salvata", testo)       # il riepilogo c'è solo se nessun file aveva la copia
+
+    def test_ripristina_in_simulazione_non_tocca_niente(self):
+        originale = b"[Display]\niSize W=2560\n"
+        f = self.file(originale)
+        giochi.applica_config(self.cfg(**{"Display/iSize W": "1280"}), [f])
+        copia = f.with_name(f.name + giochi.SUFFISSO_COPIA)
+        modificato = f.read_bytes()
+        r = giochi.ripristina_config([f], simulazione=True)[0]
+        self.assertFalse(r.scritto)
+        self.assertIsNone(r.errore)
+        self.assertEqual(f.read_bytes(), modificato)
+        self.assertEqual(copia.read_bytes(), originale)
+        self.assertIn("simulazione", giochi.testo_rapporti([r], simulazione=True))
+        self.assertEqual(sorted(p.name for p in self.dir.iterdir()), sorted([f.name, copia.name]))
+
+    def test_copia_interrotta_non_lascia_una_copia_col_nome_definitivo(self):
+        originale = b"[Display]\r\niSize W=2560\r\n"
+        f = self.file(originale)
+        copia = f.with_name(f.name + giochi.SUFFISSO_COPIA)
+        with mock.patch.object(giochi.os, "fsync", side_effect=OSError("disco pieno")):
+            r = giochi.applica_config(self.cfg(**{"Display/iSize W": "1280"}), [f])[0]
+        self.assertIn("disco pieno", r.errore)
+        self.assertFalse(r.scritto)
+        self.assertFalse(copia.exists())
+        self.assertEqual(f.read_bytes(), originale)
+        self.assertEqual([p.name for p in self.dir.iterdir()], [f.name])      # nessun temporaneo rimasto
+
+    def test_scrittura_del_file_interrotta_lascia_file_e_copia_interi(self):
+        originale = b"[Display]\niSize W=2560\n"
+        f = self.file(originale)
+        copia = f.with_name(f.name + giochi.SUFFISSO_COPIA)
+        # Il primo fsync è quello della copia, il secondo quello del file del gioco.
+        with mock.patch.object(giochi.os, "fsync", side_effect=[None, OSError("disco pieno")]):
+            r = giochi.applica_config(self.cfg(**{"Display/iSize W": "1280"}), [f])[0]
+        self.assertIn("disco pieno", r.errore)
+        self.assertFalse(r.scritto)
+        self.assertEqual(f.read_bytes(), originale)
+        self.assertEqual(copia.read_bytes(), originale)
+        self.assertEqual(sorted(p.name for p in self.dir.iterdir()), sorted([f.name, copia.name]))
+
+    def test_ripristino_interrotto_non_cancella_la_copia(self):
+        originale = b"[Display]\niSize W=2560\n"
+        f = self.file(originale)
+        giochi.applica_config(self.cfg(**{"Display/iSize W": "1280"}), [f])
+        copia = f.with_name(f.name + giochi.SUFFISSO_COPIA)
+        modificato = f.read_bytes()
+        with mock.patch.object(giochi.os, "replace", side_effect=OSError("bloccato")):
+            r = giochi.ripristina_config([f])[0]
+        self.assertIn("bloccato", r.errore)
+        self.assertEqual(f.read_bytes(), modificato)
+        self.assertEqual(copia.read_bytes(), originale)
+        self.assertEqual(sorted(p.name for p in self.dir.iterdir()), sorted([f.name, copia.name]))
+
+    def test_scrivi_atomico_sostituisce_e_non_lascia_temporanei(self):
+        f = self.file(b"vecchio")
+        giochi._scrivi_atomico(f, b"nuovo")
+        self.assertEqual(f.read_bytes(), b"nuovo")
+        self.assertEqual([p.name for p in self.dir.iterdir()], [f.name])
+
+    @unittest.skipUnless(hasattr(os, "symlink"), "servono i collegamenti simbolici")
+    def test_scrivi_atomico_scrive_il_file_vero_non_il_collegamento(self):
+        vero = self.dir / "vero"
+        vero.mkdir()
+        f = vero / "impostazioni.ini"
+        f.write_bytes(b"vecchio")
+        collegamento = self.dir / "collegamento.ini"
+        try:
+            collegamento.symlink_to(f)
+        except (OSError, NotImplementedError):
+            self.skipTest("collegamenti simbolici non permessi")
+        giochi._scrivi_atomico(collegamento, b"nuovo")
+        self.assertTrue(collegamento.is_symlink())
+        self.assertEqual(f.read_bytes(), b"nuovo")
+        self.assertEqual(sorted(p.name for p in vero.iterdir()), ["impostazioni.ini"])
+
+    def test_utf16_big_endian_con_bom_resta_big_endian(self):
+        f = self.file(b"\xfe\xff" + "[Display]\r\niSize W=2560\r\n".encode("utf-16-be"))
+        giochi.applica_config(self.cfg(**{"Display/iSize W": "1280"}), [f])
+        self.assertEqual(f.read_bytes(), b"\xfe\xff" + "[Display]\r\niSize W=1280\r\n".encode("utf-16-be"))
+
+    def test_utf16_little_endian_con_bom_resta_little_endian(self):
+        f = self.file(b"\xff\xfe" + "[Display]\r\niSize W=2560\r\n".encode("utf-16-le"))
+        giochi.applica_config(self.cfg(**{"Display/iSize W": "1280"}), [f])
+        self.assertEqual(f.read_bytes(), b"\xff\xfe" + "[Display]\r\niSize W=1280\r\n".encode("utf-16-le"))
+
+    def test_byte_non_utf8_tornano_identici_fuori_dalla_chiave(self):
+        # 0x81 e 0x8D non esistono in cp1252: con un ripiego «replace» diventerebbero «?» o U+FFFD.
+        originale = b"; \x81\x8d \xe0 \x85\n[Display]\niSize W=2560\nnota=\x81\x8d\n"
+        f = self.file(originale)
+        r = giochi.applica_config(self.cfg(**{"Display/iSize W": "1280"}), [f])[0]
+        self.assertIsNone(r.errore)
+        self.assertEqual(f.read_bytes(), originale.replace(b"=2560", b"=1280"))
+        giochi.ripristina_config([f])
+        self.assertEqual(f.read_bytes(), originale)
+
+    def test_byte_nulli_senza_bom_sono_rifiutati(self):
+        originale = b"[Display]\x00\niSize W=2560\n"
+        f = self.file(originale)
+        copia = f.with_name(f.name + giochi.SUFFISSO_COPIA)
+        r = giochi.applica_config(self.cfg(**{"Display/iSize W": "1280"}), [f])[0]
+        self.assertEqual(r.errore, "codifica non riconosciuta: file non modificato")
+        self.assertFalse(r.scritto)
+        self.assertEqual(f.read_bytes(), originale)
+        self.assertFalse(copia.exists())
+        self.assertEqual([p.name for p in self.dir.iterdir()], [f.name])
+
+    def test_errori_di_codifica_vanno_nel_rapporto(self):
+        # UTF-16 con BOM ma di lunghezza dispari: non si decodifica.
+        originale = b"\xff\xfe[\x00D"
+        f = self.file(originale)
+        r = giochi.applica_config(self.cfg(**{"Display/iSize W": "1280"}), [f])[0]
+        self.assertTrue(r.errore)
+        self.assertFalse(r.scritto)
+        self.assertEqual(f.read_bytes(), originale)
+        self.assertFalse(f.with_name(f.name + giochi.SUFFISSO_COPIA).exists())
+
+    def _sola_lettura(self, f: Path) -> None:
+        os.chmod(f, stat.S_IREAD)
+        self.addCleanup(os.chmod, f, stat.S_IWRITE | stat.S_IREAD)
+        if os.access(f, os.W_OK):
+            self.skipTest("qui il bit di sola lettura non vale (utente root)")
+
+    def test_file_di_sola_lettura_non_si_modifica(self):
+        originale = b"[Display]\niSize W=2560\n"
+        f = self.file(originale)
+        self._sola_lettura(f)
+        r = giochi.applica_config(self.cfg(**{"Display/iSize W": "1280"}), [f])[0]
+        self.assertEqual(r.errore, "file di sola lettura: non modificato")
+        self.assertFalse(r.scritto)
+        self.assertEqual(f.read_bytes(), originale)
+        self.assertEqual([p.name for p in self.dir.iterdir()], [f.name])      # né copia né temporanei
+        self.assertIn("file di sola lettura", giochi.testo_rapporti([r]))
+
+    def test_ripristino_di_un_file_di_sola_lettura(self):
+        originale = b"[Display]\niSize W=2560\n"
+        f = self.file(originale)
+        giochi.applica_config(self.cfg(**{"Display/iSize W": "1280"}), [f])
+        copia = f.with_name(f.name + giochi.SUFFISSO_COPIA)
+        modificato = f.read_bytes()
+        self._sola_lettura(f)
+        r = giochi.ripristina_config([f])[0]
+        self.assertEqual(r.errore, "file di sola lettura: non modificato")
+        self.assertEqual(f.read_bytes(), modificato)
+        self.assertEqual(copia.read_bytes(), originale)
+        self.assertEqual(sorted(p.name for p in self.dir.iterdir()), sorted([f.name, copia.name]))
+
+    def test_scrittura_fallita_su_file_di_sola_lettura_non_lascia_temporanei(self):
+        f = self.file(b"vecchio")
+        self._sola_lettura(f)       # il temporaneo eredita il bit con copymode: va reso scrivibile prima di toglierlo
+        with mock.patch.object(giochi.os, "replace", side_effect=OSError("bloccato")):
+            with self.assertRaises(OSError):
+                giochi._scrivi_atomico(f, b"nuovo")
+        self.assertEqual([p.name for p in self.dir.iterdir()], [f.name])
+        self.assertEqual(f.read_bytes(), b"vecchio")
+
+    def test_chiave_senza_sezione_va_nel_rapporto(self):
+        originale = b"[Display]\niSize W=2560\n"
+        f = self.file(originale)
+        r = giochi.applica_config(self.cfg(**{"Display/iSize W": "1280", "senzasezione": "1"}), [f])[0]
+        self.assertIn("chiave senza sezione", r.errore)
+        self.assertEqual(f.read_bytes(), originale)
+        self.assertEqual([p.name for p in self.dir.iterdir()], [f.name])
+
+    def test_file_ammesso(self):
+        cfg = giochi.ConfigGioco(tipo="ini", cartelle=[], file=["SkyrimPrefs.ini", "Altro.ini"], valori={})
+        self.assertTrue(giochi.file_ammesso(cfg, Path("/x/y/SkyrimPrefs.ini")))
+        self.assertTrue(giochi.file_ammesso(cfg, "/x/y/skyrimprefs.INI"))
+        self.assertTrue(giochi.file_ammesso(cfg, Path("altro.ini")))
+        self.assertFalse(giochi.file_ammesso(cfg, Path("/x/y/Skyrim.ini")))
+        self.assertFalse(giochi.file_ammesso(cfg, Path("/x/SkyrimPrefs.ini/passwd")))
+        self.assertFalse(giochi.file_ammesso(cfg, Path("/x/y/SkyrimPrefs.ini.bak")))
+
+    def test_witcher3_un_file_modificato_e_uno_no(self):
+        cfg = _guida("onexplayer1s", "witcher3").config
+        nome = cfg.file[0]
+        (self.dir / "uno").mkdir()
+        (self.dir / "due").mkdir()
+        da_cambiare, a_posto = self.dir / "uno" / nome, self.dir / "due" / nome
+        da_cambiare.write_bytes(TestConfigurazioneReale.WITCHER.encode())
+        a_posto.write_bytes(TestConfigurazioneReale.WITCHER.encode())
+        giochi.applica_config(cfg, [a_posto])                         # già alle impostazioni consigliate...
+        a_posto.with_name(nome + giochi.SUFFISSO_COPIA).unlink()      # ...e senza copia, come un file mai toccato da noi
+        a_posto_prima = a_posto.read_bytes()
+        originale = da_cambiare.read_bytes()
+        applicati = giochi.applica_config(cfg, [da_cambiare, a_posto])
+        self.assertEqual([r.scritto for r in applicati], [True, False])
+        self.assertTrue(all(r.errore is None for r in applicati))
+        ripristinati = giochi.ripristina_config([da_cambiare, a_posto])
+        self.assertTrue(all(r.errore is None for r in ripristinati), [r.errore for r in ripristinati])
+        self.assertEqual([r.scritto for r in ripristinati], [True, False])
+        self.assertEqual(da_cambiare.read_bytes(), originale)
+        self.assertEqual(a_posto.read_bytes(), a_posto_prima)
+
+    def test_utf16_con_bom_resta_utf16(self):
+        f = self.file("[Display]\r\niSize W=2560\r\n".encode("utf-16"))
+        self.assertTrue(f.read_bytes().startswith((b"\xff\xfe", b"\xfe\xff")))
+        giochi.applica_config(self.cfg(**{"Display/iSize W": "1280"}), [f])
+        dati = f.read_bytes()
+        self.assertTrue(dati.startswith((b"\xff\xfe", b"\xfe\xff")))
+        self.assertEqual(dati.decode("utf-16"), "[Display]\r\niSize W=1280\r\n")
+
+    def test_cp1252_resta_cp1252(self):
+        # Una «à» in cp1252 non è UTF-8 valido: se il file venisse riscritto in UTF-8 il gioco leggerebbe un carattere sbagliato.
+        f = self.file("; Qualità\n[Display]\niSize W=2560\n".encode("cp1252"))
+        giochi.applica_config(self.cfg(**{"Display/iSize W": "1280"}), [f])
+        dati = f.read_bytes()
+        self.assertIn(b"Qualit\xe0", dati)
+        self.assertEqual(dati.decode("cp1252"), "; Qualità\n[Display]\niSize W=1280\n")
+
+    def test_utf8_con_bom_resta_con_bom(self):
+        f = self.file(b"\xef\xbb\xbf[Display]\niSize W=2560\n")
+        giochi.applica_config(self.cfg(**{"Display/iSize W": "1280"}), [f])
+        self.assertEqual(f.read_bytes(), b"\xef\xbb\xbf[Display]\niSize W=1280\n")
+
+    def test_xml_nel_file(self):
+        cfg = giochi.ConfigGioco(tipo="xml", cartelle=[], file=["system.xml"], valori={"graphics/msaa": "0"})
+        f = self.dir / "system.xml"
+        f.write_bytes(b'<s>\n<graphics>\n<msaa value="2" />\n</graphics>\n</s>\n')
+        giochi.applica_config(cfg, [f])
+        self.assertEqual(f.read_bytes(), b'<s>\n<graphics>\n<msaa value="0" />\n</graphics>\n</s>\n')
+
+
+class TestTrovaFile(unittest.TestCase):
+    PREFISSO = "steamapps/compatdata/{}/pfx/drive_c/users/steamuser"
+
+    def setUp(self):
+        self._tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(self._tmp.cleanup)
+        self.home = Path(self._tmp.name) / "home"
+        self.steam = self.home / ".local/share/Steam"
+        (self.steam / "steamapps").mkdir(parents=True)
+        self.cfg = _guida("onexplayer1s", "skyrim").config
+
+    def metti(self, radice: Path, appid: str, testo: str = "[Display]\n", cartella="Documents/My Games/Skyrim Special Edition"):
+        f = radice / self.PREFISSO.format(appid) / cartella / "SkyrimPrefs.ini"
+        f.parent.mkdir(parents=True)
+        f.write_text(testo)
+        return f
+
+    def test_vuota_se_non_c_e_niente(self):
+        self.assertEqual(giochi.trova_file(self.cfg, self.home), [])
+        self.assertEqual(giochi.trova_file(self.cfg, self.home / "non-esiste"), [])
+
+    def test_trova_nel_prefisso_proton(self):
+        f = self.metti(self.steam, "489830")
+        self.assertEqual(giochi.trova_file(self.cfg, self.home), [f])
+
+    def test_trova_anche_la_cartella_gog_e_my_documents(self):
+        a = self.metti(self.steam, "1", cartella="Documents/My Games/Skyrim Special Edition GOG")
+        b = self.metti(self.steam, "2", cartella="My Documents/My Games/Skyrim Special Edition")
+        self.assertEqual({p.resolve() for p in giochi.trova_file(self.cfg, self.home)}, {a.resolve(), b.resolve()})
+
+    def test_seconda_libreria_dal_vdf(self):
+        seconda = Path(self._tmp.name) / "sd"
+        (seconda / "steamapps").mkdir(parents=True)
+        f1 = self.metti(self.steam, "1")
+        f2 = self.metti(seconda, "2")
+        vdf = f'"libraryfolders"\n{{\n\t"0"\n\t{{\n\t\t"path"\t\t"{seconda.as_posix()}"\n\t}}\n}}\n'
+        (self.steam / "steamapps/libraryfolders.vdf").write_text(vdf)
+        self.assertEqual({p.resolve() for p in giochi.trova_file(self.cfg, self.home)}, {f1.resolve(), f2.resolve()})
+
+    def test_piu_recente_per_primo(self):
+        vecchio = self.metti(self.steam, "1")
+        nuovo = self.metti(self.steam, "2")
+        os.utime(vecchio, (1_600_000_000, 1_600_000_000))
+        os.utime(nuovo, (1_700_000_000, 1_700_000_000))
+        self.assertEqual([p.resolve() for p in giochi.trova_file(self.cfg, self.home)], [nuovo.resolve(), vecchio.resolve()])
+        os.utime(vecchio, (1_800_000_000, 1_800_000_000))
+        self.assertEqual([p.resolve() for p in giochi.trova_file(self.cfg, self.home)], [vecchio.resolve(), nuovo.resolve()])
+
+    def test_nessun_doppione(self):
+        # La libreria principale è elencata anche nel suo stesso libraryfolders.vdf, come fa Steam.
+        f = self.metti(self.steam, "1")
+        vdf = f'"libraryfolders"\n{{\n"0"\n{{\n"path"  "{self.steam.as_posix()}"\n}}\n}}\n'
+        (self.steam / "steamapps/libraryfolders.vdf").write_text(vdf)
+        self.assertEqual(giochi.trova_file(self.cfg, self.home), [f])
+        self.assertEqual(len(giochi.radici_steam(self.home)), 1)
+
+    def test_alias_della_stessa_cartella(self):
+        f = self.metti(self.steam, "1")
+        try:
+            (self.home / ".steam").mkdir()
+            (self.home / ".steam/steam").symlink_to(self.steam, target_is_directory=True)
+        except OSError:
+            self.skipTest("collegamenti simbolici non permessi su questo sistema")
+        self.assertEqual(giochi.trova_file(self.cfg, self.home), [f])
+
+
+class TestConfigurazioneReale(unittest.TestCase):
+    """Le configurazioni vere di ogni gioco, applicate a un file d'esempio realistico."""
+
+    def applica(self, profilo, ident, contenuto: bytes, nome: str):
+        with tempfile.TemporaryDirectory() as d:
+            f = Path(d) / nome
+            f.write_bytes(contenuto)
+            r = giochi.applica_config(_guida(profilo, ident).config, [f])[0]
+            self.assertIsNone(r.errore)
+            return f.read_bytes().decode("utf-8"), r      # byte, non read_text: così gli a capo CRLF restano visibili
+
+    SKYRIM = ("[General]\r\nsLanguage=ITALIAN\r\n[Display]\r\niSize H=1600\r\niSize W=2560\r\nbFull Screen=0\r\n"
+              "iShadowMapResolution=4096\r\nfShadowDistance=8000.0000\r\nbUseTAA=0\r\n[Grass]\r\nfGrassStartFadeDistance=7000.0000\r\n")
+    RDR2 = ('<?xml version="1.0" encoding="UTF-8"?>\n<rage__fwuiSystemSettingsCollection>\n  <graphics>\n'
+            '    <textureQuality>kSettingLevel_High</textureQuality>\n    <msaa value="2" />\n  </graphics>\n  <advancedGraphics>\n'
+            '    <API>kSettingAPI_DX12</API>\n    <locked value="true" />\n    <treeQuality>kSettingLevel_Ultra</treeQuality>\n'
+            '  </advancedGraphics>\n</rage__fwuiSystemSettingsCollection>\n')
+    WITCHER = '[Viewport]\nVSync=true\nResolution="2560x1600"\n[PostProcess]\nAllowMotionBlur=true\n[Rendering]\nHairWorksLevel=2\n'
+
+    def test_skyrim_onexplayer(self):
+        testo, r = self.applica("onexplayer1s", "skyrim", self.SKYRIM.encode(), "SkyrimPrefs.ini")
+        for riga in ("iSize W=1280", "iSize H=800", "iShadowMapResolution=1024", "bFull Screen=1", "bUseTAA=1",
+                     "fGrassStartFadeDistance=3500.0000"):
+            self.assertIn(riga, testo)
+        self.assertIn("sLanguage=ITALIAN", testo)                 # il resto non si tocca
+        self.assertNotIn("\n", testo.replace("\r\n", ""))         # a capo CRLF intatti
+        self.assertTrue(r.scritto)
+
+    def test_skyrim_ally(self):
+        testo, _ = self.applica("rogallyz1x", "skyrim", self.SKYRIM.encode(), "SkyrimPrefs.ini")
+        for riga in ("iSize W=1920", "iSize H=1080", "iShadowMapResolution=2048", "bVolumetricLightingEnable=1"):
+            self.assertIn(riga, testo)
+
+    def test_skyrim_generico_lascia_la_risoluzione(self):
+        testo, _ = self.applica("generico", "skyrim", self.SKYRIM.encode(), "SkyrimPrefs.ini")
+        self.assertIn("iSize W=2560", testo)
+        self.assertIn("iSize H=1600", testo)
+        self.assertIn("iShadowMapResolution=1024", testo)
+
+    def test_rdr2_ally(self):
+        testo, r = self.applica("rogallyz1x", "rdr2", self.RDR2.encode(), "system.xml")
+        self.assertIn("<API>kSettingAPI_Vulkan</API>", testo)
+        self.assertIn('<locked value="false" />', testo)
+        self.assertIn("<treeQuality>kSettingLevel_High</treeQuality>", testo)
+        self.assertIn('<msaa value="0" />', testo)
+        self.assertGreater(r.conta("assente"), 0)                 # le voci che il file non ha non vengono inventate
+        self.assertEqual(testo.count("<"), self.RDR2.count("<"))
+
+    def test_rdr2_onexplayer(self):
+        testo, _ = self.applica("onexplayer1s", "rdr2", self.RDR2.encode(), "system.xml")
+        self.assertIn("<treeQuality>kSettingLevel_Low</treeQuality>", testo)
+        self.assertIn("<textureQuality>kSettingLevel_Ultra</textureQuality>", testo)
+
+    def test_witcher_onexplayer(self):
+        testo, r = self.applica("onexplayer1s", "witcher3", self.WITCHER.encode(), "user.settings")
+        self.assertIn("HairWorksLevel=0", testo)
+        self.assertIn('Resolution="1280x800"', testo)
+        self.assertIn("AllowMotionBlur=false", testo)
+        self.assertIn("VSync=false", testo)
+        self.assertEqual(r.conta("assente"), 0)
+
+    def test_witcher_non_aggiunge_chiavi(self):
+        # Il gioco scarta i file che non hanno la sua struttura: una chiave mancante si segnala, non si inventa.
+        testo, r = self.applica("generico", "witcher3", b"[Rendering]\nHairWorksLevel=2\n", "user.settings")
+        self.assertEqual(testo, "[Rendering]\nHairWorksLevel=0\n")
+        self.assertEqual(r.conta("assente"), 2)
+
+
+class TestTestoGuide(unittest.TestCase):
+    def test_html_elenchi_grassetto_codice(self):
+        h = giochi.testo_html("Prima **riga** con `codice`.\n\n1. uno\n2. due\n\n- a\n- b\n\nFine")
+        self.assertIn("<ol>", h)
+        self.assertIn("<li>uno</li>", h)
+        self.assertIn("<ul>", h)
+        self.assertIn("<li>b</li>", h)
+        self.assertIn("<b>riga</b>", h)
+        self.assertIn("<code>codice</code>", h)
+        self.assertEqual(h.count("<ol>"), h.count("</ol>"))
+        self.assertEqual(h.count("<ul>"), h.count("</ul>"))
+        self.assertTrue(h.endswith("<p>Fine</p>"))
+
+    def test_html_elenco_senza_riga_vuota_in_mezzo(self):
+        h = giochi.testo_html("1. uno\n- puntato")
+        self.assertLess(h.index("</ol>"), h.index("<ul>"))
+
+    def test_html_escape(self):
+        h = giochi.testo_html("a < b & c > d")
+        self.assertIn("a &lt; b &amp; c &gt; d", h)
+        self.assertIn("&lt;script&gt;", giochi.testo_html("- <script>"))
+
+    def test_testo_semplice(self):
+        self.assertEqual(giochi.testo_semplice("**Dolphin** e `~/Giochi`"), "Dolphin e ~/Giochi")
+
+    def test_testo_guida(self):
+        g = _guida("onexplayer1s", "skyrim")
+        t = giochi.testo_guida(g)
+        self.assertIn(g.nome, t)
+        self.assertIn(f"Passo 1 di {len(g.passi)}", t)
+        self.assertIn(f"Passo {len(g.passi)} di {len(g.passi)}", t)
+        self.assertIn("--imposta-gioco skyrim", t)
+        self.assertIn("--ripristina-gioco skyrim", t)
+        self.assertNotIn("**", t)
+        self.assertNotIn("`", t)
+
+
+class TestProgressiGuide(unittest.TestCase):
+    def test_salva_e_rileggi(self):
+        with tempfile.TemporaryDirectory() as d:
+            f = Path(d) / "sotto/guide.json"
+            giochi.salva_progresso("rdr2", 4, f)
+            giochi.salva_progresso("skyrim", 2, f)
+            giochi.salva_progresso("rdr2", 5, f)
+            self.assertEqual(giochi.leggi_progressi(f), {"rdr2": 5, "skyrim": 2})
+
+    def test_file_assente_o_rotto(self):
+        with tempfile.TemporaryDirectory() as d:
+            f = Path(d) / "guide.json"
+            self.assertEqual(giochi.leggi_progressi(f), {})
+            f.write_text("{non è json", encoding="utf-8")
+            self.assertEqual(giochi.leggi_progressi(f), {})
+            f.write_text("[1, 2]", encoding="utf-8")
+            self.assertEqual(giochi.leggi_progressi(f), {})
+            f.write_text('{"rdr2": "tre", "skyrim": 2}', encoding="utf-8")
+            self.assertEqual(giochi.leggi_progressi(f), {"skyrim": 2})
+            f.write_text("{non è json", encoding="utf-8")
+            giochi.salva_progresso("witcher3", 1, f)          # un file rotto non impedisce di salvare di nuovo
+            self.assertEqual(giochi.leggi_progressi(f), {"witcher3": 1})
+
+    def test_cartella_non_scrivibile_non_solleva(self):
+        with tempfile.TemporaryDirectory() as d:
+            ostacolo = Path(d) / "file"
+            ostacolo.write_text("x")
+            giochi.salva_progresso("rdr2", 1, ostacolo / "guide.json")      # la «cartella» è un file
+
+
+class TestGuideDaConsole(unittest.TestCase):
+    def esegui(self, *argv):
+        out, err = io.StringIO(), io.StringIO()
+        with contextlib.redirect_stdout(out), contextlib.redirect_stderr(err):
+            codice = punto_ingresso.main(list(argv))
+        return codice, out.getvalue(), err.getvalue()
+
+    def test_guida(self):
+        codice, out, _ = self.esegui("--guida", "rdr2", "--profilo", "onexplayer1s")
+        self.assertEqual(codice, 0)
+        self.assertIn("Red Dead Redemption 2", out)
+        self.assertIn("Passo 1 di", out)
+
+    def test_guida_sconosciuta(self):
+        codice, out, err = self.esegui("--guida", "boh", "--profilo", "generico")
+        self.assertEqual(codice, 2)
+        self.assertEqual(out, "")
+        self.assertIn("rdr2", err)
+
+    def test_profilo_sconosciuto(self):
+        self.assertEqual(self.esegui("--guida", "rdr2", "--profilo", "boh")[0], 2)
+
+    def test_imposta_senza_file_trovati(self):
+        with mock.patch.object(punto_ingresso, "trova_file", lambda cfg, *a: []):
+            codice, _, err = self.esegui("--imposta-gioco", "skyrim", "--profilo", "onexplayer1s")
+            self.assertEqual(codice, 1)
+            self.assertIn("SkyrimPrefs.ini", err)
+            self.assertEqual(self.esegui("--ripristina-gioco", "skyrim", "--profilo", "onexplayer1s")[0], 1)
+
+    def test_imposta_e_ripristina(self):
+        with tempfile.TemporaryDirectory() as d:
+            f = Path(d) / "SkyrimPrefs.ini"
+            originale = b"[Display]\r\niShadowMapResolution=4096\r\n"
+            f.write_bytes(originale)
+            with mock.patch.object(punto_ingresso, "trova_file", lambda cfg, *a: [f]):
+                codice, out, _ = self.esegui("--imposta-gioco", "skyrim", "--profilo", "onexplayer1s", "--dry-run")
+                self.assertEqual(codice, 0)
+                self.assertIn("1024", out)
+                self.assertEqual(f.read_bytes(), originale)           # con --dry-run il file non cambia
+                codice, out, _ = self.esegui("--imposta-gioco", "skyrim", "--profilo", "onexplayer1s")
+                self.assertEqual(codice, 0)
+                self.assertIn(b"iShadowMapResolution=1024", f.read_bytes())
+                self.assertIn("salvato", out)
+                codice, out, _ = self.esegui("--ripristina-gioco", "skyrim", "--profilo", "onexplayer1s")
+                self.assertEqual(codice, 0)
+                self.assertEqual(f.read_bytes(), originale)
+
+    def test_ripristina_senza_copia_non_e_un_errore(self):
+        with tempfile.TemporaryDirectory() as d:
+            f = Path(d) / "SkyrimPrefs.ini"
+            f.write_bytes(b"[Display]\n")
+            with mock.patch.object(punto_ingresso, "trova_file", lambda cfg, *a: [f]):
+                codice, out, err = self.esegui("--ripristina-gioco", "skyrim", "--profilo", "generico")
+            self.assertEqual(codice, 0)
+            self.assertIn("Nessuna copia salvata: non c'era niente da ripristinare", out)
+            self.assertEqual(err, "")
+            self.assertEqual(f.read_bytes(), b"[Display]\n")
+
+    def test_ripristina_con_dry_run_non_ripristina(self):
+        with tempfile.TemporaryDirectory() as d:
+            f = Path(d) / "SkyrimPrefs.ini"
+            originale = b"[Display]\r\niShadowMapResolution=4096\r\n"
+            f.write_bytes(originale)
+            copia = f.with_name(f.name + giochi.SUFFISSO_COPIA)
+            with mock.patch.object(punto_ingresso, "trova_file", lambda cfg, *a: [f]):
+                self.esegui("--imposta-gioco", "skyrim", "--profilo", "onexplayer1s")
+                modificato = f.read_bytes()
+                self.assertNotEqual(modificato, originale)
+                codice, out, _ = self.esegui("--ripristina-gioco", "skyrim", "--profilo", "onexplayer1s", "--dry-run")
+                self.assertEqual(codice, 0)
+                self.assertIn("simulazione", out)
+                self.assertEqual(f.read_bytes(), modificato)
+                self.assertEqual(copia.read_bytes(), originale)
+                codice, _, _ = self.esegui("--ripristina-gioco", "skyrim", "--profilo", "onexplayer1s")
+                self.assertEqual(codice, 0)
+                self.assertEqual(f.read_bytes(), originale)
+                self.assertFalse(copia.exists())
+
+    def test_errore_di_scrittura_da_uscita_1(self):
+        with tempfile.TemporaryDirectory() as d:
+            f = Path(d) / "SkyrimPrefs.ini"
+            f.write_bytes(b"[Display]\niShadowMapResolution=4096\n")
+            with mock.patch.object(punto_ingresso, "trova_file", lambda cfg, *a: [f]), \
+                    mock.patch.object(giochi.os, "replace", side_effect=OSError("sola lettura")):
+                codice, out, _ = self.esegui("--imposta-gioco", "skyrim", "--profilo", "onexplayer1s")
+            self.assertEqual(codice, 1)
+            self.assertIn("sola lettura", out)
 
 
 if __name__ == "__main__":

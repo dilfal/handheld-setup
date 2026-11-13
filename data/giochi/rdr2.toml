@@ -1,0 +1,234 @@
+id = "rdr2"
+nome = "Red Dead Redemption 2"
+ordine = 1
+
+# Fonti dei valori: guida ufficiale ASUS per la ROG Ally (9 giugno 2023, 1080p con FSR 2 Qualità, 40-50 FPS in Turbo);
+# per il OneXPlayer le impostazioni ottimizzate per Steam Deck (pcoptimizedsettings.com, 13 giugno 2024), senza FSR
+# perché a 1280×800 sgranerebbe: la Iris Xe è un po' più lenta della Deck, quindi l'obiettivo è 30 FPS.
+# Le chiavi di system.xml sono controllate su cinque file reali (versione 37 del formato).
+# Intervalli numerici: parser Forceflow/rdr2_settings_parser (lodScale 0,75–1; grassLod 0,5–3; waterSimulationQuality 0–4).
+# L'indice del filtro anisotropico (2 = 4x, 3 = 8x) è da verificare sul dispositivo.
+
+[obiettivo]
+onexplayer1s = "Obiettivo: 30 FPS stabili a 1280×800 (la metà esatta dello schermo, quindi nitida), texture Ultra e il resto al minimo."
+rogallyz1x = "Obiettivo: 40-50 FPS a 1080p con FSR 2 su Qualità e VRR, texture Ultra (impostazioni della guida ufficiale ASUS)."
+generico = "Obiettivo: 30 FPS stabili a risoluzione ridotta, texture Ultra e il resto al minimo. È un punto di partenza prudente: sul tuo dispositivo potresti poter alzare."
+
+[parametri]
+eseguibile = "RDR2.exe"
+percorso_esempio = "~/Giochi/Red Dead Redemption 2/RDR2.exe"
+nota_eseguibile = "Se la tua copia parte da un altro file (per esempio `Launcher.exe`), scegli quello."
+primo_avvio = "Premi **Gioca**, aspetta il menu principale (la prima volta il gioco prepara i suoi file e può volerci qualche minuto), poi esci dal gioco dal suo menu."
+zona_prova = "Saint Denis, o Valentine con la pioggia"
+nota_origine = "- **Comprato da Rockstar o Epic:** ha bisogno del Rockstar Games Launcher; installalo con Heroic o Lutris (questa guida non lo copre). Quando il gioco parte, riprendi dal passo «Scrivi le impostazioni grafiche» e, se il file non viene trovato, indicalo con «Scegli il file a mano»."
+
+[parametri.onexplayer1s]
+risoluzione = "1280×800"
+perche_risoluzione = "Lo schermo è 2560×1600: a 1280×800 ogni punto del gioco diventa un quadrato di 2×2 punti dello schermo, senza sfocature, e la scheda video lavora su un quarto dei punti."
+fps = "30"
+tdp = "Profilo TDP 28W (con il caricatore collegato; a batteria 20W)"
+se_scatta = "controlla di avere applicato il Profilo TDP 28W; se non basta, nel gioco attiva **FSR 2** su **Qualità** (l'immagine diventa un po' meno nitida), poi **Bilanciato**."
+se_avanza = "alza una voce per volta, in quest'ordine: **Qualità illuminazione** su Media, poi **Qualità ombre** su Media."
+
+[parametri.rogallyz1x]
+risoluzione = "1920×1080"
+perche_risoluzione = ""
+fps = "Nessun limite (con il VRR va bene così); se preferisci consumi più bassi, 40"
+tdp = "25 W (30 W con il caricatore collegato)"
+se_scatta = "nel gioco porta **FSR 2** da Qualità a **Bilanciato**; se non basta abbassa **Qualità ombre** a Bassa."
+se_avanza = "alza **Qualità illuminazione** ad Alta oppure **Ombre distanti** a Media; oppure abbassa il Limite TDP a 20 W e tieni la batteria più a lungo."
+
+[parametri.generico]
+risoluzione = "1280×800 (o 1280×720 su uno schermo 16:9)"
+perche_risoluzione = "Una risoluzione più bassa di quella dello schermo è la scelta che pesa di più sui fotogrammi: parti da qui e alzala solo se il gioco regge."
+fps = "30"
+tdp = "il valore più alto che il dispositivo regge senza scaldare troppo"
+se_scatta = "nel gioco attiva **FSR 2** su **Qualità** (Impostazioni → Grafica); se non basta passa a **Bilanciato**."
+se_avanza = "alza la risoluzione di gioco, poi una voce per volta: **Qualità illuminazione**, **Qualità ombre**."
+
+[[passo]]
+titolo = "Scrivi le impostazioni grafiche"
+dove = "app"
+azione = "config"
+testo = """
+Con il gioco **chiuso**, premi **Applica**: il programma cerca il file `system.xml` di {nome} e cambia solo le voci grafiche elencate al passo successivo. Risoluzione, comandi e salvataggi non vengono toccati.
+
+Prima di scrivere salva una copia del file: con **Ripristina** torni a com'era prima del primo Applica. Usalo con il gioco chiuso: le modifiche fatte dopo dal menu del gioco vanno perse.
+
+Se il file non viene trovato, torna al passo «Primo avvio». Se qualche voce risulta mancante, la imposti a mano con la tabella del prossimo passo.
+"""
+
+[[passo]]
+titolo = "Controlla nel gioco e completa a mano"
+dove = "gioco"
+testo = """
+1. Avvia {nome} e apri **Impostazioni → Grafica**.
+2. Imposta le voci segnate **a mano**: il programma non le scrive.
+3. Scorri le altre e controlla che corrispondano (se hai premuto Applica dovrebbero esserlo già).
+4. In fondo, le **Impostazioni avanzate** devono essere **sbloccate** per vedere la seconda metà dell'elenco.
+
+Tra parentesi c'è il nome inglese della voce: in italiano può essere scritta in modo un po' diverso.
+"""
+nota_app = "Per non andare avanti e indietro tra il gioco e questa finestra, apri la stessa tabella sul telefono: `070293.xyz/{pagina_web}`"
+
+[passo.voci]
+onexplayer1s = [
+  ["Tipo di schermo (Screen Type)", "Schermo intero · a mano"],
+  ["Sincronia verticale (VSync)", "No · a mano"],
+  ["FSR 2", "No · a mano (solo se non tieni i 30 FPS: Qualità)"],
+  ["Qualità texture (Texture Quality)", "Ultra"],
+  ["Filtro anisotropico (Anisotropic Filtering)", "4x"],
+  ["Qualità illuminazione (Lighting Quality)", "Bassa"],
+  ["Illuminazione globale (Global Illumination)", "Bassa"],
+  ["Qualità ombre (Shadow Quality)", "Bassa"],
+  ["Ombre distanti (Far Shadow Quality)", "Bassa"],
+  ["Occlusione ambientale (SSAO)", "Media"],
+  ["Qualità riflessi (Reflection Quality)", "Bassa"],
+  ["Qualità specchi (Mirror Quality)", "Bassa"],
+  ["Qualità acqua (Water Quality)", "Bassa"],
+  ["Qualità volumetrica (Volumetrics Quality)", "Bassa"],
+  ["Qualità particelle (Particle Quality)", "Bassa"],
+  ["Tassellazione (Tessellation Quality)", "Bassa"],
+  ["TAA", "Medio"],
+  ["FXAA e MSAA", "No"],
+  ["API grafica (Graphics API)", "Vulkan"],
+  ["Volumetria vicina, lontana e luce volumetrica", "Bassa"],
+  ["Illuminazione particelle (Particle Lighting)", "Bassa"],
+  ["Ombre morbide (Soft Shadows)", "Basse"],
+  ["Ombre dell'erba (Grass Shadows)", "Basse"],
+  ["Ombre lunghe (Long Shadows)", "No"],
+  ["SSAO a piena risoluzione (Full Resolution SSAO)", "No"],
+  ["Rifrazione, riflessi e fisica dell'acqua", "Basse"],
+  ["Sfocatura di movimento (Motion Blur)", "No"],
+  ["Dettaglio geometria (Geometry Level of Detail)", "Minimo"],
+  ["Dettaglio erba (Grass Level of Detail)", "Minimo"],
+  ["Qualità alberi (Tree Quality)", "Bassa"],
+  ["Mappatura parallasse (Parallax Occlusion Mapping)", "Bassa"],
+  ["Qualità decalcomanie (Decal Quality)", "Bassa"],
+  ["Qualità pelliccia (Fur Quality)", "Media"],
+  ["Tassellazione alberi (Tree Tessellation)", "No"],
+]
+rogallyz1x = [
+  ["Tipo di schermo (Screen Type)", "Schermo intero · a mano"],
+  ["Sincronia verticale (VSync)", "No · a mano (ci pensa il VRR)"],
+  ["FSR 2", "Qualità · a mano (TAA, FXAA e MSAA si spengono da soli)"],
+  ["Qualità texture (Texture Quality)", "Ultra"],
+  ["Filtro anisotropico (Anisotropic Filtering)", "8x"],
+  ["Qualità illuminazione (Lighting Quality)", "Media"],
+  ["Illuminazione globale (Global Illumination)", "Bassa"],
+  ["Qualità ombre (Shadow Quality)", "Media"],
+  ["Ombre distanti (Far Shadow Quality)", "Bassa"],
+  ["Occlusione ambientale (SSAO)", "Media"],
+  ["Qualità riflessi (Reflection Quality)", "Bassa"],
+  ["Qualità specchi (Mirror Quality)", "Bassa"],
+  ["Qualità acqua (Water Quality)", "Bassa"],
+  ["Qualità volumetrica (Volumetrics Quality)", "Bassa"],
+  ["Qualità particelle (Particle Quality)", "Media"],
+  ["Tassellazione (Tessellation Quality)", "Media"],
+  ["API grafica (Graphics API)", "Vulkan"],
+  ["Volumetria vicina, lontana e luce volumetrica", "Bassa"],
+  ["Illuminazione particelle (Particle Lighting)", "Media"],
+  ["Ombre morbide (Soft Shadows)", "Alte"],
+  ["Ombre dell'erba (Grass Shadows)", "Basse"],
+  ["Ombre lunghe (Long Shadows)", "No"],
+  ["SSAO a piena risoluzione (Full Resolution SSAO)", "No"],
+  ["Rifrazione, riflessi e fisica dell'acqua", "Basse"],
+  ["Sfocatura di movimento (Motion Blur)", "No"],
+  ["Dettaglio geometria (Geometry Level of Detail)", "Massimo"],
+  ["Dettaglio erba (Grass Level of Detail)", "2 tacche su 10"],
+  ["Qualità alberi (Tree Quality)", "Alta"],
+  ["Mappatura parallasse (Parallax Occlusion Mapping)", "Media"],
+  ["Qualità decalcomanie (Decal Quality)", "Bassa"],
+  ["Qualità pelliccia (Fur Quality)", "Media"],
+  ["Tassellazione alberi (Tree Tessellation)", "No"],
+]
+generico = "onexplayer1s"
+
+[config]
+tipo = "xml"
+cartelle = ["Documents/Rockstar Games/Red Dead Redemption 2/Settings", "My Documents/Rockstar Games/Red Dead Redemption 2/Settings"]
+file = "system.xml"
+
+[config.qualita]
+generico = "onexplayer1s"
+
+[config.qualita.onexplayer1s]
+"graphics/textureQuality" = "kSettingLevel_Ultra"
+"graphics/anisotropicFiltering" = "2"
+"graphics/lightingQuality" = "kSettingLevel_Low"
+"graphics/ambientLightingQuality" = "kSettingLevel_Low"
+"graphics/shadowQuality" = "kSettingLevel_Low"
+"graphics/farShadowQuality" = "kSettingLevel_Low"
+"graphics/ssao" = "kSettingLevel_Medium"
+"graphics/reflectionQuality" = "kSettingLevel_Low"
+"graphics/mirrorQuality" = "kSettingLevel_Low"
+"graphics/waterQuality" = "kSettingLevel_Low"
+"graphics/volumetricsQuality" = "kSettingLevel_Low"
+"graphics/particleQuality" = "kSettingLevel_Low"
+"graphics/tessellation" = "kSettingLevel_Low"
+"graphics/taa" = "kSettingLevel_Medium"
+"graphics/fxaaEnabled" = "false"
+"graphics/msaa" = "0"
+"advancedGraphics/API" = "kSettingAPI_Vulkan"
+"advancedGraphics/locked" = "false"
+"advancedGraphics/scatteringVolumeQuality" = "kSettingLevel_Low"
+"advancedGraphics/volumetricsRaymarchQuality" = "kSettingLevel_Low"
+"advancedGraphics/volumetricsLightingQuality" = "kSettingLevel_Low"
+"advancedGraphics/volumetricsRaymarchResolutionUnclamped" = "false"
+"advancedGraphics/particleLightingQuality" = "kSettingLevel_Low"
+"advancedGraphics/shadowSoftShadows" = "kSettingLevel_Low"
+"advancedGraphics/shadowGrassShadows" = "kSettingLevel_Low"
+"advancedGraphics/shadowLongShadows" = "false"
+"advancedGraphics/ssaoFullScreenEnabled" = "false"
+"advancedGraphics/waterRefractionQuality" = "kSettingLevel_Low"
+"advancedGraphics/waterReflectionQuality" = "kSettingLevel_Low"
+"advancedGraphics/waterSimulationQuality" = "1"
+"advancedGraphics/motionBlur" = "false"
+"advancedGraphics/reflectionMSAA" = "0"
+"advancedGraphics/lodScale" = "0.750000"
+"advancedGraphics/grassLod" = "0.500000"
+"advancedGraphics/treeQuality" = "kSettingLevel_Low"
+"advancedGraphics/POMQuality" = "kSettingLevel_Low"
+"advancedGraphics/decalQuality" = "kSettingLevel_Low"
+"advancedGraphics/furDisplayQuality" = "kSettingLevel_Medium"
+"advancedGraphics/treeTessellationEnabled" = "false"
+
+[config.qualita.rogallyz1x]
+"graphics/textureQuality" = "kSettingLevel_Ultra"
+"graphics/anisotropicFiltering" = "3"
+"graphics/lightingQuality" = "kSettingLevel_Medium"
+"graphics/ambientLightingQuality" = "kSettingLevel_Low"
+"graphics/shadowQuality" = "kSettingLevel_Medium"
+"graphics/farShadowQuality" = "kSettingLevel_Low"
+"graphics/ssao" = "kSettingLevel_Medium"
+"graphics/reflectionQuality" = "kSettingLevel_Low"
+"graphics/mirrorQuality" = "kSettingLevel_Low"
+"graphics/waterQuality" = "kSettingLevel_Low"
+"graphics/volumetricsQuality" = "kSettingLevel_Low"
+"graphics/particleQuality" = "kSettingLevel_Medium"
+"graphics/tessellation" = "kSettingLevel_Medium"
+"graphics/fxaaEnabled" = "false"
+"graphics/msaa" = "0"
+"advancedGraphics/API" = "kSettingAPI_Vulkan"
+"advancedGraphics/locked" = "false"
+"advancedGraphics/scatteringVolumeQuality" = "kSettingLevel_Low"
+"advancedGraphics/volumetricsRaymarchQuality" = "kSettingLevel_Low"
+"advancedGraphics/volumetricsLightingQuality" = "kSettingLevel_Low"
+"advancedGraphics/volumetricsRaymarchResolutionUnclamped" = "false"
+"advancedGraphics/particleLightingQuality" = "kSettingLevel_Medium"
+"advancedGraphics/shadowSoftShadows" = "kSettingLevel_High"
+"advancedGraphics/shadowGrassShadows" = "kSettingLevel_Low"
+"advancedGraphics/shadowLongShadows" = "false"
+"advancedGraphics/ssaoFullScreenEnabled" = "false"
+"advancedGraphics/waterRefractionQuality" = "kSettingLevel_Low"
+"advancedGraphics/waterReflectionQuality" = "kSettingLevel_Low"
+"advancedGraphics/waterSimulationQuality" = "1"
+"advancedGraphics/motionBlur" = "false"
+"advancedGraphics/reflectionMSAA" = "0"
+"advancedGraphics/lodScale" = "1.000000"
+"advancedGraphics/grassLod" = "1.000000"
+"advancedGraphics/treeQuality" = "kSettingLevel_High"
+"advancedGraphics/POMQuality" = "kSettingLevel_Medium"
+"advancedGraphics/decalQuality" = "kSettingLevel_Low"
+"advancedGraphics/furDisplayQuality" = "kSettingLevel_Medium"
+"advancedGraphics/treeTessellationEnabled" = "false"

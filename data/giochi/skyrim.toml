@@ -1,0 +1,140 @@
+id = "skyrim"
+nome = "Skyrim Special Edition"
+ordine = 3
+
+# Vale anche per la Anniversary Edition (stesso eseguibile). Le impostazioni grafiche stanno in SkyrimPrefs.ini, che il
+# launcher crea al primo avvio riconoscendo la scheda video: per questo il primo avvio passa dal launcher.
+# Il gioco è fatto per i 60 FPS: oltre, la fisica si rompe (oggetti che volano, il carro dell'inizio che si ribalta),
+# quindi anche sulla ROG Ally a 120 Hz il limite resta 60. Le chiavi sono controllate su file reali.
+
+[obiettivo]
+onexplayer1s = "Obiettivo: 60 FPS a 1280×800 partendo dal preset Medio, con ombre più leggere e senza luce volumetrica."
+rogallyz1x = "Obiettivo: 60 FPS fissi a 1080p partendo dal preset Ultra, con ombre a 2048 e pochi watt."
+generico = "Obiettivo: 60 FPS a risoluzione ridotta partendo dal preset Medio. È un punto di partenza prudente: sul tuo dispositivo potresti poter alzare."
+
+[parametri]
+eseguibile = "SkyrimSELauncher.exe"
+percorso_esempio = "~/Giochi/Skyrim Special Edition/SkyrimSELauncher.exe"
+nota_eseguibile = "Scegli il launcher e non `SkyrimSE.exe`: al primo avvio è il launcher a creare i file di impostazioni."
+primo_avvio = "Premi **Gioca**: si apre il launcher. Tocca **Opzioni**, scegli il preset **{preset}** e conferma con **OK**; poi tocca **Gioca**, arriva al menu principale ed esci dal gioco."
+zona_prova = "Riverwood con la pioggia, o Whiterun di giorno"
+nota_origine = ""
+
+[parametri.onexplayer1s]
+risoluzione = "1280×800"
+perche_risoluzione = "Lo schermo è 2560×1600: a 1280×800 ogni punto del gioco diventa un quadrato di 2×2 punti dello schermo, senza sfocature, e la scheda video lavora su un quarto dei punti."
+preset = "Medio"
+fps = "60"
+tdp = "Profilo TDP 20W (28W con il caricatore collegato, se serve)"
+se_scatta = "porta il limite fotogrammi a 30 oppure, nel launcher, scegli il preset **Basso** e poi premi di nuovo **Applica** nell'app (passo «Scrivi le impostazioni grafiche»)."
+se_avanza = "prova il Profilo TDP 15W: meno calore, ventole più silenziose e batteria più lunga."
+
+[parametri.rogallyz1x]
+risoluzione = "1920×1080"
+perche_risoluzione = ""
+preset = "Ultra"
+fps = "60 (non di più: sopra i 60 la fisica del gioco si rompe)"
+tdp = "15 W"
+se_scatta = "alza il Limite TDP a 18 W."
+se_avanza = "abbassa il Limite TDP a 12 W: Skyrim è leggero e la batteria dura molto di più."
+
+[parametri.generico]
+risoluzione = "1280×800 (o 1280×720 su uno schermo 16:9)"
+perche_risoluzione = "Una risoluzione più bassa di quella dello schermo è la scelta che pesa di più sui fotogrammi: parti da qui e alzala solo se il gioco regge."
+preset = "Medio"
+fps = "60 (non di più: sopra i 60 la fisica del gioco si rompe)"
+tdp = "un valore medio, per esempio 15 W"
+se_scatta = "nel launcher scegli il preset **Basso** e poi premi di nuovo **Applica** nell'app (passo «Scrivi le impostazioni grafiche»)."
+se_avanza = "alza la risoluzione di gioco, oppure nel launcher passa al preset **Alto**."
+
+[[passo]]
+titolo = "Scrivi le impostazioni grafiche"
+dove = "app"
+azione = "config"
+testo = """
+Con il gioco **chiuso**, premi **Applica**: il programma cerca `SkyrimPrefs.ini` e cambia solo le voci della tabella qui sotto, partendo dal preset **{preset}** che hai scelto nel launcher. Salvataggi, comandi e audio non vengono toccati.
+
+Prima di scrivere salva una copia del file: con **Ripristina** torni a com'era prima del primo Applica. Usalo con il gioco chiuso: le modifiche fatte dopo dal menu del gioco vanno perse.
+
+Da qui in poi, quando si apre il launcher tocca solo **Gioca**: se riapri **Opzioni**, il launcher riscrive il file e devi premere di nuovo Applica.
+"""
+
+[passo.voci]
+onexplayer1s = [
+  ["Risoluzione", "1280×800, schermo intero"],
+  ["Risoluzione delle ombre", "1024"],
+  ["Distanza delle ombre", "4000"],
+  ["Luce volumetrica (raggi di sole)", "No: è l'effetto che pesa di più"],
+  ["Riflessi sull'acqua (Screen Space Reflections)", "No"],
+  ["Antialiasing", "TAA (FXAA spento)"],
+  ["Distanza dell'erba", "3500"],
+  ["Sincronia verticale", "Sì (Skyrim la usa per regolare il ritmo del gioco)"],
+]
+rogallyz1x = [
+  ["Risoluzione", "1920×1080, schermo intero"],
+  ["Risoluzione delle ombre", "2048 (a 4096 costa molto e si vede poco)"],
+  ["Distanza delle ombre", "8000"],
+  ["Luce volumetrica (raggi di sole)", "Sì, qualità media"],
+  ["Antialiasing", "TAA (FXAA spento)"],
+  ["Sincronia verticale", "Sì (Skyrim la usa per regolare il ritmo del gioco)"],
+]
+generico = [
+  ["Risoluzione delle ombre", "1024"],
+  ["Distanza delle ombre", "4000"],
+  ["Luce volumetrica (raggi di sole)", "No: è l'effetto che pesa di più"],
+  ["Riflessi sull'acqua (Screen Space Reflections)", "No"],
+  ["Antialiasing", "TAA (FXAA spento)"],
+  ["Distanza dell'erba", "3500"],
+  ["Sincronia verticale", "Sì (Skyrim la usa per regolare il ritmo del gioco)"],
+]
+
+[[passo]]
+titolo = "Attiva il controller nel gioco"
+dove = "gioco"
+testo = """
+1. Avvia {nome}: nel launcher tocca solo **Gioca**.
+2. Se a schermo vedi i tasti della tastiera invece di quelli del controller, nelle **Impostazioni** del gioco cerca la voce **Controller** e attivala.
+3. Se il controller non risponde affatto, nella pagina del gioco su Steam tocca l'icona del controller e scegli **Abilita Steam Input** con la disposizione **Gamepad**.
+"""
+
+[config]
+tipo = "ini"
+cartelle = [
+  "Documents/My Games/Skyrim Special Edition",
+  "Documents/My Games/Skyrim Special Edition GOG",
+  "My Documents/My Games/Skyrim Special Edition",
+  "My Documents/My Games/Skyrim Special Edition GOG",
+]
+file = "SkyrimPrefs.ini"
+
+[config.qualita]
+generico = "onexplayer1s"
+
+[config.qualita.onexplayer1s]
+"Display/iShadowMapResolution" = "1024"
+"Display/fShadowDistance" = "4000.0000"
+"Display/bVolumetricLightingEnable" = "0"
+"Display/bScreenSpaceReflectionEnabled" = "0"
+"Display/bUseTAA" = "1"
+"Display/bFXAAEnabled" = "0"
+"Display/iVSyncPresentInterval" = "1"
+"Grass/fGrassStartFadeDistance" = "3500.0000"
+
+[config.qualita.rogallyz1x]
+"Display/iShadowMapResolution" = "2048"
+"Display/fShadowDistance" = "8000.0000"
+"Display/bVolumetricLightingEnable" = "1"
+"Display/iVolumetricLightingQuality" = "1"
+"Display/bUseTAA" = "1"
+"Display/bFXAAEnabled" = "0"
+"Display/iVSyncPresentInterval" = "1"
+
+[config.schermo.onexplayer1s]
+"Display/iSize W" = "1280"
+"Display/iSize H" = "800"
+"Display/bFull Screen" = "1"
+
+[config.schermo.rogallyz1x]
+"Display/iSize W" = "1920"
+"Display/iSize H" = "1080"
+"Display/bFull Screen" = "1"

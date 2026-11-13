@@ -1,0 +1,139 @@
+id = "witcher3"
+nome = "The Witcher 3"
+ordine = 2
+
+# La versione aggiornata (4.x) ha due eseguibili: bin/x64/witcher3.exe (DirectX 11, impostazioni in user.settings)
+# e bin/x64_dx12/witcher3.exe (DirectX 12, impostazioni in dx12user.settings). Su Linux quello DirectX 11 passa da
+# DXVK ed è nettamente più veloce: è la scelta per entrambi i dispositivi. Le chiavi sono controllate su file reali.
+# La qualità grafica si sceglie dal menu del gioco con i preset: nei file ogni preset corrisponde a decine di numeri.
+
+[obiettivo]
+onexplayer1s = "Obiettivo: 30 FPS stabili a 1280×800 con l'eseguibile DirectX 11, preset Basso e texture Alte."
+rogallyz1x = "Obiettivo: 45-60 FPS a 1080p con l'eseguibile DirectX 11, preset Alto, texture Ultra e VRR. È una stima prudente, da verificare sul dispositivo."
+generico = "Obiettivo: 30 FPS stabili a risoluzione ridotta con l'eseguibile DirectX 11 e il preset Basso. È un punto di partenza prudente."
+
+[parametri]
+eseguibile = "bin/x64/witcher3.exe"
+percorso_esempio = "~/Giochi/The Witcher 3/bin/x64/witcher3.exe"
+nota_eseguibile = "Attenzione: esiste anche `bin/x64_dx12/witcher3.exe` (DirectX 12), che qui è molto più lento. Prendi quello nella cartella `x64` **senza** `_dx12`."
+primo_avvio = "Premi **Gioca**, arriva al menu principale, poi scegli **Esci dal gioco**."
+zona_prova = "il mercato di Novigrad, o un bosco fitto di Velen"
+nota_origine = ""
+
+[parametri.onexplayer1s]
+risoluzione = "1280×800"
+perche_risoluzione = "Lo schermo è 2560×1600: a 1280×800 ogni punto del gioco diventa un quadrato di 2×2 punti dello schermo, senza sfocature, e la scheda video lavora su un quarto dei punti."
+fps = "30"
+nota_preset = "Se tra i preset compare **Steam Deck**, provalo al posto di Basso: è pensato per una scheda video di potenza simile."
+tdp = "Profilo TDP 28W (con il caricatore collegato; a batteria 20W)"
+se_scatta = "abbassa **Raggio di visibilità della vegetazione** e **Densità dell'erba** al minimo, poi spegni l'**Occlusione ambientale**. Controlla anche di avere applicato il Profilo TDP 28W."
+se_avanza = "porta il **Preset grafica** a Medio."
+voci_base = "quattro voci: risoluzione, NVIDIA HairWorks spento, sfocatura di movimento spenta, sincronia verticale spenta (a quella pensa la Gaming Mode)"
+
+[parametri.rogallyz1x]
+risoluzione = "1920×1080"
+perche_risoluzione = ""
+fps = "60"
+nota_preset = ""
+tdp = "25 W"
+se_scatta = "porta il **Preset grafica** a Medio lasciando le texture su Ultra."
+se_avanza = "abbassa il Limite TDP a 18 W per far durare di più la batteria."
+voci_base = "quattro voci: risoluzione, NVIDIA HairWorks spento, sfocatura di movimento spenta, sincronia verticale spenta (a quella pensa la Gaming Mode)"
+
+[parametri.generico]
+risoluzione = "1280×800 (o 1280×720 su uno schermo 16:9)"
+perche_risoluzione = "Una risoluzione più bassa di quella dello schermo è la scelta che pesa di più sui fotogrammi: parti da qui e alzala solo se il gioco regge."
+fps = "30"
+nota_preset = "Se tra i preset compare **Steam Deck**, provalo al posto di Basso."
+tdp = "il valore più alto che il dispositivo regge senza scaldare troppo"
+se_scatta = "abbassa **Raggio di visibilità della vegetazione** e **Densità dell'erba** al minimo, poi spegni l'**Occlusione ambientale**."
+se_avanza = "alza la risoluzione di gioco, poi porta il **Preset grafica** a Medio."
+voci_base = "tre voci: NVIDIA HairWorks spento, sfocatura di movimento spenta, sincronia verticale spenta (a quella pensa la Gaming Mode)"
+
+[[passo]]
+titolo = "Scrivi le impostazioni di base"
+dove = "app"
+azione = "config"
+testo = """
+Con il gioco **chiuso**, premi **Applica**: il programma cerca i file di impostazioni di {nome} (`user.settings` e, se c'è, `dx12user.settings`) e cambia solo {voci_base}.
+
+Prima di scrivere salva una copia di ogni file: con **Ripristina** torni a com'era prima del primo Applica. Usalo con il gioco chiuso: le modifiche fatte dopo dal menu del gioco vanno perse.
+
+La qualità grafica vera e propria si sceglie dal menu del gioco, al passo successivo.
+"""
+
+[passo.voci]
+onexplayer1s = [
+  ["Risoluzione", "1280×800"],
+  ["NVIDIA HairWorks", "No"],
+  ["Sfocatura di movimento (Motion Blur)", "No"],
+  ["Sincronia verticale (VSync)", "No"],
+]
+rogallyz1x = [
+  ["Risoluzione", "1920×1080"],
+  ["NVIDIA HairWorks", "No"],
+  ["Sfocatura di movimento (Motion Blur)", "No"],
+  ["Sincronia verticale (VSync)", "No"],
+]
+generico = [
+  ["NVIDIA HairWorks", "No"],
+  ["Sfocatura di movimento (Motion Blur)", "No"],
+  ["Sincronia verticale (VSync)", "No"],
+]
+
+[[passo]]
+titolo = "Scegli la qualità nel menu del gioco"
+dove = "gioco"
+testo = """
+1. Avvia {nome} e apri **Opzioni → Video**.
+2. In **Grafica** scegli il preset indicato qui sotto, poi ritocca le singole voci della tabella.
+3. In **Post-elaborazione** (Postprocessing) scegli il preset indicato e controlla le voci della tabella.
+4. Conferma e torna al menu.
+
+{nota_preset}
+
+Tra parentesi c'è il nome inglese della voce: in italiano può essere scritta in modo un po' diverso.
+"""
+nota_app = "Per non andare avanti e indietro tra il gioco e questa finestra, apri la stessa tabella sul telefono: `070293.xyz/{pagina_web}`"
+
+[passo.voci]
+onexplayer1s = [
+  ["Modalità di visualizzazione (Display Mode)", "Schermo intero"],
+  ["Fotogrammi al secondo massimi (Maximum FPS)", "60 (il limite a 30 lo mette la Gaming Mode)"],
+  ["Preset grafica (Graphics Preset)", "Basso"],
+  ["Qualità delle texture (Texture Quality)", "Alta"],
+  ["NVIDIA HairWorks", "No"],
+  ["Preset post-elaborazione (Postprocessing Preset)", "Basso"],
+  ["Antialiasing", "Sì"],
+  ["Occlusione ambientale (Ambient Occlusion)", "SSAO"],
+  ["Sfocatura di movimento (Motion Blur)", "No"],
+]
+rogallyz1x = [
+  ["Modalità di visualizzazione (Display Mode)", "Schermo intero"],
+  ["Fotogrammi al secondo massimi (Maximum FPS)", "60"],
+  ["Preset grafica (Graphics Preset)", "Alto"],
+  ["Qualità delle texture (Texture Quality)", "Ultra"],
+  ["NVIDIA HairWorks", "No"],
+  ["Preset post-elaborazione (Postprocessing Preset)", "Alto"],
+  ["Antialiasing", "Sì"],
+  ["Occlusione ambientale (Ambient Occlusion)", "SSAO"],
+  ["Sfocatura di movimento (Motion Blur)", "No"],
+]
+generico = "onexplayer1s"
+
+[config]
+tipo = "ini"
+aggiungi = false
+cartelle = ["Documents/The Witcher 3", "My Documents/The Witcher 3"]
+file = ["user.settings", "dx12user.settings"]
+
+[config.qualita.tutti]
+"Rendering/HairWorksLevel" = "0"
+"PostProcess/AllowMotionBlur" = "false"
+"Viewport/VSync" = "false"
+
+[config.schermo.onexplayer1s]
+"Viewport/Resolution" = '"1280x800"'
+
+[config.schermo.rogallyz1x]
+"Viewport/Resolution" = '"1920x1080"'

@@ -89,6 +89,15 @@ QProgressBar {
     border-radius: 10px;
     text-align: center;
 }
+QLabel.chip {
+    background-color: #3584e4;
+    color: white;
+    border-radius: 11px;
+    min-height: 16px;
+    padding: 3px 12px;
+    font-size: 12px;
+    font-weight: bold;
+}
 QPlainTextEdit.log {
     font-family: monospace;
     font-size: 13px;
@@ -171,7 +180,7 @@ class EsecutoreWorker(QObject):
 
 
 class Procedura(QMainWindow):
-    def __init__(self, dry_run: bool, profilo_id: str | None = None):
+    def __init__(self, dry_run: bool, profilo_id: str | None = None, apri_guide: bool = False):
         super().__init__()
         self.setWindowTitle("Bazzite Handheld Setup (KDE Plasma)")
         self.resize(720, 960)
@@ -227,6 +236,11 @@ class Procedura(QMainWindow):
         self.stack.addWidget(self.pag_riepilogo)
         self.stack.addWidget(self._p_esecuzione())
         self._ricostruisci_tweak()
+        # Le guide ai giochi stanno fuori dalla sequenza delle pagine: si aprono da un pulsante e hanno i loro comandi.
+        from .gui_guide import VistaGuide
+        self.vista_guide = VistaGuide(self.profilo.id, self.profilo.nome, self.dry_run, self._chiudi_guide)
+        self.i_guide = self.stack.addWidget(self.vista_guide)
+        self._prima_delle_guide = 0
 
         # Barra inferiore di navigazione
         nav_box = QHBoxLayout()
@@ -244,6 +258,8 @@ class Procedura(QMainWindow):
         root_layout.addLayout(nav_box)
 
         self._aggiorna_bottoni()
+        if apri_guide:
+            self._apri_guide()
 
     # ── Pagine ────────────────────────────────────────────────────────
     def _p_benvenuto(self) -> QWidget:
@@ -278,6 +294,17 @@ class Procedura(QMainWindow):
         lbl_desc.setAlignment(Qt.AlignmentFlag.AlignCenter)
         lbl_desc.setStyleSheet("font-size: 15px;")   # colore del tema: si legge con tema chiaro e scuro
         lay.addWidget(lbl_desc)
+
+        lay.addSpacing(8)
+        btn_guide = QPushButton("Guide ai giochi")
+        btn_guide.setProperty("class", "pill")
+        btn_guide.clicked.connect(self._apri_guide)
+        lay.addWidget(btn_guide, 0, Qt.AlignmentFlag.AlignCenter)
+        lbl_guide = QLabel("Red Dead Redemption 2, The Witcher 3 e Skyrim: le impostazioni migliori, passo passo.")
+        lbl_guide.setWordWrap(True)
+        lbl_guide.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        lbl_guide.setStyleSheet(f"color: {colore_tenue()}; font-size: 13px;")
+        lay.addWidget(lbl_guide)
 
         lay.addStretch(2)
         return w
@@ -355,6 +382,7 @@ class Procedura(QMainWindow):
         self.profilo = self.profili[idx]
         self._mostra_note()
         self._ricostruisci_tweak()
+        self.vista_guide.imposta_profilo(self.profilo.id, self.profilo.nome)
 
     def _p_app(self) -> QWidget:
         scroll = QScrollArea()
@@ -504,6 +532,12 @@ class Procedura(QMainWindow):
         self.btn_riavvia.clicked.connect(self._chiedi_riavvio)
         lay.addWidget(self.btn_riavvia, 0, Qt.AlignmentFlag.AlignCenter)
 
+        self.btn_guide_fine = QPushButton("Guide ai giochi")
+        self.btn_guide_fine.setProperty("class", "pill")
+        self.btn_guide_fine.setVisible(False)
+        self.btn_guide_fine.clicked.connect(self._apri_guide)
+        lay.addWidget(self.btn_guide_fine, 0, Qt.AlignmentFlag.AlignCenter)
+
         return w
 
     # ── Riepilogo ─────────────────────────────────────────────────────
@@ -564,7 +598,25 @@ class Procedura(QMainWindow):
         self.stack.setCurrentIndex(j)
         self._aggiorna_bottoni()
 
+    def _apri_guide(self):
+        if self.in_esecuzione:
+            return
+        if self._indice() != self.i_guide:
+            self._prima_delle_guide = self._indice()
+        self.vista_guide.mostra_elenco()
+        self.stack.setCurrentIndex(self.i_guide)
+        self._aggiorna_bottoni()
+
+    def _chiudi_guide(self):
+        self.stack.setCurrentIndex(self._prima_delle_guide)
+        self._aggiorna_bottoni()
+
     def _aggiorna_bottoni(self):
+        if self._indice() == self.i_guide:      # le guide hanno i loro pulsanti
+            self.btn_indietro.setVisible(False)
+            self.btn_avanti.setVisible(False)
+            return
+        self.btn_avanti.setVisible(True)
         nome = PAGINE[self._indice()]
         self.btn_indietro.setVisible(nome not in ("benvenuto", "esecuzione"))
         labels = {"benvenuto": "Inizia", "riepilogo": "Installa", "esecuzione": "Chiudi"}
@@ -603,6 +655,7 @@ class Procedura(QMainWindow):
             self.btn_riavvia.setVisible(True)
         self.lbl_stato.setText(messaggio)
         self.barra.setValue(100)
+        self.btn_guide_fine.setVisible(True)
         self._aggiorna_bottoni()
 
     def _chiedi_riavvio(self):
@@ -622,10 +675,10 @@ class Procedura(QMainWindow):
                 subprocess.Popen(["systemctl", "reboot"])
 
 
-def avvia(dry_run: bool, profilo_id: str | None = None) -> int:
+def avvia(dry_run: bool, profilo_id: str | None = None, apri_guide: bool = False) -> int:
     import sys
     app = QApplication.instance() or QApplication(sys.argv[:1])
     app.setStyleSheet(QSS)
-    finestra = Procedura(dry_run, profilo_id)
+    finestra = Procedura(dry_run, profilo_id, apri_guide)
     finestra.show()
     return app.exec()

@@ -1,0 +1,130 @@
+# Passi uguali per tutti i giochi: «preparazione» va in testa a ogni guida, «chiusura» in coda.
+# I segnaposto tra graffe vengono dai [parametri] di questo file e di quello del gioco, scelti per profilo.
+# Formato dei testi: **grassetto**, `codice`, righe «1. » (elenco numerato) e «- » (elenco puntato).
+# `sul_sito = false`: il passo non compare nelle pagine web, che lo spiegano già per esteso nella sezione 2.
+
+[parametri.onexplayer1s]
+menu_rapido = "il tasto **Turbo** (oppure **Home + B**; con una tastiera `Ctrl+2`)"
+pagina_web = "giochi-oxp"
+potenza = "Sul OneXPlayer la potenza non si regola da questo menu: apri Bazzite Handheld Setup e applica **{tdp}** (il 20W è tra le impostazioni consigliate, il 15W e il 28W tra le Avanzate)."
+
+[parametri.rogallyz1x]
+menu_rapido = "il tasto **Armoury Crate**"
+pagina_web = "giochi-ally"
+potenza = "Nello stesso menu (oppure nella sezione Handheld Daemon, se il Limite TDP non c'è) porta la potenza a **{tdp}**."
+
+[parametri.generico]
+menu_rapido = "il tasto del menu rapido (quello con i tre puntini **…**)"
+pagina_web = "giochi-oxp"
+potenza = "Se il tuo dispositivo mostra il **Limite TDP**, imposta {tdp}."
+
+[[preparazione]]
+titolo = "Da dove viene il gioco"
+sul_sito = false
+testo = """
+- **Comprato su Steam:** installalo da Steam (Libreria → Installa) e salta i tre passi che seguono (copia, aggiunta a Steam, scelta di Proton). Una copia di Steam copiata a mano di solito non parte.
+- **Copia senza protezioni (per esempio GOG):** segui i passi nell'ordine.
+{nota_origine}
+"""
+
+[[preparazione]]
+titolo = "Copia il gioco sul disco interno"
+dove = "desktop"
+sul_sito = false
+testo = """
+1. Passa alla Modalità Desktop: **Menu Steam → Alimentazione → Passa al desktop**.
+2. Apri **Dolphin** (la cartella blu nella barra in basso) e, nella tua cartella Home, crea la cartella `Giochi`.
+3. Copia lì dentro la cartella di {nome}: alla fine devi avere `{percorso_esempio}`.
+
+Non avviare il gioco da una chiavetta o da un disco esterno in formato NTFS o exFAT: Proton ha bisogno di un disco Linux, altrimenti il gioco si chiude appena parte.
+"""
+
+[[preparazione]]
+titolo = "Aggiungi il gioco a Steam"
+dove = "desktop"
+sul_sito = false
+testo = """
+1. Apri **Steam**, in basso a sinistra tocca **Aggiungi un gioco → Aggiungi un gioco non di Steam…**
+2. Tocca **Sfoglia…** e, in basso, scegli il tipo di file **Tutti i file**.
+3. Apri la cartella del gioco e scegli **`{eseguibile}`**. {nota_eseguibile}
+4. Conferma con **Apri** e poi con **Aggiungi i programmi selezionati**.
+"""
+
+[[preparazione]]
+titolo = "Scegli Proton"
+dove = "desktop"
+sul_sito = false
+testo = """
+1. Nella Libreria di Steam fai clic destro sul gioco (tieni premuto il dito) e apri **Proprietà…**
+2. Vai su **Compatibilità** e metti la spunta su **Forza l'uso di uno strumento di compatibilità specifico di Steam Play**.
+3. Nel menu a tendina scegli **GE-Proton** (l'ultima versione) se l'hai installato con ProtonUp-Qt; altrimenti **Proton Experimental**.
+
+GE-Proton si installa una volta sola: apri **ProtonUp-Qt**, tocca **Aggiungi versione**, lascia GE-Proton e l'ultima versione, poi **Installa** e riavvia Steam.
+"""
+
+[[preparazione]]
+titolo = "Imposta la risoluzione di gioco: {risoluzione}"
+dove = "gaming"
+solo = ["onexplayer1s", "generico"]
+testo = """
+1. Torna in Gaming Mode (icona **Torna alla Gaming Mode** sul desktop).
+2. Apri la pagina del gioco, tocca l'ingranaggio e poi **Proprietà**.
+3. In **Generali**, alla voce **Risoluzione di gioco** (Game Resolution), scegli **{risoluzione}**.
+4. Attiva anche **Imposta la risoluzione per lo schermo interno ed esterno**, se compare.
+
+{perche_risoluzione}
+"""
+
+[[preparazione]]
+titolo = "Primo avvio: apri il gioco e chiudilo"
+dove = "gaming"
+testo = """
+{primo_avvio}
+
+Questo passo serve perché, finché non lo avvii una volta, il gioco non crea i suoi file di impostazioni e i passi successivi non hanno niente su cui lavorare.
+"""
+
+[[chiusura]]
+titolo = "Menu rapido: fotogrammi, scalatura e potenza"
+dove = "gaming"
+testo = """
+1. Avvia il gioco e premi {menu_rapido}.
+2. Apri **Prestazioni** (l'icona della batteria).
+3. Attiva **Usa profilo per gioco**: così queste scelte valgono solo per {nome}.
+4. Imposta le voci qui sotto.
+
+{potenza}
+"""
+
+[chiusura.voci]
+onexplayer1s = [
+  ["Usa profilo per gioco (Per-game profile)", "Attivo"],
+  ["Limite fotogrammi (Framerate Limit)", "{fps}"],
+  ["Modalità di scalatura (Scaling Mode)", "Intero (Integer)"],
+  ["Filtro di scalatura (Scaling Filter)", "Pixel (Nearest)"],
+]
+rogallyz1x = [
+  ["Usa profilo per gioco (Per-game profile)", "Attivo"],
+  ["Frequenza di aggiornamento variabile (VRR)", "Attiva"],
+  ["Limite fotogrammi (Framerate Limit)", "{fps}"],
+  ["Limite TDP (TDP Limit)", "{tdp}"],
+]
+generico = [
+  ["Usa profilo per gioco (Per-game profile)", "Attivo"],
+  ["Limite fotogrammi (Framerate Limit)", "{fps}"],
+  ["Limite TDP (TDP Limit), se c'è", "{tdp}"],
+]
+
+[[chiusura]]
+titolo = "Controlla come gira e ritocca"
+dove = "gaming"
+testo = """
+1. Nel menu rapido, in **Prestazioni**, porta il **Livello dell'overlay delle prestazioni** a **1**: in alto a sinistra compare il numero di fotogrammi al secondo (FPS).
+2. Gioca cinque minuti in una zona impegnativa ({zona_prova}) e guarda il numero.
+3. Quando hai finito riporta l'overlay a **0**.
+
+- **Se scende sotto l'obiettivo:** {se_scatta}
+- **Se non scende mai sotto l'obiettivo:** {se_avanza}
+
+Cambia una cosa per volta e riprova: è l'unico modo per capire che cosa ha fatto la differenza.
+"""

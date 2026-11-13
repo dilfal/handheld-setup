@@ -15,6 +15,27 @@ SCORCIATOIE = {
 }
 
 
+# Indirizzi brevi da aprire sul telefono (l'app li mostra nelle guide dei giochi): cartella -> pagina di destinazione.
+SCORCIATOIE_PAGINE = {
+    "giochi-oxp": "ottimizzazione_onexplayer_1s.html",
+    "giochi-ally": "ottimizzazione_rog_ally.html",
+}
+
+PAGINA_RIMANDO = """<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta http-equiv="refresh" content="0; url=/guide/{pagina}">
+    <title>Guida ai giochi | Bazzite Handheld Setup</title>
+</head>
+<body>
+    <p>Apro la guida ai giochi… Se non si apre da sola, <a href="/guide/{pagina}">tocca qui</a>.</p>
+</body>
+</html>
+"""
+
+
 def sincronizza(dest: Path = SITO) -> None:
     if not dest.is_dir():
         raise SystemExit(f"Cartella del sito non trovata: {dest}")
@@ -32,6 +53,11 @@ def sincronizza(dest: Path = SITO) -> None:
         testo = html.read_text(encoding="utf-8")
         (dest / html.name).write_text(testo, encoding="utf-8", newline="\n")
         (guide_dest / html.name).write_text(testo, encoding="utf-8", newline="\n")
+
+    # 2b. Indirizzi brevi per il telefono: 070293.xyz/giochi-oxp e 070293.xyz/giochi-ally rimandano alla guida
+    for cartella, pagina in SCORCIATOIE_PAGINE.items():
+        (dest / cartella).mkdir(exist_ok=True)
+        (dest / cartella / "index.html").write_text(PAGINA_RIMANDO.format(pagina=pagina), encoding="utf-8", newline="\n")
 
     # 3. Garantisce CNAME e .nojekyll
     (dest / "CNAME").write_text("070293.xyz\n", encoding="utf-8", newline="\n")

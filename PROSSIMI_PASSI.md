@@ -1,6 +1,6 @@
 # Bazzite Handheld Setup: appunti per quando avrai gli handheld
 
-Aggiornato il 12 novembre 2026. Versione dell'app: 0.6.0 (KDE Plasma 6 + Pubblicazione su `dilfal/bazzite-handheld-setup` e `070293.xyz`).
+Aggiornato il 13 novembre 2026. Versione dell'app: 0.7.0 (KDE Plasma 6, pubblicazione su `dilfal/bazzite-handheld-setup` e `070293.xyz`, guide ai giochi).
 
 ## 1. Cosa abbiamo deciso
 
@@ -33,7 +33,10 @@ bhs/runner.py           esecuzione con --dry-run e log
 bhs/cli.py              modalità senza interfaccia: --elenco, --applica
 bhs/gui.py              finestra Qt6 / PySide6 nativa
 tools/fumo_gui.py       prova automatica della finestra con screenshot offscreen (PySide6)
-tests/test_core.py      70 test della logica (tutti verdi su Windows e in Fedora 44 WSL)
+bhs/giochi.py           guide ai giochi: dati da data/giochi/*.toml, ricerca e modifica dei file di impostazioni
+bhs/gui_guide.py        vista Qt delle guide ai giochi
+tools/genera_guide.py   rigenera le sezioni dei giochi nelle guide web (--verifica per controllare)
+tests/test_core.py      test della logica (tutti verdi su Windows e in Fedora 44 WSL); tests/test_guide_web.py per le guide web
 guide/index.html                         hub delle guide passo-passo offline
 guide/installazione_onexplayer_1s.html   guida passo-passo installazione Bazzite KDE (Rufus, BIOS, fix schermo nero) su OneXPlayer 1S
 guide/ottimizzazione_onexplayer_1s.html  guida passo-passo ottimizzazione giochi .exe (RDR2, Witcher 3, Skyrim) su OneXPlayer 1S
@@ -101,6 +104,23 @@ Per ogni dispositivo, nell'ordine. Annota l'esito accanto a ogni riga.
 - [ ] hhd è presente? (`command -v hhd`)
 - [ ] TDP: dove si cambia (menu rapido di Steam in Game Mode)? Funziona in Desktop Mode?
 - [ ] Il limite di carica è esposto dal kernel? Dopo `limite_carica_80` e un **riavvio**: `cat /sys/class/power_supply/BAT0/charge_control_end_threshold` dà 80? `systemctl status bhs-limite-carica.service`. Lo stesso dopo lo standby e dopo aver staccato e riattaccato il cavo (regola udev `99-bhs-cura-batteria.rules`)
+
+### F. Guide ai giochi (v0.7.0: nessuna di queste cose è stata provata con i giochi veri)
+Per ciascun gioco (Red Dead Redemption 2, The Witcher 3, Skyrim Special Edition) e per ciascun dispositivo (OneXPlayer 1S, ROG Ally):
+- [ ] Dopo il primo avvio del gioco da Steam (fino al suo menu), `python3 -m bhs --imposta-gioco <gioco> --dry-run` trova il file di impostazioni (`system.xml` per RDR2, `user.settings` e `dx12user.settings` per The Witcher 3, `SkyrimPrefs.ini` per Skyrim). Se non lo trova, il percorso cercato è quello giusto per Proton (`compatdata/<id>/pfx/drive_c/users/steamuser/…`)?
+- [ ] Dopo «Applica» il gioco parte e nel suo menu mostra i valori scritti. In particolare: **RDR2 non rigetta `system.xml`** (nessun ritorno alle impostazioni predefinite all'avvio) e i valori numerici (filtro anisotropico, dettaglio geometria, dettaglio erba, fisica dell'acqua) corrispondono alle tacche attese nel menu
+- [ ] «Ripristina» (o `--ripristina-gioco`) rimette tutto com'era: il file torna identico alla copia `.bhs-originale`
+- [ ] I **nomi italiani** delle voci nei menu dei giochi coincidono con quelli scritti nelle guide (nelle guide c'è anche il nome inglese); correggere quelli che non tornano
+- [ ] In Gaming Mode esistono le voci «Risoluzione di gioco» e «Modalità di scalatura: Intero» (e, sul OneXPlayer, il limite a 30/60 fotogrammi) con i nomi usati nelle guide
+- [ ] Gli FPS reali rispetto agli obiettivi dichiarati nelle guide (per esempio 30 FPS stabili a 1280×800 per RDR2 sul OneXPlayer): se non si raggiungono, correggere i valori o l'obiettivo
+- [ ] **Skyrim**: il launcher sotto Proton si apre; il preset scelto e il pulsante «Opzioni» funzionano col touch
+- [ ] **The Witcher 3**: tra i preset grafici compare davvero «Steam Deck» e, scelto al posto di Basso, dà il risultato descritto
+- [ ] La guida nella finestra: il pulsante «Guide ai giochi» compare nel benvenuto e a fine installazione, il passo a cui eri arrivato viene ricordato alla riapertura, e le scorciatoie `070293.xyz/giochi-oxp` e `070293.xyz/giochi-ally` aprono la guida giusta (dopo la prossima pubblicazione del sito)
+- [ ] Da console: `curl -L 070293.xyz/oxp | sh -s -- --imposta-gioco rdr2 --dry-run` in Modalità Desktop non apre la finestra, non crea il `.venv` e mostra solo cosa cambierebbe
+- [ ] Origine del gioco (Steam, GOG, Rockstar/Epic): quali copie partono davvero come gioco non di Steam
+- [ ] Dove si regolano TDP e VRR sulla Ally (menu di Steam o Handheld Daemon)
+- [ ] Dove sta la voce Controller nelle impostazioni di Skyrim
+- [ ] FPS reali di The Witcher 3 sulla Ally (l'obiettivo 45-60 è una stima)
 
 ## 5. Fatto finora
 

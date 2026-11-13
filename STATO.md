@@ -12,9 +12,8 @@ Aggiornato il 13 novembre 2026 (sera). Bazzite alla radice (v0.7.0), utility Win
 - **Controlli**: `pubblica_guide.py` 0 (7 pagine); `genera_guide.py --verifica` 0; `python -m unittest tests.test_guide_web` 13 test OK (pytest non è installato). Una revisione Opus fatta (corretto solo «passo-passo» → «passo passo» nell'indice).
 
 ## Da fare
-- **Utente, Cloudflare**: record `CNAME`, nome `guide`, destinazione `dilfal.github.io`, proxy spento (solo DNS). Il token `CLOUDFLARE_API_TOKEN` del PC non vede la zona `070293.xyz`, quindi non si può fare da qui.
-- **Dopo il DNS**: attivare «Enforce HTTPS» (`gh api -X PUT repos/dilfal/guide.070293.xyz/pages -F https_enforced=true` con il token di `dilfal`, quando il certificato è pronto) e provare `https://guide.070293.xyz`.
-- **Commit in questo repository**: `guide/sottodominio/` e `tools/pubblica_guide.py` sono ancora non tracciati (nessun commit fatto: aspetta il sì dell'utente).
+- **DNS e HTTPS**: fatti. Record `CNAME` `guide` → `dilfal.github.io` creato dall'utente su Cloudflare (solo DNS); certificato approvato, «Enforce HTTPS» attivo; le 7 pagine rispondono 200 su `https://guide.070293.xyz`. (Il token `CLOUDFLARE_API_TOKEN` del PC non vede la zona `070293.xyz`.)
+- **Commit in questo repository**: fatto e pubblicato (`7e0f5d6`).
 - Facoltativo: link a `guide.070293.xyz` dalla homepage di `070293.xyz`; `070293.xyz/guide/` resta com'è (lo usano gli indirizzi brevi `giochi-oxp` e `giochi-ally`).
 - Prove sui dispositivi: `PROSSIMI_PASSI.md` (Bazzite) e `windows/ISTRUZIONI.md` (Windows).
 

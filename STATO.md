@@ -3,7 +3,7 @@
 Aggiornato il 13 novembre 2026. **La v0.7.0 è in un commit, su GitHub e sul sito**: resta solo da provarla sui dispositivi.
 
 ## Fatto
-- **Guide ai giochi** (commit `80da79b` su `dilfal/bazzite-handheld-setup`, ramo `main`): pulsante «Guide ai giochi» nell'app, un passo per schermata, passo ricordato alla riapertura. Tre giochi (Red Dead Redemption 2, The Witcher 3, Skyrim Special Edition), valori diversi per OneXPlayer 1S, ROG Ally e profilo generico.
+- **Guide ai giochi** (commit `80da79b` su `dilfal/handheld-setup`, ramo `main`): pulsante «Guide ai giochi» nell'app, un passo per schermata, passo ricordato alla riapertura. Tre giochi (Red Dead Redemption 2, The Witcher 3, Skyrim Special Edition), valori diversi per OneXPlayer 1S, ROG Ally e profilo generico.
 - **Impostazioni automatiche**: «Applica» cambia solo le chiavi elencate nel file del gioco (`system.xml`, `user.settings`/`dx12user.settings`, `SkyrimPrefs.ini`), con copia `<file>.bhs-originale` e «Ripristina».
 - **Riga di comando**: `--guide`, `--guida GIOCO`, `--imposta-gioco GIOCO` (anche con `--dry-run`), `--ripristina-gioco GIOCO`.
 - **Sito pubblicato** (commit `23768b8` su `dilfal/070293`, con `python tools/pubblica_070293.py`): script e scorciatoie `/oxp`, `/ally`, `/bhs` aggiornati, guide rigenerate, indirizzi brevi nuovi `070293.xyz/giochi-oxp` e `070293.xyz/giochi-ally`.

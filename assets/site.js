@@ -124,7 +124,7 @@
   function buildCommands(device) {
     const shortPipe = `curl -L ${device.shortPath} | sh`;
     const shortNoPipe = `curl -Lo f ${device.shortPath} && sh f`;
-    const githubRaw = `curl -fsSL https://raw.githubusercontent.com/dilfal/bazzite-handheld-setup/main/${device.script} | bash`;
+    const githubRaw = `curl -fsSL https://raw.githubusercontent.com/dilfal/handheld-setup/main/${device.script} | bash`;
     return { shortPipe, shortNoPipe, githubRaw };
   }
 

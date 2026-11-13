@@ -4,5 +4,5 @@ __pycache__/
 desktop.ini
 .DS_Store
 
-# Archivi dei driver OneXPlayer 1S (1,4 GB, pubblicati nelle Release di onexplayer-1s-drivers)
-OneDrive_2026-11-13/
+# Archivi dei driver OneXPlayer 1S (0,9 GB, pubblicati nella Release windows-v1.0.0)
+windows/drivers/

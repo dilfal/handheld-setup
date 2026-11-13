@@ -1,6 +1,6 @@
 # Bazzite Handheld Setup: appunti per quando avrai gli handheld
 
-Aggiornato il 13 novembre 2026. Versione dell'app: 0.7.0 (KDE Plasma 6, pubblicazione su `dilfal/bazzite-handheld-setup` e `070293.xyz`, guide ai giochi).
+Aggiornato il 13 novembre 2026. Versione dell'app: 0.7.0 (KDE Plasma 6, pubblicazione su `dilfal/handheld-setup` e `070293.xyz`, guide ai giochi).
 
 ## 1. Cosa abbiamo deciso
 
@@ -169,7 +169,7 @@ pulsante «Riavvia ora» con conferma; riepilogo con una riga per comando.
 - [x] `limite_carica_80`: si disattiva con `carica_100` (nelle Avanzate)
 - [ ] `limite_carica_80` sulla ROG Ally: da provare con riavvio, standby e cavo staccato e riattaccato
 - [ ] Verificare EmuDeck (link manuale)
-- [x] Pubblicare il repository (`dilfal/bazzite-handheld-setup`) e attivare le scorciatoie e guide su `070293.xyz` (`curl -L 070293.xyz/oxp | sh` e `curl -L 070293.xyz/ally | sh`)
+- [x] Pubblicare il repository (`dilfal/handheld-setup`) e attivare le scorciatoie e guide su `070293.xyz` (`curl -L 070293.xyz/oxp | sh` e `curl -L 070293.xyz/ally | sh`)
 - [ ] Gestione di Decky e dei suoi plugin (CSS Loader, SimpleDeckyTDP, ecc.)
 - [x] TDP sul 1S Intel: tweak `tdp_15w`, `tdp_20w`, `tdp_28w` (Intel RAPL, servizio `bhs-tdp-rapl.service`). Da provare sul dispositivo (sezione 4.D)
 - Idee dalla guida non ancora fatte (chiedi se le vuoi):

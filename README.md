@@ -1,4 +1,11 @@
-# Bazzite Handheld Setup
+# Handheld Setup (Bazzite e Windows)
+
+Repository unico per gli handheld, `dilfal/handheld-setup` (prima `bazzite-handheld-setup`, con `onexplayer-1s-drivers` fuso dal 13 novembre 2026). Contiene due strumenti separati:
+
+- **Bazzite (Linux)**: alla radice del repository, descritto in questo file.
+- **Windows 11 (OneXPlayer 1S)**: cartella [`windows/`](windows/README.md), utility WPF per driver, programmi di gioco, schermo e touch. Avvio: `irm 070293.xyz/oxp-win | iex`.
+
+## Bazzite
 
 Configurazione guidata, con interfaccia nativa Qt6 (PySide6), da lanciare dopo l'installazione di **Bazzite (KDE Plasma 6) per handheld**.
 Due script separati, uno per dispositivo, che condividono lo stesso codice:
@@ -25,12 +32,12 @@ curl -Lo f 070293.xyz/oxp
 sh f
 ```
 
-Indirizzo completo dal repository GitHub (`dilfal/bazzite-handheld-setup`):
+Indirizzo completo dal repository GitHub (`dilfal/handheld-setup`):
 ```bash
 # OneXPlayer 1S
-curl -fsSL https://raw.githubusercontent.com/dilfal/bazzite-handheld-setup/main/install-onexplayer.sh | bash
+curl -fsSL https://raw.githubusercontent.com/dilfal/handheld-setup/main/install-onexplayer.sh | bash
 # ROG Ally
-curl -fsSL https://raw.githubusercontent.com/dilfal/bazzite-handheld-setup/main/install-rog-ally.sh | bash
+curl -fsSL https://raw.githubusercontent.com/dilfal/handheld-setup/main/install-rog-ally.sh | bash
 ```
 
 Opzioni manuali (dopo `sh -s --` o `bash -s --`): `--dry-run` (solo simulazione), `--diagnosi` (rapporto di sistema), `--elenco` (tweak e stato),
@@ -96,4 +103,4 @@ Le quattro guide HTML interattive (con pulsanti per copiare i comandi in un clic
 ## Stato (v0.7.0)
 Fatto e provato con test (144, di cui 8 saltati su Windows per mancanza di una shell POSIX o dei collegamenti simbolici; in Fedora WSL girano tutti e 144): rilevamento, profili, profilo fisso, installatori (inclusi modalità console automatica, opzioni senza interfaccia e pre-configurazione Live USB `/mnt/sysimage`), tweak KDE Plasma 6, guide ai giochi (dati, scrittura e ripristino dei file di impostazioni, pagine web) ed esecuzione con simulazione (`python -I -m unittest discover -s tests`). Gli installatori dedicati sono verificati con `tools/genera_installatori.py --verifica`, le guide web con `tools/genera_guide.py --verifica`.
 Le guide ai giochi non sono ancora state provate con i giochi veri (vedi `PROSSIMI_PASSI.md`, sezione 4).
-Pubblicato su GitHub (`dilfal/bazzite-handheld-setup`) e servito con scorciatoie e guide online su `https://070293.xyz`.
+Pubblicato su GitHub (`dilfal/handheld-setup`) e servito con scorciatoie e guide online su `https://070293.xyz`.

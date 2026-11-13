@@ -11,6 +11,8 @@ Aggiornato il 13 novembre 2026 (sera). Bazzite alla radice (v0.7.0), utility Win
   - `tools/pubblica_guide.py`: copia `guide/*.html` (tranne `index.html`) e `guide/sottodominio/*.html` nella radice del sito; si ferma con 1 se una pagina non è collegata dall'indice o se un `href`/`src` locale non esiste.
 - **Controlli**: `pubblica_guide.py` 0 (7 pagine); `genera_guide.py --verifica` 0; `python -m unittest tests.test_guide_web` 13 test OK (pytest non è installato). Una revisione Opus fatta (corretto solo «passo-passo» → «passo passo» nell'indice).
 
+- **Video delle due guide hardware** (richiesta dell'utente): uno per riga, larghi quanto la finestra e mai più alti dello schermo (CSS `.video-grid` più un piccolo script che misura la finestra senza barra di scorrimento); negli `iframe` c'è `?vq=hd2160`, che è solo una richiesta: la qualità la sceglie YouTube in base alla grandezza del riquadro e alla connessione. Misurato in Chrome a 1582×804 (video 1427×803), 982 e 504 px di larghezza (video a tutta larghezza, nessuno scorrimento orizzontale). Commit `84f03b1` qui e `db935dc` nel sito, online.
+
 ## Da fare
 - **DNS e HTTPS**: fatti. Record `CNAME` `guide` → `dilfal.github.io` creato dall'utente su Cloudflare (solo DNS); certificato approvato, «Enforce HTTPS» attivo; le 7 pagine rispondono 200 su `https://guide.070293.xyz`. (Il token `CLOUDFLARE_API_TOKEN` del PC non vede la zona `070293.xyz`.)
 - **Commit in questo repository**: fatto e pubblicato (`7e0f5d6`).

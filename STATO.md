@@ -10,7 +10,7 @@ Aggiornato il 13 novembre 2026. Bazzite alla radice (v0.7.0), utility Windows in
 
 ## Da fare
 - **Vecchio repo `dilfal/onexplayer-1s-drivers`**: archiviato (rinvio a `070293.xyz/oxp-win`, commit `3cd7e15`). Fatto.
-- **Pages di `handheld-setup`** (`dilfal.click/handheld-setup/`) ancora acceso e duplicato di 070293.xyz: spegnerlo (`gh api -X DELETE repos/dilfal/handheld-setup/pages`) quando l'utente conferma.
+- **Pages di `handheld-setup`**: spento (era un duplicato di 070293.xyz). Fatto.
 - **Cloudflare**: per `070293.xyz` non serve nulla (DNS-only verso i 4 IP di GitHub Pages, `www` CNAME). Facoltativo: record AAAA IPv6.
 - **Cartella locale** `C:\Users\df\Dev\GitHub\onexplayer-1s-drivers`: da cancellare a mano dopo l'archiviazione.
 - Prove sui dispositivi: `PROSSIMI_PASSI.md` (Bazzite) e `windows/ISTRUZIONI.md` (Windows: driver, touch, rotazione).

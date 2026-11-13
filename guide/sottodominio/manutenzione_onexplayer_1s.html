@@ -172,11 +172,20 @@
       color: var(--text-muted);
     }
 
+    /* Video più grandi possibile: uno per riga, larghi quanto la finestra, mai più alti dello schermo */
+    html { overflow-x: clip; }
     .video-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+      grid-template-columns: 1fr;
       gap: 1.5rem;
-      margin-top: 1rem;
+      margin: 1rem 0 0;
+      width: var(--larghezza-finestra, 100vw);
+      margin-left: calc(50% - var(--larghezza-finestra, 100vw) / 2);
+    }
+    .video-grid .video-card {
+      width: min(100%, calc(100vh * 16 / 9));
+      width: min(100%, calc(100dvh * 16 / 9));
+      margin: 0 auto;
     }
 
     .video-card {
@@ -246,9 +255,6 @@
     }
 
     @media (max-width: 600px) {
-      .video-grid {
-        grid-template-columns: 1fr;
-      }
       section, header {
         padding: 1.25rem;
       }
@@ -408,7 +414,7 @@
       <div class="video-grid">
         <article class="video-card">
           <div class="video-embed">
-            <iframe src="https://www.youtube.com/embed/JeckPIEkSLc" title="ONEXPLAYER 1S Disassembly (Pyr3x)" allowfullscreen loading="lazy"></iframe>
+            <iframe src="https://www.youtube.com/embed/JeckPIEkSLc?vq=hd2160" title="ONEXPLAYER 1S Disassembly (Pyr3x)" allowfullscreen loading="lazy"></iframe>
           </div>
           <div class="video-info">
             <div>
@@ -421,7 +427,7 @@
 
         <article class="video-card">
           <div class="video-embed">
-            <iframe src="https://www.youtube.com/embed/QspBOlrY-uk" title="ONEXPLAYER 1S - Disassembly (Melvin .R)" allowfullscreen loading="lazy"></iframe>
+            <iframe src="https://www.youtube.com/embed/QspBOlrY-uk?vq=hd2160" title="ONEXPLAYER 1S - Disassembly (Melvin .R)" allowfullscreen loading="lazy"></iframe>
           </div>
           <div class="video-info">
             <div>
@@ -434,7 +440,7 @@
 
         <article class="video-card">
           <div class="video-embed">
-            <iframe src="https://www.youtube.com/embed/LM_VfY1VO_Y" title="Onexplayer teardown and repaste (Dr.Darshan hegde)" allowfullscreen loading="lazy"></iframe>
+            <iframe src="https://www.youtube.com/embed/LM_VfY1VO_Y?vq=hd2160" title="Onexplayer teardown and repaste (Dr.Darshan hegde)" allowfullscreen loading="lazy"></iframe>
           </div>
           <div class="video-info">
             <div>
@@ -447,7 +453,7 @@
 
         <article class="video-card">
           <div class="video-embed">
-            <iframe src="https://www.youtube.com/embed/uJj2f5oDT8c" title="Sostituzione batteria OneXPlayer 1S" allowfullscreen loading="lazy"></iframe>
+            <iframe src="https://www.youtube.com/embed/uJj2f5oDT8c?vq=hd2160" title="Sostituzione batteria OneXPlayer 1S" allowfullscreen loading="lazy"></iframe>
           </div>
           <div class="video-info">
             <div>
@@ -460,5 +466,14 @@
       </div>
     </section>
   </div>
+<script>
+  // Larghezza reale della finestra (senza la barra di scorrimento): la usano i video a tutta larghezza.
+  (function () {
+    var radice = document.documentElement;
+    function misura() { radice.style.setProperty('--larghezza-finestra', radice.clientWidth + 'px'); }
+    misura();
+    window.addEventListener('resize', misura);
+  })();
+</script>
 </body>
 </html>

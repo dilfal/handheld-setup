@@ -107,11 +107,20 @@
       font-size: 0.9em;
       color: #93c5fd;
     }
+    /* Video più grandi possibile: uno per riga, larghi quanto la finestra, mai più alti dello schermo */
+    html { overflow-x: clip; }
     .video-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      grid-template-columns: 1fr;
       gap: 18px;
       margin: 18px 0;
+      width: var(--larghezza-finestra, 100vw);
+      margin-left: calc(50% - var(--larghezza-finestra, 100vw) / 2);
+    }
+    .video-grid .video-card {
+      width: min(100%, calc(100vh * 16 / 9));
+      width: min(100%, calc(100dvh * 16 / 9));
+      margin: 0 auto;
     }
     .video-card {
       background: var(--surface-alt);
@@ -223,7 +232,7 @@
       <div class="video-grid">
         <div class="video-card">
           <div class="video-wrapper">
-            <iframe src="https://www.youtube.com/embed/-Hb-TNYU4vE" title="ROG Ally SSD Upgrade Clone Guide" loading="lazy" allowfullscreen></iframe>
+            <iframe src="https://www.youtube.com/embed/-Hb-TNYU4vE?vq=hd2160" title="ROG Ally SSD Upgrade Clone Guide" loading="lazy" allowfullscreen></iframe>
           </div>
           <div class="video-meta">
             <div>
@@ -267,7 +276,7 @@
       <div class="video-grid">
         <div class="video-card">
           <div class="video-wrapper">
-            <iframe src="https://www.youtube.com/embed/N4sQwYOWZeQ" title="Installing 2TB 2280 NVMe in Asus ROG Ally with 90 degrees adapter" loading="lazy" allowfullscreen></iframe>
+            <iframe src="https://www.youtube.com/embed/N4sQwYOWZeQ?vq=hd2160" title="Installing 2TB 2280 NVMe in Asus ROG Ally with 90 degrees adapter" loading="lazy" allowfullscreen></iframe>
           </div>
           <div class="video-meta">
             <div>
@@ -280,7 +289,7 @@
 
         <div class="video-card">
           <div class="video-wrapper">
-            <iframe src="https://www.youtube.com/embed/Vl18Hv8hybA" title="Upgrade Asus ROG Ally from 512GB 2230 to 2TB 2280" loading="lazy" allowfullscreen></iframe>
+            <iframe src="https://www.youtube.com/embed/Vl18Hv8hybA?vq=hd2160" title="Upgrade Asus ROG Ally from 512GB 2230 to 2TB 2280" loading="lazy" allowfullscreen></iframe>
           </div>
           <div class="video-meta">
             <div>
@@ -293,7 +302,7 @@
 
         <div class="video-card">
           <div class="video-wrapper">
-            <iframe src="https://www.youtube.com/embed/cyshyfsld2A" title="Asus Rog Ally 2TB 2280 SSD Upgrade Tutorial" loading="lazy" allowfullscreen></iframe>
+            <iframe src="https://www.youtube.com/embed/cyshyfsld2A?vq=hd2160" title="Asus Rog Ally 2TB 2280 SSD Upgrade Tutorial" loading="lazy" allowfullscreen></iframe>
           </div>
           <div class="video-meta">
             <div>
@@ -306,7 +315,7 @@
 
         <div class="video-card">
           <div class="video-wrapper">
-            <iframe src="https://www.youtube.com/embed/e8BTv1h7HDY" title="ASUS ROG Ally RC71L SSD Upgrade 2230 to 2280 PCIe 4.0 Adapter" loading="lazy" allowfullscreen></iframe>
+            <iframe src="https://www.youtube.com/embed/e8BTv1h7HDY?vq=hd2160" title="ASUS ROG Ally RC71L SSD Upgrade 2230 to 2280 PCIe 4.0 Adapter" loading="lazy" allowfullscreen></iframe>
           </div>
           <div class="video-meta">
             <div>
@@ -344,7 +353,7 @@
       <div class="video-grid">
         <div class="video-card">
           <div class="video-wrapper">
-            <iframe src="https://www.youtube.com/embed/MKvrmw1V5GU" title="ROG Ally 2280 SSD Mod, Heatsink and ASUS Cloud Recovery" loading="lazy" allowfullscreen></iframe>
+            <iframe src="https://www.youtube.com/embed/MKvrmw1V5GU?vq=hd2160" title="ROG Ally 2280 SSD Mod, Heatsink and ASUS Cloud Recovery" loading="lazy" allowfullscreen></iframe>
           </div>
           <div class="video-meta">
             <div>
@@ -363,7 +372,7 @@
       <div class="video-grid">
         <div class="video-card">
           <div class="video-wrapper">
-            <iframe src="https://www.youtube.com/embed/wvW72gyrfpU" title="PCWorld Testing Kryonaut & PTM7950 On The ROG Ally" loading="lazy" allowfullscreen></iframe>
+            <iframe src="https://www.youtube.com/embed/wvW72gyrfpU?vq=hd2160" title="PCWorld Testing Kryonaut & PTM7950 On The ROG Ally" loading="lazy" allowfullscreen></iframe>
           </div>
           <div class="video-meta">
             <div>
@@ -380,5 +389,14 @@
       Guida specifica per Asus ROG Ally Z1 Extreme (RC71L) — Procedere a proprio rischio, scollegando sempre la batteria prima di intervenire sullo slot M.2.
     </footer>
   </div>
+<script>
+  // Larghezza reale della finestra (senza la barra di scorrimento): la usano i video a tutta larghezza.
+  (function () {
+    var radice = document.documentElement;
+    function misura() { radice.style.setProperty('--larghezza-finestra', radice.clientWidth + 'px'); }
+    misura();
+    window.addEventListener('resize', misura);
+  })();
+</script>
 </body>
 </html>

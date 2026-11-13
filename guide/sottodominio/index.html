@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Guide | 070293.xyz</title>
+    <meta name="description" content="Guide passo passo per console portatili: installare Bazzite KDE, ottimizzare i giochi .exe e fare manutenzione su OneXPlayer 1S e ASUS ROG Ally.">
+    <style>
+        :root {
+            --bg: #0f141c;
+            --surface: #171d27;
+            --surface-hover: #1f2735;
+            --border: #293241;
+            --text: #e6edf3;
+            --text-muted: #8b949e;
+            --accent: #58a6ff;
+            --accent-purple: #d2a8ff;
+            --font-sans: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            font-family: var(--font-sans);
+            line-height: 1.6;
+            padding: 40px 16px;
+        }
+        .container {
+            max-width: 840px;
+            margin: 0 auto;
+        }
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        h1 {
+            font-size: 32px;
+            font-weight: 800;
+            margin-bottom: 12px;
+            color: #ffffff;
+        }
+        p.subtitle {
+            font-size: 16px;
+            color: var(--text-muted);
+        }
+        .device-section {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 28px;
+            margin-bottom: 32px;
+        }
+        .badge {
+            display: inline-block;
+            font-size: 12px;
+            font-weight: 700;
+            padding: 4px 10px;
+            border-radius: 20px;
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .badge-oxp { background: #1f3a5f; color: #58a6ff; }
+        .badge-ally { background: #2b1f48; color: #d2a8ff; }
+        .device-section h2 {
+            font-size: 23px;
+            margin-bottom: 20px;
+            color: #fff;
+        }
+        .sub-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 16px;
+        }
+        .guide-card {
+            background: #121720;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+            text-decoration: none;
+            color: inherit;
+            display: flex;
+            flex-direction: column;
+            transition: all 0.2s;
+        }
+        .guide-card:hover {
+            background: var(--surface-hover);
+            border-color: var(--accent);
+            transform: translateY(-2px);
+        }
+        .guide-card.ally-card:hover {
+            border-color: var(--accent-purple);
+        }
+        .step-label {
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+            color: var(--accent);
+            margin-bottom: 6px;
+        }
+        .ally-card .step-label {
+            color: var(--accent-purple);
+        }
+        .guide-card h3 {
+            font-size: 17px;
+            color: #fff;
+            margin-bottom: 8px;
+        }
+        .guide-card p {
+            font-size: 13.5px;
+            color: var(--text-muted);
+        }
+        footer {
+            text-align: center;
+            font-size: 13px;
+            color: var(--text-muted);
+            border-top: 1px solid var(--border);
+            padding-top: 24px;
+        }
+        footer a {
+            color: var(--accent);
+            text-decoration: none;
+        }
+        footer a:hover { text-decoration: underline; }
+        @media (max-width: 480px) {
+            body { padding: 24px 12px; }
+            h1 { font-size: 26px; }
+            .device-section { padding: 20px 16px; }
+            .device-section h2 { font-size: 20px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>Guide</h1>
+        <p class="subtitle">Guide passo passo per OneXPlayer 1S e ASUS ROG Ally: installazione di Bazzite KDE, ottimizzazione dei giochi .exe e manutenzione dell'hardware.</p>
+    </header>
+
+    <!-- ONEXPLAYER 1S -->
+    <div class="device-section">
+        <span class="badge badge-oxp">OneXPlayer 1S</span>
+        <h2>OneXPlayer 1S</h2>
+
+        <div class="sub-grid">
+            <a href="installazione_onexplayer_1s.html" class="guide-card">
+                <div class="step-label">Installazione</div>
+                <h3>Installare Bazzite KDE</h3>
+                <p>Preparazione di Windows, chiavetta USB con Rufus, avvio dal Boot Menu, correzione dello schermo nero e configurazione automatica.</p>
+            </a>
+
+            <a href="ottimizzazione_onexplayer_1s.html" class="guide-card">
+                <div class="step-label">Giochi</div>
+                <h3>Ottimizzazione dei giochi .exe</h3>
+                <p>GE-Proton con ProtonUp-Qt, aggiunta degli .exe a Steam, scalatura intera 2:1 e una guida per ciascun gioco.</p>
+            </a>
+
+            <a href="manutenzione_onexplayer_1s.html" class="guide-card">
+                <div class="step-label">Manutenzione</div>
+                <h3>Batteria, pasta termica e viti</h3>
+                <p>Attrezzi necessari, mappa delle viti per lunghezza, procedura di smontaggio passo passo e video di riferimento.</p>
+            </a>
+        </div>
+    </div>
+
+    <!-- ASUS ROG ALLY -->
+    <div class="device-section">
+        <span class="badge badge-ally">ASUS ROG Ally</span>
+        <h2>ASUS ROG Ally</h2>
+
+        <div class="sub-grid">
+            <a href="installazione_rog_ally.html" class="guide-card ally-card">
+                <div class="step-label">Installazione</div>
+                <h3>Installare Bazzite KDE</h3>
+                <p>Disattivazione di BitLocker e Avvio Rapido, chiavetta USB con Rufus, VRAM e Boot Override nel BIOS, VRR a 120 Hz e limite di carica all'80%.</p>
+            </a>
+
+            <a href="ottimizzazione_rog_ally.html" class="guide-card ally-card">
+                <div class="step-label">Giochi</div>
+                <h3>Ottimizzazione dei giochi .exe</h3>
+                <p>GE-Proton, aggiunta degli .exe a Steam, 1080p con VRR e una guida per ciascun gioco.</p>
+            </a>
+
+            <a href="nvme_rog_ally.html" class="guide-card ally-card">
+                <div class="step-label">Hardware</div>
+                <h3>Upgrade NVMe 2 TB 2280</h3>
+                <p>Sostituzione dell'SSD da 512 GB (2230) con uno da 2 TB (2280) tramite adattatore, con clonazione o ASUS Cloud Recovery.</p>
+            </a>
+        </div>
+    </div>
+
+    <footer>
+        Script e installatori: <a href="https://070293.xyz">070293.xyz</a> &middot; <a href="https://github.com/dilfal/handheld-setup">GitHub (dilfal/handheld-setup)</a>
+    </footer>
+</div>
+
+</body>
+</html>

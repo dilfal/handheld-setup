@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Guida Manutenzione OneXPlayer 1S: Batteria, Pasta Termica e Viti</title>
+  <style>
+    :root {
+      --bg: #f8fafc;
+      --surface: #ffffff;
+      --text: #1e293b;
+      --text-muted: #475569;
+      --primary: #2563eb;
+      --primary-dark: #1d4ed8;
+      --border: #e2e8f0;
+      --warning-bg: #fef2f2;
+      --warning-border: #ef4444;
+      --warning-text: #991b1b;
+      --badge-bg: #eff6ff;
+      --badge-text: #1e40af;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      margin: 0;
+      padding: 2rem 1rem;
+    }
+
+    .container {
+      max-width: 920px;
+      margin: 0 auto;
+    }
+
+    header {
+      background: var(--surface);
+      padding: 2rem;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      margin-bottom: 1.5rem;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    }
+
+    header h1 {
+      margin: 0 0 0.5rem 0;
+      font-size: 1.85rem;
+      color: #0f172a;
+    }
+
+    header p {
+      margin: 0;
+      color: var(--text-muted);
+    }
+
+    section {
+      background: var(--surface);
+      padding: 1.75rem 2rem;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      margin-bottom: 1.5rem;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    }
+
+    h2 {
+      margin-top: 0;
+      font-size: 1.35rem;
+      color: #0f172a;
+      border-bottom: 2px solid var(--border);
+      padding-bottom: 0.5rem;
+      margin-bottom: 1.25rem;
+    }
+
+    ul, ol {
+      padding-left: 1.4rem;
+      margin-bottom: 0;
+    }
+
+    li {
+      margin-bottom: 0.65rem;
+    }
+
+    .alert-warning {
+      background-color: var(--warning-bg);
+      border-left: 5px solid var(--warning-border);
+      color: var(--warning-text);
+      padding: 1.25rem 1.5rem;
+      border-radius: 8px;
+      margin-bottom: 1.5rem;
+    }
+
+    .alert-warning strong {
+      display: block;
+      font-size: 1.05rem;
+      margin-bottom: 0.35rem;
+    }
+
+    .table-wrapper {
+      overflow-x: auto;
+      margin-top: 1rem;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.95rem;
+    }
+
+    th, td {
+      text-align: left;
+      padding: 0.85rem 1rem;
+      border-bottom: 1px solid var(--border);
+      vertical-align: top;
+    }
+
+    th {
+      background-color: #f1f5f9;
+      font-weight: 600;
+      color: #0f172a;
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    .step-card {
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1.25rem 1.5rem;
+      margin-bottom: 1rem;
+      background-color: #fcfcfd;
+    }
+
+    .step-card:last-child {
+      margin-bottom: 0;
+    }
+
+    .step-header {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.5rem;
+      margin-bottom: 0.6rem;
+    }
+
+    .step-title {
+      font-weight: 700;
+      font-size: 1.1rem;
+      color: #0f172a;
+    }
+
+    .step-badge {
+      background-color: var(--badge-bg);
+      color: var(--badge-text);
+      font-size: 0.8rem;
+      font-weight: 600;
+      padding: 0.25rem 0.65rem;
+      border-radius: 999px;
+    }
+
+    .step-verify {
+      margin-top: 0.75rem;
+      padding-top: 0.6rem;
+      border-top: 1px dashed var(--border);
+      font-size: 0.9rem;
+      color: var(--text-muted);
+    }
+
+    .video-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+      gap: 1.5rem;
+      margin-top: 1rem;
+    }
+
+    .video-card {
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+      background: #fcfcfd;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .video-embed {
+      position: relative;
+      padding-bottom: 56.25%;
+      height: 0;
+      overflow: hidden;
+      background: #000;
+    }
+
+    .video-embed iframe {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      border: 0;
+    }
+
+    .video-info {
+      padding: 1rem 1.25rem;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .video-info h3 {
+      margin: 0 0 0.4rem 0;
+      font-size: 1.05rem;
+      color: #0f172a;
+    }
+
+    .video-info p {
+      margin: 0 0 0.85rem 0;
+      font-size: 0.9rem;
+      color: var(--text-muted);
+    }
+
+    .video-link {
+      font-size: 0.85rem;
+      color: var(--primary);
+      text-decoration: none;
+      word-break: break-all;
+      font-weight: 500;
+    }
+
+    .video-link:hover {
+      text-decoration: underline;
+      color: var(--primary-dark);
+    }
+
+    code {
+      background: #f1f5f9;
+      padding: 0.15rem 0.4rem;
+      border-radius: 4px;
+      font-size: 0.9em;
+    }
+
+    @media (max-width: 600px) {
+      .video-grid {
+        grid-template-columns: 1fr;
+      }
+      section, header {
+        padding: 1.25rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <p style="margin: 0 0 1rem;"><a href="index.html" style="color: #2563eb; text-decoration: none; font-weight: 600;">&larr; Tutte le guide</a></p>
+    <header>
+      <h1>Guida alla manutenzione del OneXPlayer 1S</h1>
+      <p>Sostituzione della batteria, rinnovo della pasta termica, attrezzi necessari e mappa completa delle viti per il modello da 8,4" (Intel Core 11ª gen).</p>
+    </header>
+
+    <div class="alert-warning" role="alert">
+      <strong>⚠️ ATTENZIONE: Sicurezza elettrica e batteria al litio</strong>
+      Prima di iniziare lo smontaggio, scarica la batteria <b>sotto il 25%</b>, spegni completamente Windows (evita la sospensione) e rimuovi eventuali schede <b>microSD</b>. Non usare mai leve o cacciaviti metallici per scollare la batteria e non piegarla: una cella al litio danneggiata può incendiarsi.
+    </div>
+
+    <section id="attrezzi">
+      <h2>1. Cacciaviti e attrezzi necessari</h2>
+      <ul>
+        <li><strong>Cacciavite di precisione Phillips #00 (PH00):</strong> è l'unica punta richiesta per tutte le viti esterne della scocca, le viti delle due ventole, la piastra metallica dell'SSD e le 4 viti del dissipatore CPU.</li>
+        <li><strong>Plettro o leva in plastica (plastic spudger):</strong> indispensabile per sganciare le clip del guscio posteriore senza graffiare la scocca o danneggiare i cavi flat interni.</li>
+        <li><strong>Pinzette di precisione antistatiche:</strong> per scollegare in sicurezza il connettore della batteria e il cavo flat del pulsante di accensione/microSD.</li>
+        <li><strong>Vaschetta magnetica o foglio sagomato:</strong> le viti esterne hanno <strong>3 lunghezze diverse</strong>; tenerle divise evita di avvitare una vite troppo lunga nel foro sbagliato danneggiando scocca o scheda madre.</li>
+        <li><strong>Alcool isopropilico (&gt;90%) e panno in microfibra / cotton fioc:</strong> per pulire perfettamente i residui della vecchia pasta termica dal processore e dal dissipatore.</li>
+        <li><strong>Pasta termica non conduttiva:</strong> ad esempio Arctic MX-4 / MX-6, Noctua NT-H1 / NT-H2 oppure pad a cambiamento di fase Honeywell PTM7950.</li>
+        <li><strong>Tessera di plastica flessibile e biadesivo sottile:</strong> per scollare la vecchia batteria dall'alloggiamento e fissare quella nuova.</li>
+        <li><strong>Nastro isolante nero o nastro Kapton:</strong> per ripristinare la tenuta d'aria tra le ventole e i radiatori in rame.</li>
+      </ul>
+    </section>
+
+    <section id="viti">
+      <h2>2. Mappa delle viti e raggruppamenti per lunghezza</h2>
+      <p>Il produttore (One-Netbook) non pubblica schemi tecnici con la misura esatta in millimetri di ogni singola vite. Lo smontaggio completo del <strong>OneXPlayer 1S</strong> conferma però che le <strong>11 viti esterne sono suddivise in 3 lunghezze diverse</strong> in base alla posizione, mentre le <strong>viti interne sono tutte identiche all'interno di ciascun singolo componente</strong>.</p>
+
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>Posizione / Componente</th>
+              <th>Quantità</th>
+              <th>Corrispondenza tra viti</th>
+              <th>Note pratiche per il rimontaggio</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Esterno — Sotto il cavalletto + Bordo superiore (lato Power/impronte)</strong></td>
+              <td>2 viti (1 + 1)</td>
+              <td><strong>Lunghezza Gruppo 1</strong> (uguali tra loro)</td>
+              <td>La vite nascosta sotto la cerniera del kickstand e quella sul bordo superiore vicino al tasto Power/lettore impronte formano una coppia distinta dalle altre viti dei bordi.</td>
+            </tr>
+            <tr>
+              <td><strong>Esterno — Bordo inferiore + Restante bordo superiore</strong></td>
+              <td>3 viti</td>
+              <td><strong>Lunghezza Gruppo 2</strong> (uguali tra loro)</td>
+              <td>Seconda misura esterna. Alcune di queste viti possono restare trattenute nella sede in plastica anche quando sono completamente svitate.</td>
+            </tr>
+            <tr>
+              <td><strong>Esterno — Retro impugnature (sinistra e destra)</strong></td>
+              <td>6 viti (3 + 3)</td>
+              <td><strong>Lunghezza Gruppo 3</strong> (tutte uguali tra loro)</td>
+              <td>Le 3 viti sull'impugnatura sinistra e le 3 sull'impugnatura destra condividono la stessa lunghezza.</td>
+            </tr>
+            <tr>
+              <td><strong>Interno — Ventole di raffreddamento</strong></td>
+              <td>6 viti (3 + 3)</td>
+              <td><strong>Tutte uguali tra loro</strong></td>
+              <td>3 viti fissano la ventola sinistra e 3 la ventola destra; sono interscambiabili tra loro.</td>
+            </tr>
+            <tr>
+              <td><strong>Interno — Piastra metallica SSD NVMe / VRM</strong></td>
+              <td>Viti perimetrali</td>
+              <td><strong>Tutte uguali tra loro</strong></td>
+              <td>Fissano la placca in alluminio sopra l'SSD; basta conservarle in un unico gruppo separato.</td>
+            </tr>
+            <tr>
+              <td><strong>Interno — Dissipatore CPU (heatsink)</strong></td>
+              <td>4 viti</td>
+              <td><strong>Tutte uguali tra loro</strong></td>
+              <td>Fissano il blocco in rame intorno al processore; vanno svitate e serrate sempre con schema incrociato (a X).</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <ul style="margin-top: 1rem;">
+        <li><strong>Metodo del foglio sagomato:</strong> disegna su un foglio il contorno della console e appoggia ogni vite nel punto esatto da cui l'hai rimossa.</li>
+        <li><strong>Controllo della resistenza:</strong> in fase di chiusura, non forzare mai il cacciavite PH00; se una vite incontra un blocco netto prima di arrivare a battuta, appartiene a un altro gruppo ed è troppo lunga per quel foro.</li>
+      </ul>
+    </section>
+
+    <section id="procedura">
+      <h2>3. Procedura passo-passo</h2>
+
+      <div class="step-card">
+        <div class="step-header">
+          <span class="step-title">Passo 1: Rimuovi tutte le viti esterne</span>
+          <span class="step-badge">Cacciavite PH00 • 3 lunghezze diverse</span>
+        </div>
+        <p>Apri il cavalletto posteriore (kickstand) e svita la vite nascosta al centro (spesso coperta da un sigillo di garanzia). Rimuovi quindi le <strong>2 viti sul bordo superiore</strong>, le <strong>2 viti sul bordo inferiore</strong> e le <strong>6 viti sul guscio posteriore</strong> (3 a sinistra e 3 a destra), separandole secondo i 3 gruppi indicati nella tabella.</p>
+        <div class="step-verify"><strong>Verifica:</strong> Tutte le 11 viti esterne sono state rimosse o girano liberamente nella propria sede.</div>
+      </div>
+
+      <div class="step-card">
+        <div class="step-header">
+          <span class="step-title">Passo 2: Apri la scocca posteriore e scollega il cavo flat</span>
+          <span class="step-badge">Leva in plastica • Massima cautela</span>
+        </div>
+        <p>Inserisci il plettro in plastica lungo la fessura perimetrale partendo dai lati e sgancia gradualmente le clip. Solleva il guscio posteriore <strong>solo di pochi centimetri senza tirare</strong>: la schedina del pulsante Power, del sensore d'impronte e dello slot microSD è montata sul coperchio ed è collegata alla scheda madre tramite un cavo flat (ribbon). Solleva la linguetta del connettore ZIF con le pinzette o l'unghia e sfila il cavo flat.</p>
+        <div class="step-verify"><strong>Verifica:</strong> Il coperchio posteriore è completamente separato dalla console senza alcuna trazione sul cavo flat.</div>
+      </div>
+
+      <div class="step-card">
+        <div class="step-header">
+          <span class="step-title">Passo 3: Scollega e sostituisci la batteria</span>
+          <span class="step-badge">Modello batteria 627138 (11,4 V)</span>
+        </div>
+        <p>Individua il connettore della batteria (sigla <code>627138</code>) sulla scheda madre e sollevalo delicatamente con le pinzette facendo leva alternativamente sui due lati. Per estrarre la vecchia batteria, fai scorrere una tessera di plastica flessibile sotto i bordi (puoi usare pochissime gocce di alcool isopropilico per ammorbidire il biadesivo). Applica nuove strisce di biadesivo, posiziona la nuova batteria e <strong>lasciala scollegata</strong> fino al termine del lavoro sulla pasta termica.</p>
+        <div class="step-verify"><strong>Verifica:</strong> La nuova batteria aderisce in piano nel suo alloggiamento senza sporgere dal telaio.</div>
+      </div>
+
+      <div class="step-card">
+        <div class="step-header">
+          <span class="step-title">Passo 4: Rimuovi le due ventole e la piastra metallica</span>
+          <span class="step-badge">Cacciavite PH00</span>
+        </div>
+        <p>Stacca con delicatezza il nastro isolante nero che sigilla le due ventole ai radiatori. Scollega i connettori delle ventole dalla scheda madre, svita le <strong>3 viti PH00</strong> di ciascuna ventola e mettile da parte (approfittane per rimuovere la polvere). Svita poi le viti PH00 della piastra metallica centrale che copre l'SSD NVMe e i VRM, sollevandola con cura per non strappare i pad termici applicati sul lato inferiore.</p>
+        <div class="step-verify"><strong>Verifica:</strong> Ventole e piastra metallica sono rimosse, lasciando completamente scoperto il dissipatore in rame.</div>
+      </div>
+
+      <div class="step-card">
+        <div class="step-header">
+          <span class="step-title">Passo 5: Smonta il dissipatore e applica la nuova pasta termica</span>
+          <span class="step-badge">Cacciavite PH00 + Alcool isopropilico</span>
+        </div>
+        <p>Svita in ordine incrociato le <strong>4 viti PH00</strong> che fissano il dissipatore intorno al processore e solleva il blocco in rame. Pulisci con cura il die rettangolare della CPU Intel e la base in rame del dissipatore usando un panno in microfibra inumidito con alcool isopropilico, lasciando intatta la pellicola isolante nera attorno al chip. Applica una sottile striscia o un chicco di nuova pasta termica al centro del die.</p>
+        <div class="step-verify"><strong>Verifica:</strong> La superficie del die è a specchio prima dell'applicazione e la nuova pasta copre il silicio senza sbordare eccessivamente.</div>
+      </div>
+
+      <div class="step-card">
+        <div class="step-header">
+          <span class="step-title">Passo 6: Rimonta il dissipatore, ricollega la batteria e chiudi</span>
+          <span class="step-badge">Serraggio incrociato a X</span>
+        </div>
+        <p>Riposiziona il dissipatore e stringi le 4 viti PH00 gradualmente <strong>a X</strong> (mezzo giro per volta) per distribuire uniformemente la pressione. Rimonta la piastra metallica dell'SSD verificando che i pad termici siano in posizione, riavvita le due ventole, ricollega i rispettivi cavetti e riapplica il nastro isolante tra ventole e radiatori. <strong>Ricollega infine il connettore della batteria</strong>, reinserisci il cavo flat del tasto Power, chiudi il guscio posteriore a pressione e riavvita le 11 viti esterne nei rispettivi gruppi.</p>
+        <div class="step-verify"><strong>Verifica:</strong> La console si avvia normalmente, riconosce batteria e microSD, e in idle mantiene temperature intorno ai 40–50 °C.</div>
+      </div>
+    </section>
+
+    <section id="video">
+      <h2>4. Video di riferimento per OneXPlayer 1S</h2>
+      <p>Guide video dedicate allo smontaggio, alla sostituzione della pasta termica e al cambio batteria sul modello specifico <strong>OneXPlayer 1S</strong>:</p>
+
+      <div class="video-grid">
+        <article class="video-card">
+          <div class="video-embed">
+            <iframe src="https://www.youtube.com/embed/JeckPIEkSLc" title="ONEXPLAYER 1S Disassembly (Pyr3x)" allowfullscreen loading="lazy"></iframe>
+          </div>
+          <div class="video-info">
+            <div>
+              <h3>ONEXPLAYER 1S Disassembly — Pyr3x</h3>
+              <p>Smontaggio completo passo-passo della scocca, distinzione dei 3 gruppi di viti esterne, rimozione ventole, piastra SSD e dissipatore CPU.</p>
+            </div>
+            <a class="video-link" href="https://www.youtube.com/watch?v=JeckPIEkSLc" target="_blank" rel="noopener noreferrer">https://www.youtube.com/watch?v=JeckPIEkSLc</a>
+          </div>
+        </article>
+
+        <article class="video-card">
+          <div class="video-embed">
+            <iframe src="https://www.youtube.com/embed/QspBOlrY-uk" title="ONEXPLAYER 1S - Disassembly (Melvin .R)" allowfullscreen loading="lazy"></iframe>
+          </div>
+          <div class="video-info">
+            <div>
+              <h3>ONEXPLAYER 1S - Disassembly — Melvin .R</h3>
+              <p>Guida dettagliata all'apertura del coperchio posteriore, scollegamento del cavo flat del tasto Power, disconnessione della batteria e repaste.</p>
+            </div>
+            <a class="video-link" href="https://www.youtube.com/watch?v=QspBOlrY-uk" target="_blank" rel="noopener noreferrer">https://www.youtube.com/watch?v=QspBOlrY-uk</a>
+          </div>
+        </article>
+
+        <article class="video-card">
+          <div class="video-embed">
+            <iframe src="https://www.youtube.com/embed/LM_VfY1VO_Y" title="Onexplayer teardown and repaste (Dr.Darshan hegde)" allowfullscreen loading="lazy"></iframe>
+          </div>
+          <div class="video-info">
+            <div>
+              <h3>Onexplayer teardown and repaste — Dr.Darshan hegde</h3>
+              <p>Focus sulla pulizia del die Intel Tiger Lake (preservando la pellicola isolante perimetrale), applicazione pasta termica e verifica temperature.</p>
+            </div>
+            <a class="video-link" href="https://www.youtube.com/watch?v=LM_VfY1VO_Y" target="_blank" rel="noopener noreferrer">https://www.youtube.com/watch?v=LM_VfY1VO_Y</a>
+          </div>
+        </article>
+
+        <article class="video-card">
+          <div class="video-embed">
+            <iframe src="https://www.youtube.com/embed/uJj2f5oDT8c" title="Sostituzione batteria OneXPlayer 1S" allowfullscreen loading="lazy"></iframe>
+          </div>
+          <div class="video-info">
+            <div>
+              <h3>Sostituzione batteria OneXPlayer 1S — ねたきりおじいちゃんねる</h3>
+              <p>Apertura del guscio posteriore con plettro in plastica e sostituzione di una batteria gonfia sul modello 1S.</p>
+            </div>
+            <a class="video-link" href="https://www.youtube.com/watch?v=uJj2f5oDT8c" target="_blank" rel="noopener noreferrer">https://www.youtube.com/watch?v=uJj2f5oDT8c</a>
+          </div>
+        </article>
+      </div>
+    </section>
+  </div>
+</body>
+</html>

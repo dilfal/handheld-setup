@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Guida Upgrade NVMe 2TB 2280 — Asus ROG Ally Z1 Extreme (RC71L)</title>
+  <style>
+    :root {
+      --bg: #0f1115;
+      --surface: #181b22;
+      --surface-alt: #202530;
+      --border: #2e3444;
+      --text: #e6e9ef;
+      --muted: #a1a9ba;
+      --accent: #ff2e4c;
+      --accent-soft: rgba(255, 46, 76, 0.14);
+      --warn: #f59e0b;
+      --warn-soft: rgba(245, 158, 11, 0.12);
+      --ok: #10b981;
+      --ok-soft: rgba(16, 185, 129, 0.12);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Inter, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.65;
+    }
+    .container {
+      max-width: 1020px;
+      margin: 0 auto;
+      padding: 32px 20px 64px;
+    }
+    header {
+      border-bottom: 2px solid var(--border);
+      padding-bottom: 20px;
+      margin-bottom: 32px;
+    }
+    .badge {
+      display: inline-block;
+      background: var(--accent-soft);
+      color: #ff6b81;
+      border: 1px solid rgba(255, 46, 76, 0.35);
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      margin-bottom: 10px;
+    }
+    h1 {
+      margin: 6px 0 10px;
+      font-size: 1.85rem;
+      line-height: 1.25;
+    }
+    h2 {
+      margin: 28px 0 14px;
+      font-size: 1.3rem;
+      border-left: 4px solid var(--accent);
+      padding-left: 12px;
+    }
+    h3 {
+      margin: 22px 0 10px;
+      font-size: 1.06rem;
+      color: #ffffff;
+    }
+    p { margin: 0 0 14px; color: var(--text); }
+    .subtitle { color: var(--muted); font-size: 0.98rem; }
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px 22px;
+      margin-bottom: 22px;
+    }
+    .callout {
+      border-radius: 10px;
+      padding: 14px 18px;
+      margin: 16px 0;
+      border: 1px solid transparent;
+    }
+    .callout-warn {
+      background: var(--warn-soft);
+      border-color: rgba(245, 158, 11, 0.35);
+    }
+    .callout-danger {
+      background: var(--accent-soft);
+      border-color: rgba(255, 46, 76, 0.4);
+    }
+    .callout-ok {
+      background: var(--ok-soft);
+      border-color: rgba(16, 185, 129, 0.35);
+    }
+    .callout strong { display: block; margin-bottom: 4px; }
+    ul, ol {
+      margin: 8px 0 16px;
+      padding-left: 22px;
+    }
+    li { margin-bottom: 8px; }
+    code {
+      background: var(--surface-alt);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 0.9em;
+      color: #93c5fd;
+    }
+    .video-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 18px;
+      margin: 18px 0;
+    }
+    .video-card {
+      background: var(--surface-alt);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+    .video-wrapper {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      background: #000;
+    }
+    .video-wrapper iframe {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      border: 0;
+    }
+    .video-meta {
+      padding: 12px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      flex: 1;
+      justify-content: space-between;
+    }
+    .video-title {
+      font-weight: 600;
+      font-size: 0.95rem;
+      color: #fff;
+    }
+    .video-desc {
+      font-size: 0.85rem;
+      color: var(--muted);
+      margin: 0;
+    }
+    .btn-yt {
+      display: inline-block;
+      align-self: flex-start;
+      background: #2b3140;
+      color: #fff;
+      text-decoration: none;
+      font-size: 0.82rem;
+      font-weight: 600;
+      padding: 6px 11px;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      transition: background 0.15s ease;
+    }
+    .btn-yt:hover { background: var(--accent); border-color: var(--accent); }
+    .step-num {
+      display: inline-block;
+      background: var(--accent);
+      color: #fff;
+      font-weight: 700;
+      font-size: 0.8rem;
+      padding: 2px 8px;
+      border-radius: 999px;
+      margin-right: 8px;
+      vertical-align: middle;
+    }
+    footer {
+      margin-top: 40px;
+      padding-top: 18px;
+      border-top: 1px solid var(--border);
+      font-size: 0.85rem;
+      color: var(--muted);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <p style="margin: 0 0 1rem;"><a href="index.html" style="color: #ff6b81; text-decoration: none; font-weight: 600;">&larr; Tutte le guide</a></p>
+    <header>
+      <span class="badge">Modello: Asus ROG Ally Z1 Extreme (RC71L)</span>
+      <h1>Sostituzione SSD NVMe da 512 GB (2230) a 2 TB (2280) con adattatore</h1>
+      <p class="subtitle">Guida operativa con video specifici integrati inline per il modello RC71L, protezione del sensore ALS e ripristino Windows tramite ASUS Cloud Recovery o clonazione.</p>
+    </header>
+
+    <section class="card">
+      <h2>1. Attrezzatura e preparazione pre-smontaggio</h2>
+      <ul>
+        <li><strong>Cacciavite Phillips PH0</strong> e <strong>plettro in plastica</strong> (o spatolina non metallica).</li>
+        <li><strong>Adattatore M.2 2230-to-2280 a 90 gradi (PCIe 4.0)</strong> e il nuovo <strong>SSD NVMe 2280 da 2 TB</strong> (preferibilmente <em>single-sided</em>).</li>
+        <li><strong>Opzionale:</strong> tronchesine di precisione (nel caso serva tagliare il piolino centrale interno della scocca), dissipatore sottile superiore e ciotolina per le viti.</li>
+        <li><strong>Caricabatterie originale ASUS USB-C da 65 W</strong> (o superiore, indispensabile per il riavvio dopo la chiusura).</li>
+      </ul>
+
+      <div class="callout callout-warn">
+        <strong>Checklist obbligatoria prima di aprire la console</strong>
+        1. Accendi la ROG Ally con il vecchio SSD e aggiorna il BIOS all'ultima versione tramite l'app <strong>MyASUS</strong>.<br>
+        2. Scarica la batteria al <strong>25% o meno</strong>.<br>
+        3. Spegni completamente Windows e <strong>rimuovi l'eventuale scheda microSD</strong> dallo slot.
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>2. Scelta dati: Clonazione preventiva oppure ASUS Cloud Recovery</h2>
+      <p>Prima di smontare la scocca, scegli se clonare il disco originale da 512 GB sul nuovo 2 TB oppure effettuare una reinstallazione pulita dal BIOS.</p>
+      <ul>
+        <li><strong>Opzione A — Clonazione prima dello smontaggio:</strong> inserisci il nuovo 2280 da 2 TB in un box USB esterno, collega la ROG Ally a una dock con caricatore inserito e clona l'unità con <em>Macrium Reflect Home</em> (trial 30 giorni; circa 1 ora e 20 minuti nel test riportato da Wagner's TechTalk) oppure con <em>Clonezilla</em>.</li>
+        <li><strong>Opzione B — Installazione pulita (ASUS Cloud Recovery):</strong> sostituisci direttamente l'SSD e lascia scaricare a BIOS/Wi-Fi l'immagine ufficiale Windows e i driver ASUS.</li>
+      </ul>
+
+      <div class="video-grid">
+        <div class="video-card">
+          <div class="video-wrapper">
+            <iframe src="https://www.youtube.com/embed/-Hb-TNYU4vE" title="ROG Ally SSD Upgrade Clone Guide" loading="lazy" allowfullscreen></iframe>
+          </div>
+          <div class="video-meta">
+            <div>
+              <div class="video-title">Video: Clonazione SSD su ROG Ally senza perdere dati</div>
+              <p class="video-desc">Guida passo-passo per clonare il sistema esistente prima di sostituire fisicamente il drive.</p>
+            </div>
+            <a class="btn-yt" href="https://www.youtube.com/watch?v=-Hb-TNYU4vE" target="_blank" rel="noopener">Apri su YouTube</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2><span class="step-num">STEP 1</span>Apertura della scocca posteriore (RC71L) e batteria</h2>
+      <ol>
+        <li>Appoggia la console a schermo in giù su una superficie morbida.</li>
+        <li>Svita le <strong>6 viti posteriori</strong> con il cacciavite PH0 (3 lungo il bordo superiore, 3 lungo quello inferiore). La vite centrale inferiore è <em>imperdibile</em> (non esce dal guscio) e aiuta a sollevare il coperchio.</li>
+        <li>Fai scorrere il plettro in plastica lungo il perimetro per liberare le clip. <em>Specifico RC71L:</em> la ROG Ally originale del 2023 <strong>non ha cavi flat collegati al coperchio posteriore</strong>, a differenza dei modelli Ally X e Xbox Ally.</li>
+        <li>Solleva la linguetta nera di protezione posta tra le due ventole per accedere alla batteria e allo slot M.2.</li>
+        <li>Con uno spudger o plettro in plastica, spingi indietro la <strong>clip metallica di fermo</strong> sul connettore della batteria e stacca il cavo tirandolo <strong>verticalmente verso l'alto</strong>.</li>
+      </ol>
+    </section>
+
+    <section class="card">
+      <h2><span class="step-num">STEP 2</span>Rimozione 2230, montaggio adattatore 2280 e SSD da 2 TB</h2>
+      <ol>
+        <li>Svita la vite di fissaggio del modulo 2230 da 512 GB e sfilalo delicatamente dallo slot.</li>
+        <li>Inserisci l'<strong>adattatore 2230-to-2280 a 90 gradi</strong> nello slot M.2 (angolazione di circa 30° fino a completo inserimento dei contatti) e fissalo con la vite originale.</li>
+        <li>Inserisci il nuovo <strong>NVMe 2280 da 2 TB</strong> nell'adattatore e fissalo con la vite in dotazione.</li>
+        <li><strong>Verifica ingombri:</strong> appoggia leggermente il coperchio posteriore senza forzare. Se hai un SSD <em>double-sided</em> o monti un dissipatore superiore, taglia il <strong>piolino plastico centrale interno</strong> sul guscio posteriore per evitare pressioni sul drive.</li>
+      </ol>
+
+      <div class="callout callout-danger">
+        <strong>Avvertenze meccaniche e termiche critiche</strong>
+        • <strong>Non stringere con forza eccessiva la vite dell'adattatore:</strong> sotto il foro passano i cavi della batteria.<br>
+        • <strong>Mai applicare pad termici sotto l'SSD:</strong> convoglierebbero il calore proveniente dal lato scheda madre verso il drive. I pad vanno usati solo sopra l'SSD se abbinati a un dissipatore superiore.<br>
+        • <strong>Garanzia:</strong> modificare la scocca interna o usare adattatori 2280 può invalidare la garanzia ASUS.
+      </div>
+
+      <h3>Video specifici inline: Asus ROG Ally (RC71L) + adattatore 2280 + 2 TB</h3>
+      <div class="video-grid">
+        <div class="video-card">
+          <div class="video-wrapper">
+            <iframe src="https://www.youtube.com/embed/N4sQwYOWZeQ" title="Installing 2TB 2280 NVMe in Asus ROG Ally with 90 degrees adapter" loading="lazy" allowfullscreen></iframe>
+          </div>
+          <div class="video-meta">
+            <div>
+              <div class="video-title">1. ROG Ally 2 TB 2280 con adattatore a 90° + Speed Test</div>
+              <p class="video-desc">Installazione mirata di un NVMe 2280 da 2 TB su Asus ROG Ally con adattatore a 90 gradi e verifica velocità.</p>
+            </div>
+            <a class="btn-yt" href="https://www.youtube.com/watch?v=N4sQwYOWZeQ" target="_blank" rel="noopener">Apri su YouTube</a>
+          </div>
+        </div>
+
+        <div class="video-card">
+          <div class="video-wrapper">
+            <iframe src="https://www.youtube.com/embed/Vl18Hv8hybA" title="Upgrade Asus ROG Ally from 512GB 2230 to 2TB 2280" loading="lazy" allowfullscreen></iframe>
+          </div>
+          <div class="video-meta">
+            <div>
+              <div class="video-title">2. Passaggio diretto da 512 GB (2230) a 2 TB (2280)</div>
+              <p class="video-desc">Upgrade completo su Asus ROG Ally da SSD 2230 da 512 GB a Samsung 990 Pro 2280 da 2 TB tramite adattatore.</p>
+            </div>
+            <a class="btn-yt" href="https://www.youtube.com/watch?v=Vl18Hv8hybA" target="_blank" rel="noopener">Apri su YouTube</a>
+          </div>
+        </div>
+
+        <div class="video-card">
+          <div class="video-wrapper">
+            <iframe src="https://www.youtube.com/embed/cyshyfsld2A" title="Asus Rog Ally 2TB 2280 SSD Upgrade Tutorial" loading="lazy" allowfullscreen></iframe>
+          </div>
+          <div class="video-meta">
+            <div>
+              <div class="video-title">3. Tutorial upgrade 2 TB 2280 (Corsair MP600 + adattatore)</div>
+              <p class="video-desc">Installazione passo-passo di un SSD M.2 2280 da 2 TB su Asus ROG Ally tramite adattatore M.2.</p>
+            </div>
+            <a class="btn-yt" href="https://www.youtube.com/watch?v=cyshyfsld2A" target="_blank" rel="noopener">Apri su YouTube</a>
+          </div>
+        </div>
+
+        <div class="video-card">
+          <div class="video-wrapper">
+            <iframe src="https://www.youtube.com/embed/e8BTv1h7HDY" title="ASUS ROG Ally RC71L SSD Upgrade 2230 to 2280 PCIe 4.0 Adapter" loading="lazy" allowfullscreen></iframe>
+          </div>
+          <div class="video-meta">
+            <div>
+              <div class="video-title">4. Focus telaio RC71L con adattatore PCIe 4.0</div>
+              <p class="video-desc">Guida dedicata esattamente alla revisione RC71L per il passaggio da 2230 a 2280 PCIe 4.0.</p>
+            </div>
+            <a class="btn-yt" href="https://www.youtube.com/watch?v=e8BTv1h7HDY" target="_blank" rel="noopener">Apri su YouTube</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2><span class="step-num">STEP 3</span>Pulizia ventole, chiusura, sblocco ALS e Cloud Recovery</h2>
+      <ol>
+        <li><strong>Pulizia preventiva:</strong> approfitta della scocca aperta per rimuovere delicatamente eventuale polvere accumulata sulle ventole, lasciando intatto il blocco dissipatore dell'APU.</li>
+        <li>Riabbassa la linguetta protettiva (se non interferisce con lo spessore del 2280) e <strong>ricollega la batteria</strong> premendo la spina perfettamente in piano e facendo scorrere fino a fondo corsa la clip metallica di ritegno.</li>
+        <li>Chiudi il guscio posteriore agganciando tutte le clip perimetrali e riavvita le 6 viti.</li>
+        <li><strong>Sblocco sensore ALS:</strong> collega il caricabatterie originale da 65 W (o superiore) e attendi l'accensione del LED arancione prima di premere il tasto Power.</li>
+      </ol>
+
+      <div class="callout callout-ok">
+        <strong>Perché dopo lo smontaggio serve il caricabatterie per accendersi?</strong>
+        Sul lato destro della scheda madre è presente un sensore di luminosità ambientale (ALS) che rileva l'apertura del telaio. Come protezione di sicurezza, la console si riaccende solo dopo aver richiuso la scocca (oscurando il sensore) e collegato un alimentatore USB-C da almeno 65 W.
+      </div>
+
+      <h3>Ripristino Windows da BIOS (solo se non hai clonato il vecchio disco)</h3>
+      <ol>
+        <li>Con caricatore da 65 W collegato e slot microSD vuoto, tieni premuto <code>Volume Giù</code> e premi <code>Power</code> fino a entrare nel BIOS.</li>
+        <li>Premi <code>Y</code> per passare alla modalità avanzata (<strong>Advanced Mode</strong>).</li>
+        <li>Vai nella scheda <strong>Advanced</strong>, seleziona <strong>ASUS Cloud Recovery</strong> e premi <code>A</code>.</li>
+        <li>Collega il Wi-Fi su richiesta e lascia scaricare e installare l'immagine senza interrompere i riavvii automatici.</li>
+      </ol>
+
+      <div class="video-grid">
+        <div class="video-card">
+          <div class="video-wrapper">
+            <iframe src="https://www.youtube.com/embed/MKvrmw1V5GU" title="ROG Ally 2280 SSD Mod, Heatsink and ASUS Cloud Recovery" loading="lazy" allowfullscreen></iframe>
+          </div>
+          <div class="video-meta">
+            <div>
+              <div class="video-title">Video: Mod 2280, dissipatore, chiusura e ASUS Cloud Recovery</div>
+              <p class="video-desc">Copre installazione dissipatore (05:46), chiusura coperchio (06:33) e procedura Cloud Recovery (06:59).</p>
+            </div>
+            <a class="btn-yt" href="https://www.youtube.com/watch?v=MKvrmw1V5GU" target="_blank" rel="noopener">Apri su YouTube</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Nota sul dissipatore dell'APU (intervento non consigliato durante il cambio SSD)</h2>
+      <p>Secondo i riscontri della community, la ROG Ally Z1 Extreme impiega di fabbrica un materiale a cambiamento di fase simile al PTM7950 con durata stimata intorno ai 5 anni, non pasta termica tradizionale. Salvo anomalie termiche gravi dopo aver pulito le ventole, evita di aprire il gruppo dissipatore. A solo scopo informativo, questo test di PCWorld mostra la complessità dello smontaggio del dissipatore rispetto al cambio SSD:</p>
+      <div class="video-grid">
+        <div class="video-card">
+          <div class="video-wrapper">
+            <iframe src="https://www.youtube.com/embed/wvW72gyrfpU" title="PCWorld Testing Kryonaut & PTM7950 On The ROG Ally" loading="lazy" allowfullscreen></iframe>
+          </div>
+          <div class="video-meta">
+            <div>
+              <div class="video-title">Riferimento opzionale: Smontaggio dissipatore e test PTM7950 (PCWorld)</div>
+              <p class="video-desc">Mostra lo smontaggio del gruppo ventole/heatsink su ROG Ally (da eseguire solo in caso di reale necessità).</p>
+            </div>
+            <a class="btn-yt" href="https://www.youtube.com/watch?v=wvW72gyrfpU" target="_blank" rel="noopener">Apri su YouTube</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <footer>
+      Guida specifica per Asus ROG Ally Z1 Extreme (RC71L) — Procedere a proprio rischio, scollegando sempre la batteria prima di intervenire sullo slot M.2.
+    </footer>
+  </div>
+</body>
+</html>

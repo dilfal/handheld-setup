@@ -52,6 +52,8 @@ se_avanza = "alza la risoluzione di gioco, oppure nel launcher passa al preset *
 primo_avvio = "Avvia il gioco con **Gioca in locale**: si apre il launcher. Scegli **Opzioni**, il preset **{preset}** e conferma con **OK**; poi scegli **Gioca**, arriva al menu principale ed esci dal gioco."
 
 [parametri_windows.onexplayer1s]
+filtro_ls = "`SkyrimSE.exe`, `SkyrimSE`, `Skyrim Special Edition`"
+exe_ls = "SkyrimSE.exe"
 tdp = "20 W nel profilo «Batteria»; 28 W nel profilo «Collegato», se serve"
 se_scatta = "porta il **Limite FPS** a 30 nell'HUD di Winhanced oppure, nel launcher, scegli il preset **Basso** e imposta di nuovo le voci della tabella del passo «Imposta la grafica dal launcher»."
 se_avanza = "prova 15 W: meno calore, ventole più silenziose e batteria più lunga."
@@ -85,6 +87,35 @@ Il file delle impostazioni si chiama `SkyrimPrefs.ini` e sta nei Documenti di Wi
 [passo.voci]
 onexplayer1s = [
   ["Risoluzione", "1280×800, schermo intero"],
+  ["Risoluzione delle ombre", "1024"],
+  ["Distanza delle ombre", "4000"],
+  ["Luce volumetrica (raggi di sole)", "No: è l'effetto che pesa di più"],
+  ["Riflessi sull'acqua (Screen Space Reflections)", "No"],
+  ["Antialiasing", "TAA (FXAA spento)"],
+  ["Distanza dell'erba", "3500"],
+  ["Sincronia verticale", "Sì (Skyrim la usa per regolare il ritmo del gioco)"],
+]
+rogallyz1x = [
+  ["Risoluzione", "1920×1080, schermo intero"],
+  ["Risoluzione delle ombre", "2048 (a 4096 costa molto e si vede poco)"],
+  ["Distanza delle ombre", "8000"],
+  ["Luce volumetrica (raggi di sole)", "Sì, qualità media"],
+  ["Antialiasing", "TAA (FXAA spento)"],
+  ["Sincronia verticale", "Sì (Skyrim la usa per regolare il ritmo del gioco)"],
+]
+generico = [
+  ["Risoluzione delle ombre", "1024"],
+  ["Distanza delle ombre", "4000"],
+  ["Luce volumetrica (raggi di sole)", "No: è l'effetto che pesa di più"],
+  ["Riflessi sull'acqua (Screen Space Reflections)", "No"],
+  ["Antialiasing", "TAA (FXAA spento)"],
+  ["Distanza dell'erba", "3500"],
+  ["Sincronia verticale", "Sì (Skyrim la usa per regolare il ritmo del gioco)"],
+]
+
+[passo.voci_windows]
+onexplayer1s = [
+  ["Risoluzione", "1280×800, in finestra (Windowed Mode attivo): vedi il passo su Lossless Scaling"],
   ["Risoluzione delle ombre", "1024"],
   ["Distanza delle ombre", "4000"],
   ["Luce volumetrica (raggi di sole)", "No: è l'effetto che pesa di più"],

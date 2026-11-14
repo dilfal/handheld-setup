@@ -60,6 +60,8 @@ primo_avvio = "Avvia il gioco con **Gioca in locale**, arriva al menu principale
 limite_fps = "FPS illimitati (il limite è già nel menu del gioco)"
 
 [parametri_windows.onexplayer1s]
+filtro_ls = "`witcher3.exe`, `witcher3`, `The Witcher 3`"
+exe_ls = 'bin\x64\witcher3.exe'
 tdp = "28 W nel profilo «Collegato»; 20 W nel profilo «Batteria»"
 se_scatta = "abbassa **Raggio di visibilità della vegetazione** e **Densità dell'erba** al minimo, poi spegni l'**Occlusione ambientale**. Controlla anche di avere impostato 28 W nel profilo «Collegato»."
 voci_base = "quattro voci: risoluzione, NVIDIA HairWorks spento, sfocatura di movimento spenta, sincronia verticale spenta"
@@ -163,7 +165,7 @@ generico = "onexplayer1s"
 
 [passo.voci_windows]
 onexplayer1s = [
-  ["Modalità di visualizzazione (Display Mode)", "Schermo intero"],
+  ["Modalità di visualizzazione (Display Mode)", "Finestra (Windowed): vedi il passo su Lossless Scaling"],
   ["Fotogrammi al secondo massimi (Maximum FPS)", "30 (il limite a 30 si mette direttamente qui)"],
   ["Preset grafica (Graphics Preset)", "Basso"],
   ["Qualità delle texture (Texture Quality)", "Alta"],

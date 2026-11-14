@@ -27,6 +27,10 @@ potenza = "Se il tuo dispositivo mostra il **Limite TDP**, imposta {tdp}."
 limite_fps = "{fps}"
 
 [parametri_windows.onexplayer1s]
+# Schermo intero a 1280×800 sul pannello verticale girato da Windows: immagine piccola in basso a sinistra (provato con
+# RDR2 il 14 novembre 2026). I giochi vanno in finestra e li ingrandisce Lossless Scaling, quindi lo schermo resta nativo.
+# Ogni gioco dà in `[parametri_windows.onexplayer1s]` le voci del filtro (`filtro_ls`) e l'eseguibile (`exe_ls`).
+risoluzione = "2560×1600, cioè quella dello schermo (a ingrandire il gioco ci pensa Lossless Scaling)"
 potenza = "Sul OneXPlayer 1S la regolazione della potenza da Winhanced non è provata: se nell'HUD trovi la voce **TDP (watt)**, imposta **{tdp}**; se non c'è, usa lo strumento del produttore. Non regolare mai la potenza da due programmi insieme."
 
 [parametri_windows.rogallyz1x]
@@ -110,6 +114,22 @@ testo_windows = """
 {primo_avvio}
 
 Questo passo serve perché, finché non lo avvii una volta, il gioco non crea i suoi file di impostazioni (compaiono nei Documenti di Windows) e i passi successivi non hanno niente da controllare.
+"""
+
+[[chiusura]]
+titolo = "Lossless Scaling: immagine centrata e a tutto schermo"
+solo = ["onexplayer1s"]
+bazzite = false
+dove = "windows"
+testo = """
+Lo schermo del OneXPlayer 1S nasce in verticale e Windows lo gira: in **Schermo intero** a 1280×800 l'immagine resta piccola in basso a sinistra. Per questo {nome} va **in finestra** a 1280×800 e a portarlo a tutto schermo ci pensa **Lossless Scaling** (si compra su Steam).
+
+1. Apri Lossless Scaling e crea un profilo per {nome}, poi apri **Modifica profilo**.
+2. Nel filtro scrivi tutte queste voci: {filtro_ls} e il percorso completo di `{exe_ls}` (per trovarlo, in Steam: clic destro sul gioco → **Gestisci → Sfoglia file locali**).
+3. Sempre in **Modifica profilo**, attiva **Ridimensionamento automatico** e porta il ritardo a **20 secondi**.
+4. Prima di avviare il gioco apri Lossless Scaling (può restare ridotto a icona): 20 secondi dopo che compare la finestra di {nome}, l'immagine si ingrandisce da sola.
+
+Se non succede, tocca una volta la finestra del gioco perché torni in primo piano; altrimenti premi **Scala** in Lossless Scaling e scegli la finestra del gioco a mano.
 """
 
 [[chiusura]]

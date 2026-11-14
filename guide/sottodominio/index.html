@@ -111,6 +111,33 @@
             font-size: 13.5px;
             color: var(--text-muted);
         }
+        .guide-card.doppia:hover { transform: none; }
+        .guide-links {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: auto;
+            padding-top: 14px;
+        }
+        .guide-links a {
+            flex: 1 1 110px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 44px;
+            padding: 8px 12px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background: #1f3a5f;
+            color: var(--accent);
+            font-size: 14px;
+            font-weight: 600;
+            text-align: center;
+            text-decoration: none;
+        }
+        .guide-links a:hover { border-color: var(--accent); }
+        .ally-card .guide-links a { background: #2b1f48; color: var(--accent-purple); }
+        .ally-card .guide-links a:hover { border-color: var(--accent-purple); }
         footer {
             text-align: center;
             font-size: 13px;
@@ -151,11 +178,15 @@
                 <p>Preparazione di Windows, chiavetta USB con Rufus, avvio dal Boot Menu, correzione dello schermo nero e configurazione automatica.</p>
             </a>
 
-            <a href="ottimizzazione_onexplayer_1s.html" class="guide-card">
+            <div class="guide-card doppia">
                 <div class="step-label">Giochi</div>
                 <h3>Ottimizzazione dei giochi .exe</h3>
-                <p>GE-Proton con ProtonUp-Qt, aggiunta degli .exe a Steam, scalatura intera 2:1 e una guida per ciascun gioco.</p>
-            </a>
+                <p>Scegli il tuo sistema. Su Bazzite: GE-Proton con ProtonUp-Qt, aggiunta degli .exe a Steam e scalatura intera 2:1. Su Windows: Winhanced, librerie, limite dei fotogrammi e potenza. Una guida per ciascun gioco.</p>
+                <div class="guide-links">
+                    <a href="ottimizzazione_onexplayer_1s.html?sistema=bazzite">Bazzite</a>
+                    <a href="ottimizzazione_onexplayer_1s.html?sistema=windows">Windows (Winhanced)</a>
+                </div>
+            </div>
 
             <a href="manutenzione_onexplayer_1s.html" class="guide-card">
                 <div class="step-label">Manutenzione</div>
@@ -177,11 +208,15 @@
                 <p>Disattivazione di BitLocker e Avvio Rapido, chiavetta USB con Rufus, VRAM e Boot Override nel BIOS, VRR a 120 Hz e limite di carica all'80%.</p>
             </a>
 
-            <a href="ottimizzazione_rog_ally.html" class="guide-card ally-card">
+            <div class="guide-card ally-card doppia">
                 <div class="step-label">Giochi</div>
                 <h3>Ottimizzazione dei giochi .exe</h3>
-                <p>GE-Proton, aggiunta degli .exe a Steam, 1080p con VRR e una guida per ciascun gioco.</p>
-            </a>
+                <p>Scegli il tuo sistema. Su Bazzite: GE-Proton, aggiunta degli .exe a Steam e 1080p con VRR. Su Windows: Winhanced, 120 Hz, librerie, limite dei fotogrammi e potenza. Una guida per ciascun gioco.</p>
+                <div class="guide-links">
+                    <a href="ottimizzazione_rog_ally.html?sistema=bazzite">Bazzite</a>
+                    <a href="ottimizzazione_rog_ally.html?sistema=windows">Windows (Winhanced)</a>
+                </div>
+            </div>
 
             <a href="nvme_rog_ally.html" class="guide-card ally-card">
                 <div class="step-label">Hardware</div>

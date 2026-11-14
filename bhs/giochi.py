@@ -30,7 +30,9 @@ from .profiles import DATI, carica_profili, profilo_per_id
 
 CARTELLA_GUIDE = DATI / "giochi"
 SUFFISSO_COPIA = ".bhs-originale"
-DOVE = {"desktop": "Modalità Desktop", "gaming": "Gaming Mode", "gioco": "Dentro il gioco", "app": "In questa finestra"}
+DOVE = {"desktop": "Modalità Desktop", "gaming": "Gaming Mode", "gioco": "Dentro il gioco", "app": "In questa finestra",
+        "winhanced": "In Winhanced", "windows": "Su Windows"}
+SISTEMI = ("bazzite", "windows")      # il sistema del dispositivo: la guida di Windows usa i valori `*_windows` dei dati
 
 
 # ── Dati ──────────────────────────────────────────────────────────────
@@ -91,19 +93,29 @@ def _parametri(sorgente: dict, profilo: str) -> dict[str, str]:
     return {**comuni, **{k: str(v) for k, v in (_per_profilo(tabelle, profilo) or {}).items()}}
 
 
-def _passo(d: dict, profilo: str, parametri: dict[str, str]) -> Optional[Passo]:
+def _passo(d: dict, profilo: str, parametri: dict[str, str], sistema: str = "bazzite") -> Optional[Passo]:
     solo = d.get("solo")
     if solo and profilo not in solo:
         return None
-    voci = _per_profilo(d.get("voci"), profilo) or []
+    windows = sistema == "windows"
+    if windows and d.get("windows", True) is False:
+        return None
+
+    def scelto(chiave: str, base=None):
+        """Su Windows vale `<chiave>_windows` se c'è; altrimenti il valore di base."""
+        if windows and f"{chiave}_windows" in d:
+            return d[f"{chiave}_windows"]
+        return d.get(chiave, base)
+
+    voci = _per_profilo(scelto("voci"), profilo) or []
     return Passo(
-        titolo=_riempi(d["titolo"], parametri),
-        testo=_riempi(_per_profilo(d.get("testo", ""), profilo) or "", parametri).strip(),
-        dove=d.get("dove", ""),
+        titolo=_riempi(scelto("titolo"), parametri),
+        testo=_riempi(_per_profilo(scelto("testo", ""), profilo) or "", parametri).strip(),
+        dove=scelto("dove", ""),
         voci=[(_riempi(str(v[0]), parametri), _riempi(str(v[1]), parametri)) for v in voci],
         copia=_riempi(_per_profilo(d.get("copia", ""), profilo) or "", parametri),
-        azione=d.get("azione", ""),
-        nota_app=_riempi(_per_profilo(d.get("nota_app", ""), profilo) or "", parametri),
+        azione="" if windows else d.get("azione", ""),          # su Windows non c'è il pulsante «Applica»
+        nota_app="" if windows else _riempi(_per_profilo(d.get("nota_app", ""), profilo) or "", parametri),
         sul_sito=bool(d.get("sul_sito", True)),
     )
 
@@ -121,8 +133,15 @@ def _config(d: Optional[dict], profilo: str) -> Optional[ConfigGioco]:
                        valori={k: str(v) for k, v in valori.items()}, aggiungi=d.get("aggiungi", True))
 
 
-def carica_guide(profilo: str, cartella: Path = CARTELLA_GUIDE) -> list[Guida]:
-    """Guide ordinate, con testi e valori già scelti per il profilo (quelli sconosciuti usano «generico»)."""
+def carica_guide(profilo: str, sistema: str = "bazzite", cartella: Path = CARTELLA_GUIDE) -> list[Guida]:
+    """Guide ordinate, con testi e valori già scelti per il profilo (quelli sconosciuti usano «generico»).
+
+    `sistema="windows"` dà la variante per Winhanced: ai parametri si sovrappongono le tabelle `[parametri_windows…]`;
+    ogni passo può avere `titolo_windows`, `testo_windows`, `dove_windows`, `voci_windows` e `windows = false`
+    (il passo non compare). Con il sistema predefinito i dati sono quelli di sempre.
+    """
+    if sistema not in SISTEMI:
+        raise ValueError(f"sistema sconosciuto: {sistema!r} (valori ammessi: {', '.join(SISTEMI)})")
     if profilo_per_id(carica_profili(), profilo) is None:       # anche per i passi con `solo = [...]`, non solo per i valori
         profilo = "generico"
     comune: dict = {}
@@ -138,10 +157,13 @@ def carica_guide(profilo: str, cartella: Path = CARTELLA_GUIDE) -> list[Guida]:
             d = tomllib.load(fh)
         parametri = {"nome": d["nome"], **_parametri(comune.get("parametri", {}), profilo),
                      **_parametri(d.get("parametri", {}), profilo)}
+        if sistema == "windows":
+            parametri.update(_parametri(comune.get("parametri_windows", {}), profilo))
+            parametri.update(_parametri(d.get("parametri_windows", {}), profilo))
         for _ in range(3):         # un parametro può citarne un altro (es. «potenza» cita «tdp»)
             parametri = {k: _riempi(v, parametri) for k, v in parametri.items()}
         grezzi = comune.get("preparazione", []) + d.get("passo", []) + comune.get("chiusura", [])
-        passi = [p for p in (_passo(x, profilo, parametri) for x in grezzi) if p is not None]
+        passi = [p for p in (_passo(x, profilo, parametri, sistema) for x in grezzi) if p is not None]
         guide.append((d.get("ordine", 99), Guida(
             id=d["id"], nome=d["nome"], obiettivo=_riempi(_per_profilo(d.get("obiettivo", ""), profilo) or "", parametri),
             passi=passi, config=_config(d.get("config"), profilo), parametri=parametri)))

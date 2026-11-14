@@ -4,6 +4,8 @@
     python3 tools/genera_guide.py --verifica # esce con 1 se le pagine esistenti non coincidono con il generato
 
 Il blocco generato sta tra i marcatori GIOCHI:INIZIO e GIOCHI:FINE: ciò che c'è in mezzo non va modificato a mano.
+Per ogni gioco ci sono due sezioni: quella per Bazzite (`class="card solo-bazzite"`, id `<gioco>`) e quella per Windows
+con Winhanced (`class="card solo-windows"`, id `<gioco>-windows`); la pagina mostra quella del sistema scelto dal lettore.
 Alla prima esecuzione, quando i marcatori non ci sono ancora, il blocco sostituisce le vecchie sezioni, da
 «SEZIONE 3: RDR2» fino a «SEZIONE 6: RISOLUZIONE PROBLEMI» (esclusa).
 """
@@ -117,20 +119,25 @@ def _passo(guida: Guida, passo: Passo, numero_sezione: int, numero_passo: int, c
     return righe
 
 
-def _sezione(guida: Guida, numero: int, corto: str) -> list[str]:
-    for testo in (guida.obiettivo, *guida.parametri.values(), *(p.testo + p.titolo for p in guida.passi)):
+def _sezione(guida: Guida, numero: int, corto: str, sistema: str = "bazzite") -> list[str]:
+    windows = sistema == "windows"
+    for testo in (guida.obiettivo, *guida.parametri.values(),
+                  *(p.testo + p.titolo + p.copia + "".join(v + x for v, x in p.voci) for p in guida.passi)):
         trovato = _SEGNAPOSTO.search(testo)
         if trovato:
-            raise SystemExit(f"{guida.id}: segnaposto non risolto {trovato.group(0)} nei dati di data/giochi")
+            raise SystemExit(f"{guida.id} ({sistema}): segnaposto non risolto {trovato.group(0)} nei dati di data/giochi")
+    ident = f"{guida.id}-windows" if windows else guida.id
+    sezione_base = "come-avviare-windows" if windows else "come-avviare"
     righe = [
-        f"<!-- SEZIONE {numero}: {_esc(guida.nome).upper()} -->",
-        f'<section id="{guida.id}" class="card">',
+        f"<!-- SEZIONE {numero}: {_esc(guida.nome).upper()}{' (WINDOWS)' if windows else ''} -->",
+        f'<section id="{ident}" class="card {"solo-windows" if windows else "solo-bazzite"}">',
         f"{RIENTRO}<h2>{numero}. Passo-Passo: {_esc(guida.nome)}</h2>",
         f'{RIENTRO}<div class="alert alert-green">{_esc(guida.obiettivo)}</div>',
     ]
-    rimando = _testo(f"Prima prepara il gioco come nella sezione 2, scegliendo come eseguibile `{guida.parametri['eseguibile']}`. "
+    scelta = "indicando" if windows else "scegliendo"
+    rimando = _testo(f"Prima prepara il gioco come nella sezione 2, {scelta} come eseguibile `{guida.parametri['eseguibile']}`. "
                      f"{guida.parametri.get('nota_eseguibile', '')}".strip())
-    righe += _indenta([r.replace("nella sezione 2", 'nella <a href="#come-avviare">sezione 2</a>', 1) for r in rimando], 1)
+    righe += _indenta([r.replace("nella sezione 2", f'nella <a href="#{sezione_base}">sezione 2</a>', 1) for r in rimando], 1)
     for n, passo in enumerate((p for p in guida.passi if p.sul_sito), 1):
         righe.append("")
         righe += _indenta(_passo(guida, passo, numero, n, corto), 1)
@@ -142,8 +149,10 @@ def blocco_giochi(profilo: str) -> str:
     """Il blocco dei giochi, marcatori compresi, rientrato di un livello e senza a capo finale."""
     corto = next(c for _, (ident, _, c) in DEDICATI.items() if ident == profilo)
     righe = [INIZIO]
+    guide_windows = {g.id: g for g in carica_guide(profilo, "windows")}
     for n, guida in enumerate(carica_guide(profilo), PRIMA_NUMERO):
         righe += _sezione(guida, n, corto) + [""]
+        righe += _sezione(guide_windows[guida.id], n, corto, "windows") + [""]
     righe.append(FINE)
     return "\n".join(_indenta(righe, 1))
 

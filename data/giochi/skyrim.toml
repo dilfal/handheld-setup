@@ -47,6 +47,22 @@ tdp = "un valore medio, per esempio 15 W"
 se_scatta = "nel launcher scegli il preset **Basso** e poi premi di nuovo **Applica** nell'app (passo «Scrivi le impostazioni grafiche»)."
 se_avanza = "alza la risoluzione di gioco, oppure nel launcher passa al preset **Alto**."
 
+# Variante Windows (Winhanced): vedi l'intestazione di _comune.toml.
+[parametri_windows]
+primo_avvio = "Avvia il gioco con **Gioca in locale**: si apre il launcher. Scegli **Opzioni**, il preset **{preset}** e conferma con **OK**; poi scegli **Gioca**, arriva al menu principale ed esci dal gioco."
+
+[parametri_windows.onexplayer1s]
+tdp = "20 W (28 W con il caricatore collegato, se serve)"
+se_scatta = "porta il limite dei fotogrammi a 30 dal pannello di Winhanced oppure, nel launcher, scegli il preset **Basso** e imposta di nuovo le voci della tabella del passo «Imposta la grafica dal launcher»."
+se_avanza = "prova 15 W: meno calore, ventole più silenziose e batteria più lunga."
+
+[parametri_windows.rogallyz1x]
+se_scatta = "alza la potenza a 18 W."
+se_avanza = "abbassa la potenza a 12 W: Skyrim è leggero e la batteria dura molto di più."
+
+[parametri_windows.generico]
+se_scatta = "nel launcher scegli il preset **Basso** e imposta di nuovo le voci della tabella del passo «Imposta la grafica dal launcher»."
+
 [[passo]]
 titolo = "Scrivi le impostazioni grafiche"
 dove = "app"
@@ -58,6 +74,13 @@ Prima di scrivere salva una copia del file: con **Ripristina** torni a com'era p
 
 Da qui in poi, quando si apre il launcher tocca solo **Gioca**: se riapri **Opzioni**, il launcher riscrive il file e devi premere di nuovo Applica.
 """
+titolo_windows = "Imposta la grafica dal launcher"
+dove_windows = "windows"
+testo_windows = '''
+Su Windows non c'è l'app che scrive le impostazioni al posto tuo: le imposti a mano dal launcher (**Opzioni**) e, per le voci che il launcher non ha, dal menu delle impostazioni del gioco. Parti dal preset **{preset}** e ritocca le voci della tabella qui sotto; se una voce non compare in nessuno dei due, lasciala com'è.
+
+Il file delle impostazioni si chiama `SkyrimPrefs.ini` e sta nei Documenti di Windows, in `Documenti\My Games\Skyrim Special Edition` (nella copia GOG: `Documenti\My Games\Skyrim Special Edition GOG`). Compare dopo il primo avvio. Se i Documenti sono sincronizzati con OneDrive, la cartella è `OneDrive\Documenti\My Games\Skyrim Special Edition`.
+'''
 
 [passo.voci]
 onexplayer1s = [
@@ -96,6 +119,10 @@ testo = """
 2. Se a schermo vedi i tasti della tastiera invece di quelli del controller, nelle **Impostazioni** del gioco cerca la voce **Controller** e attivala.
 3. Se il controller non risponde affatto, nella pagina del gioco su Steam tocca l'icona del controller e scegli **Abilita Steam Input** con la disposizione **Gamepad**.
 """
+testo_windows = '''
+1. Avvia {nome} con **Gioca in locale**: nel launcher scegli solo **Gioca**.
+2. Se a schermo vedi i tasti della tastiera invece di quelli del controller, nelle **Impostazioni** del gioco cerca la voce **Controller** e attivala.
+'''
 
 [config]
 tipo = "ini"

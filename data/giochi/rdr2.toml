@@ -46,6 +46,18 @@ tdp = "il valore più alto che il dispositivo regge senza scaldare troppo"
 se_scatta = "nel gioco attiva **FSR 2** su **Qualità** (Impostazioni → Grafica); se non basta passa a **Bilanciato**."
 se_avanza = "alza la risoluzione di gioco, poi una voce per volta: **Qualità illuminazione**, **Qualità ombre**."
 
+# Variante Windows (Winhanced): vedi l'intestazione di _comune.toml.
+[parametri_windows]
+primo_avvio = "Avvia il gioco con **Gioca in locale**, aspetta il menu principale (la prima volta il gioco prepara i suoi file e può volerci qualche minuto), poi esci dal gioco dal suo menu."
+nota_origine = ""
+
+[parametri_windows.onexplayer1s]
+tdp = "28 W (con il caricatore collegato; a batteria 20 W)"
+se_scatta = "controlla di avere impostato 28 W; se non basta, nel gioco attiva **FSR 2** su **Qualità** (l'immagine diventa un po' meno nitida), poi **Bilanciato**."
+
+[parametri_windows.rogallyz1x]
+se_avanza = "alza **Qualità illuminazione** ad Alta oppure **Ombre distanti** a Media; oppure abbassa la potenza a 20 W e tieni la batteria più a lungo."
+
 [[passo]]
 titolo = "Scrivi le impostazioni grafiche"
 dove = "app"
@@ -57,6 +69,15 @@ Prima di scrivere salva una copia del file: con **Ripristina** torni a com'era p
 
 Se il file non viene trovato, torna al passo «Primo avvio». Se qualche voce risulta mancante, la imposti a mano con la tabella del prossimo passo.
 """
+titolo_windows = "Dove stanno le impostazioni grafiche"
+dove_windows = "windows"
+testo_windows = '''
+Su Windows non c'è l'app che scrive le impostazioni al posto tuo: le voci grafiche le imposti a mano dal menu del gioco, con la tabella del passo successivo.
+
+Il file delle impostazioni si chiama `system.xml` e sta nei Documenti di Windows, in `Documenti\Rockstar Games\Red Dead Redemption 2\Settings`. Compare dopo il primo avvio. Se i Documenti sono sincronizzati con OneDrive, la cartella è `OneDrive\Documenti\Rockstar Games\Red Dead Redemption 2\Settings`.
+
+Se non lo trovi, torna al passo «Primo avvio».
+'''
 
 [[passo]]
 titolo = "Controlla nel gioco e completa a mano"
@@ -69,6 +90,14 @@ testo = """
 
 Tra parentesi c'è il nome inglese della voce: in italiano può essere scritta in modo un po' diverso.
 """
+titolo_windows = "Imposta la grafica nel gioco"
+testo_windows = '''
+1. Avvia {nome} con **Gioca in locale** e apri **Impostazioni → Grafica**.
+2. Imposta le voci della tabella qui sotto: su Windows sono tutte da fare a mano.
+3. In fondo, le **Impostazioni avanzate** devono essere **sbloccate** per vedere la seconda metà dell'elenco.
+
+Tra parentesi c'è il nome inglese della voce: in italiano può essere scritta in modo un po' diverso.
+'''
 nota_app = "Per non andare avanti e indietro tra il gioco e questa finestra, apri la stessa tabella sul telefono: `070293.xyz/{pagina_web}`"
 
 [passo.voci]
@@ -112,6 +141,79 @@ rogallyz1x = [
   ["Tipo di schermo (Screen Type)", "Schermo intero · a mano"],
   ["Sincronia verticale (VSync)", "No · a mano (ci pensa il VRR)"],
   ["FSR 2", "Qualità · a mano (TAA, FXAA e MSAA si spengono da soli)"],
+  ["Qualità texture (Texture Quality)", "Ultra"],
+  ["Filtro anisotropico (Anisotropic Filtering)", "8x"],
+  ["Qualità illuminazione (Lighting Quality)", "Media"],
+  ["Illuminazione globale (Global Illumination)", "Bassa"],
+  ["Qualità ombre (Shadow Quality)", "Media"],
+  ["Ombre distanti (Far Shadow Quality)", "Bassa"],
+  ["Occlusione ambientale (SSAO)", "Media"],
+  ["Qualità riflessi (Reflection Quality)", "Bassa"],
+  ["Qualità specchi (Mirror Quality)", "Bassa"],
+  ["Qualità acqua (Water Quality)", "Bassa"],
+  ["Qualità volumetrica (Volumetrics Quality)", "Bassa"],
+  ["Qualità particelle (Particle Quality)", "Media"],
+  ["Tassellazione (Tessellation Quality)", "Media"],
+  ["API grafica (Graphics API)", "Vulkan"],
+  ["Volumetria vicina, lontana e luce volumetrica", "Bassa"],
+  ["Illuminazione particelle (Particle Lighting)", "Media"],
+  ["Ombre morbide (Soft Shadows)", "Alte"],
+  ["Ombre dell'erba (Grass Shadows)", "Basse"],
+  ["Ombre lunghe (Long Shadows)", "No"],
+  ["SSAO a piena risoluzione (Full Resolution SSAO)", "No"],
+  ["Rifrazione, riflessi e fisica dell'acqua", "Basse"],
+  ["Sfocatura di movimento (Motion Blur)", "No"],
+  ["Dettaglio geometria (Geometry Level of Detail)", "Massimo"],
+  ["Dettaglio erba (Grass Level of Detail)", "2 tacche su 10"],
+  ["Qualità alberi (Tree Quality)", "Alta"],
+  ["Mappatura parallasse (Parallax Occlusion Mapping)", "Media"],
+  ["Qualità decalcomanie (Decal Quality)", "Bassa"],
+  ["Qualità pelliccia (Fur Quality)", "Media"],
+  ["Tassellazione alberi (Tree Tessellation)", "No"],
+]
+generico = "onexplayer1s"
+
+[passo.voci_windows]
+onexplayer1s = [
+  ["Tipo di schermo (Screen Type)", "Schermo intero"],
+  ["Sincronia verticale (VSync)", "No"],
+  ["FSR 2", "No (solo se non tieni i 30 FPS: Qualità)"],
+  ["Qualità texture (Texture Quality)", "Ultra"],
+  ["Filtro anisotropico (Anisotropic Filtering)", "4x"],
+  ["Qualità illuminazione (Lighting Quality)", "Bassa"],
+  ["Illuminazione globale (Global Illumination)", "Bassa"],
+  ["Qualità ombre (Shadow Quality)", "Bassa"],
+  ["Ombre distanti (Far Shadow Quality)", "Bassa"],
+  ["Occlusione ambientale (SSAO)", "Media"],
+  ["Qualità riflessi (Reflection Quality)", "Bassa"],
+  ["Qualità specchi (Mirror Quality)", "Bassa"],
+  ["Qualità acqua (Water Quality)", "Bassa"],
+  ["Qualità volumetrica (Volumetrics Quality)", "Bassa"],
+  ["Qualità particelle (Particle Quality)", "Bassa"],
+  ["Tassellazione (Tessellation Quality)", "Bassa"],
+  ["TAA", "Medio"],
+  ["FXAA e MSAA", "No"],
+  ["API grafica (Graphics API)", "Vulkan"],
+  ["Volumetria vicina, lontana e luce volumetrica", "Bassa"],
+  ["Illuminazione particelle (Particle Lighting)", "Bassa"],
+  ["Ombre morbide (Soft Shadows)", "Basse"],
+  ["Ombre dell'erba (Grass Shadows)", "Basse"],
+  ["Ombre lunghe (Long Shadows)", "No"],
+  ["SSAO a piena risoluzione (Full Resolution SSAO)", "No"],
+  ["Rifrazione, riflessi e fisica dell'acqua", "Basse"],
+  ["Sfocatura di movimento (Motion Blur)", "No"],
+  ["Dettaglio geometria (Geometry Level of Detail)", "Minimo"],
+  ["Dettaglio erba (Grass Level of Detail)", "Minimo"],
+  ["Qualità alberi (Tree Quality)", "Bassa"],
+  ["Mappatura parallasse (Parallax Occlusion Mapping)", "Bassa"],
+  ["Qualità decalcomanie (Decal Quality)", "Bassa"],
+  ["Qualità pelliccia (Fur Quality)", "Media"],
+  ["Tassellazione alberi (Tree Tessellation)", "No"],
+]
+rogallyz1x = [
+  ["Tipo di schermo (Screen Type)", "Schermo intero"],
+  ["Sincronia verticale (VSync)", "No (ci pensa il VRR)"],
+  ["FSR 2", "Qualità (TAA, FXAA e MSAA si spengono da soli)"],
   ["Qualità texture (Texture Quality)", "Ultra"],
   ["Filtro anisotropico (Anisotropic Filtering)", "8x"],
   ["Qualità illuminazione (Lighting Quality)", "Media"],

@@ -2,6 +2,9 @@
 # I segnaposto tra graffe vengono dai [parametri] di questo file e di quello del gioco, scelti per profilo.
 # Formato dei testi: **grassetto**, `codice`, righe «1. » (elenco numerato) e «- » (elenco puntato).
 # `sul_sito = false`: il passo non compare nelle pagine web, che lo spiegano già per esteso nella sezione 2.
+# Variante Windows (Winhanced), usata solo dalle pagine web: `[parametri_windows]` e `[parametri_windows.<profilo>]` si
+# sovrappongono ai parametri; ogni passo può avere `titolo_windows`, `testo_windows`, `dove_windows`, `voci_windows`
+# (stessa forma di `voci`) e `windows = false` (il passo non compare su Windows). Se mancano vale il valore di base.
 
 [parametri.onexplayer1s]
 menu_rapido = "il tasto **Turbo** (oppure **Home + B**; con una tastiera `Ctrl+2`)"
@@ -18,9 +21,23 @@ menu_rapido = "il tasto del menu rapido (quello con i tre puntini **…**)"
 pagina_web = "giochi-oxp"
 potenza = "Se il tuo dispositivo mostra il **Limite TDP**, imposta {tdp}."
 
+# Su Windows i limiti si regolano dal pannello di Winhanced; la potenza solo sui dispositivi che Winhanced supporta.
+[parametri_windows]
+limite_fps = "{fps}"
+
+[parametri_windows.onexplayer1s]
+potenza = "Winhanced regola la potenza solo sui dispositivi che supporta e sul OneXPlayer 1S non è provato: se nel pannello trovi la voce della potenza, imposta **{tdp}**; se non c'è, usa lo strumento del produttore. Non regolare mai la potenza da due programmi insieme."
+
+[parametri_windows.rogallyz1x]
+potenza = "Nello stesso pannello porta la potenza a **{tdp}**. Se usi Winhanced, non toccare le stesse voci in Armoury Crate: la potenza e il limite dei fotogrammi si regolano da un solo programma."
+
+[parametri_windows.generico]
+potenza = "Se nel pannello trovi la voce della potenza (TDP) per il tuo dispositivo, imposta {tdp}; se non c'è, usa lo strumento del produttore. Non regolare mai la potenza da due programmi insieme."
+
 [[preparazione]]
 titolo = "Da dove viene il gioco"
 sul_sito = false
+windows = false
 testo = """
 - **Comprato su Steam:** installalo da Steam (Libreria → Installa) e salta i tre passi che seguono (copia, aggiunta a Steam, scelta di Proton). Una copia di Steam copiata a mano di solito non parte.
 - **Copia senza protezioni (per esempio GOG):** segui i passi nell'ordine.
@@ -31,6 +48,7 @@ testo = """
 titolo = "Copia il gioco sul disco interno"
 dove = "desktop"
 sul_sito = false
+windows = false
 testo = """
 1. Passa alla Modalità Desktop: **Menu Steam → Alimentazione → Passa al desktop**.
 2. Apri **Dolphin** (la cartella blu nella barra in basso) e, nella tua cartella Home, crea la cartella `Giochi`.
@@ -43,6 +61,7 @@ Non avviare il gioco da una chiavetta o da un disco esterno in formato NTFS o ex
 titolo = "Aggiungi il gioco a Steam"
 dove = "desktop"
 sul_sito = false
+windows = false
 testo = """
 1. Apri **Steam**, in basso a sinistra tocca **Aggiungi un gioco → Aggiungi un gioco non di Steam…**
 2. Tocca **Sfoglia…** e, in basso, scegli il tipo di file **Tutti i file**.
@@ -54,6 +73,7 @@ testo = """
 titolo = "Scegli Proton"
 dove = "desktop"
 sul_sito = false
+windows = false
 testo = """
 1. Nella Libreria di Steam fai clic destro sul gioco (tieni premuto il dito) e apri **Proprietà…**
 2. Vai su **Compatibilità** e metti la spunta su **Forza l'uso di uno strumento di compatibilità specifico di Steam Play**.
@@ -66,6 +86,7 @@ GE-Proton si installa una volta sola: apri **ProtonUp-Qt**, tocca **Aggiungi ver
 titolo = "Imposta la risoluzione di gioco: {risoluzione}"
 dove = "gaming"
 solo = ["onexplayer1s", "generico"]
+windows = false          # su Windows la risoluzione si sceglie nel pannello di Winhanced (tabella del passo «Pannello di Winhanced…»)
 testo = """
 1. Torna in Gaming Mode (icona **Torna alla Gaming Mode** sul desktop).
 2. Apri la pagina del gioco, tocca l'ingranaggio e poi **Proprietà**.
@@ -83,6 +104,12 @@ testo = """
 
 Questo passo serve perché, finché non lo avvii una volta, il gioco non crea i suoi file di impostazioni e i passi successivi non hanno niente su cui lavorare.
 """
+dove_windows = "winhanced"
+testo_windows = """
+{primo_avvio}
+
+Questo passo serve perché, finché non lo avvii una volta, il gioco non crea i suoi file di impostazioni (compaiono nei Documenti di Windows) e i passi successivi non hanno niente da controllare.
+"""
 
 [[chiusura]]
 titolo = "Menu rapido: fotogrammi, scalatura e potenza"
@@ -92,6 +119,16 @@ testo = """
 2. Apri **Prestazioni** (l'icona della batteria).
 3. Attiva **Usa profilo per gioco**: così queste scelte valgono solo per {nome}.
 4. Imposta le voci qui sotto.
+
+{potenza}
+"""
+titolo_windows = "Pannello di Winhanced: fotogrammi e potenza"
+dove_windows = "winhanced"
+testo_windows = """
+1. Avvia il gioco con **Gioca in locale**.
+2. Apri il pannello di Winhanced (è un widget della Xbox Game Bar).
+3. Salva le scelte nel profilo del gioco: così valgono solo per {nome}.
+4. Imposta le voci qui sotto. Le etichette possono cambiare con la versione di Winhanced.
 
 {potenza}
 """
@@ -115,6 +152,27 @@ generico = [
   ["Limite TDP (TDP Limit), se c'è", "{tdp}"],
 ]
 
+[chiusura.voci_windows]
+onexplayer1s = [
+  ["Profilo del gioco", "Salva le scelte per questo gioco"],
+  ["Risoluzione", "{risoluzione}"],
+  ["Limite dei fotogrammi", "{limite_fps}"],
+  ["Potenza (TDP)", "{tdp}"],
+]
+rogallyz1x = [
+  ["Profilo del gioco", "Salva le scelte per questo gioco"],
+  ["Risoluzione", "{risoluzione}"],
+  ["Frequenza di aggiornamento", "120 Hz"],
+  ["Limite dei fotogrammi", "{limite_fps}"],
+  ["Potenza (TDP)", "{tdp}"],
+]
+generico = [
+  ["Profilo del gioco", "Salva le scelte per questo gioco"],
+  ["Risoluzione", "{risoluzione}"],
+  ["Limite dei fotogrammi", "{limite_fps}"],
+  ["Potenza (TDP), se c'è", "{tdp}"],
+]
+
 [[chiusura]]
 titolo = "Controlla come gira e ritocca"
 dove = "gaming"
@@ -122,6 +180,16 @@ testo = """
 1. Nel menu rapido, in **Prestazioni**, porta il **Livello dell'overlay delle prestazioni** a **1**: in alto a sinistra compare il numero di fotogrammi al secondo (FPS).
 2. Gioca cinque minuti in una zona impegnativa ({zona_prova}) e guarda il numero.
 3. Quando hai finito riporta l'overlay a **0**.
+
+- **Se scende sotto l'obiettivo:** {se_scatta}
+- **Se non scende mai sotto l'obiettivo:** {se_avanza}
+
+Cambia una cosa per volta e riprova: è l'unico modo per capire che cosa ha fatto la differenza.
+"""
+dove_windows = "gioco"
+testo_windows = """
+1. Gioca cinque minuti in una zona impegnativa ({zona_prova}) e guarda come va. Se vuoi vedere il numero esatto dei fotogrammi al secondo (FPS), usa un contatore di FPS a tua scelta.
+2. Quando hai finito, spegni il contatore.
 
 - **Se scende sotto l'obiettivo:** {se_scatta}
 - **Se non scende mai sotto l'obiettivo:** {se_avanza}

@@ -52,8 +52,8 @@ se_avanza = "alza la risoluzione di gioco, oppure nel launcher passa al preset *
 primo_avvio = "Avvia il gioco con **Gioca in locale**: si apre il launcher. Scegli **Opzioni**, il preset **{preset}** e conferma con **OK**; poi scegli **Gioca**, arriva al menu principale ed esci dal gioco."
 
 [parametri_windows.onexplayer1s]
-tdp = "20 W (28 W con il caricatore collegato, se serve)"
-se_scatta = "porta il limite dei fotogrammi a 30 dal pannello di Winhanced oppure, nel launcher, scegli il preset **Basso** e imposta di nuovo le voci della tabella del passo «Imposta la grafica dal launcher»."
+tdp = "20 W nel profilo «Batteria»; 28 W nel profilo «Collegato», se serve"
+se_scatta = "porta il **Limite FPS** a 30 nell'HUD di Winhanced oppure, nel launcher, scegli il preset **Basso** e imposta di nuovo le voci della tabella del passo «Imposta la grafica dal launcher»."
 se_avanza = "prova 15 W: meno calore, ventole più silenziose e batteria più lunga."
 
 [parametri_windows.rogallyz1x]

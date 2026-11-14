@@ -51,17 +51,17 @@ se_avanza = "alza la risoluzione di gioco, poi porta il **Preset grafica** a Med
 voci_base = "tre voci: NVIDIA HairWorks spento, sfocatura di movimento spenta, sincronia verticale spenta (a quella pensa la Gaming Mode)"
 
 # Variante Windows (Winhanced): vedi l'intestazione di _comune.toml. Il limite a 30 o 60 si mette nel menu del gioco:
-# nel pannello di Winhanced resta senza limite, così non si regola la stessa cosa da due programmi.
+# nell'HUD di Winhanced resta su «FPS illimitati», così non si regola la stessa cosa da due programmi.
 [parametri_windows]
 eseguibile = 'bin\x64\witcher3.exe'
 percorso_esempio = 'C:\Giochi\The Witcher 3\bin\x64\witcher3.exe'
 nota_eseguibile = 'Esiste anche `bin\x64_dx12\witcher3.exe` (DirectX 12): per questa guida prendi quello nella cartella `x64` **senza** `_dx12` (DirectX 11).'
 primo_avvio = "Avvia il gioco con **Gioca in locale**, arriva al menu principale, poi scegli **Esci dal gioco**."
-limite_fps = "Nessuno (il limite è già nel menu del gioco)"
+limite_fps = "FPS illimitati (il limite è già nel menu del gioco)"
 
 [parametri_windows.onexplayer1s]
-tdp = "28 W (con il caricatore collegato; a batteria 20 W)"
-se_scatta = "abbassa **Raggio di visibilità della vegetazione** e **Densità dell'erba** al minimo, poi spegni l'**Occlusione ambientale**. Controlla anche di avere impostato 28 W."
+tdp = "28 W nel profilo «Collegato»; 20 W nel profilo «Batteria»"
+se_scatta = "abbassa **Raggio di visibilità della vegetazione** e **Densità dell'erba** al minimo, poi spegni l'**Occlusione ambientale**. Controlla anche di avere impostato 28 W nel profilo «Collegato»."
 voci_base = "quattro voci: risoluzione, NVIDIA HairWorks spento, sfocatura di movimento spenta, sincronia verticale spenta"
 
 [parametri_windows.rogallyz1x]

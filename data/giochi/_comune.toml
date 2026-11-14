@@ -21,18 +21,18 @@ menu_rapido = "il tasto del menu rapido (quello con i tre puntini **…**)"
 pagina_web = "giochi-oxp"
 potenza = "Se il tuo dispositivo mostra il **Limite TDP**, imposta {tdp}."
 
-# Su Windows i limiti si regolano dal pannello di Winhanced; la potenza solo sui dispositivi che Winhanced supporta.
+# Su Windows i limiti si regolano dall'HUD di Winhanced; la potenza solo sui dispositivi che Winhanced supporta.
 [parametri_windows]
 limite_fps = "{fps}"
 
 [parametri_windows.onexplayer1s]
-potenza = "Winhanced regola la potenza solo sui dispositivi che supporta e sul OneXPlayer 1S non è provato: se nel pannello trovi la voce della potenza, imposta **{tdp}**; se non c'è, usa lo strumento del produttore. Non regolare mai la potenza da due programmi insieme."
+potenza = "Sul OneXPlayer 1S la regolazione della potenza da Winhanced non è provata: se nell'HUD trovi la voce **TDP (watt)**, imposta **{tdp}**; se non c'è, usa lo strumento del produttore. Non regolare mai la potenza da due programmi insieme."
 
 [parametri_windows.rogallyz1x]
-potenza = "Nello stesso pannello porta la potenza a **{tdp}**. Se usi Winhanced, non toccare le stesse voci in Armoury Crate: la potenza e il limite dei fotogrammi si regolano da un solo programma."
+potenza = "Nello stesso HUD porta **TDP (watt)** a **{tdp}**. Se usi Winhanced, non toccare le stesse voci in Armoury Crate: la potenza e il Limite FPS si regolano da un solo programma."
 
 [parametri_windows.generico]
-potenza = "Se nel pannello trovi la voce della potenza (TDP) per il tuo dispositivo, imposta {tdp}; se non c'è, usa lo strumento del produttore. Non regolare mai la potenza da due programmi insieme."
+potenza = "Se nell'HUD trovi la voce **TDP (watt)** per il tuo dispositivo, imposta {tdp}; se non c'è, usa lo strumento del produttore. Non regolare mai la potenza da due programmi insieme."
 
 [[preparazione]]
 titolo = "Da dove viene il gioco"
@@ -86,7 +86,7 @@ GE-Proton si installa una volta sola: apri **ProtonUp-Qt**, tocca **Aggiungi ver
 titolo = "Imposta la risoluzione di gioco: {risoluzione}"
 dove = "gaming"
 solo = ["onexplayer1s", "generico"]
-windows = false          # su Windows la risoluzione si sceglie nel pannello di Winhanced (tabella del passo «Pannello di Winhanced…»)
+windows = false          # su Windows la risoluzione si sceglie nell'HUD di Winhanced (tabella del passo «HUD di Winhanced…»)
 testo = """
 1. Torna in Gaming Mode (icona **Torna alla Gaming Mode** sul desktop).
 2. Apri la pagina del gioco, tocca l'ingranaggio e poi **Proprietà**.
@@ -122,12 +122,12 @@ testo = """
 
 {potenza}
 """
-titolo_windows = "Pannello di Winhanced: fotogrammi e potenza"
+titolo_windows = "HUD di Winhanced: fotogrammi e potenza"
 dove_windows = "winhanced"
 testo_windows = """
 1. Avvia il gioco con **Gioca in locale**.
-2. Apri il pannello di Winhanced (è un widget della Xbox Game Bar).
-3. Salva le scelte nel profilo del gioco: così valgono solo per {nome}.
+2. Apri l'HUD di Winhanced premendo insieme **Select + Start**.
+3. Nell'HUD attiva l'interruttore **Usa profilo per gioco**: così le scelte valgono solo per {nome}.
 4. Imposta le voci qui sotto. Le etichette possono cambiare con la versione di Winhanced.
 
 {potenza}
@@ -154,23 +154,23 @@ generico = [
 
 [chiusura.voci_windows]
 onexplayer1s = [
-  ["Profilo del gioco", "Salva le scelte per questo gioco"],
-  ["Risoluzione", "{risoluzione}"],
-  ["Limite dei fotogrammi", "{limite_fps}"],
-  ["Potenza (TDP)", "{tdp}"],
+  ["Usa profilo per gioco", "Attivo"],
+  ["Risoluzione nel gioco", "{risoluzione}"],
+  ["Limite FPS", "{limite_fps}"],
+  ["TDP (watt)", "{tdp}"],
 ]
 rogallyz1x = [
-  ["Profilo del gioco", "Salva le scelte per questo gioco"],
-  ["Risoluzione", "{risoluzione}"],
+  ["Usa profilo per gioco", "Attivo"],
+  ["Risoluzione nel gioco", "{risoluzione}"],
   ["Frequenza di aggiornamento", "120 Hz"],
-  ["Limite dei fotogrammi", "{limite_fps}"],
-  ["Potenza (TDP)", "{tdp}"],
+  ["Limite FPS", "{limite_fps}"],
+  ["TDP (watt)", "{tdp}"],
 ]
 generico = [
-  ["Profilo del gioco", "Salva le scelte per questo gioco"],
-  ["Risoluzione", "{risoluzione}"],
-  ["Limite dei fotogrammi", "{limite_fps}"],
-  ["Potenza (TDP), se c'è", "{tdp}"],
+  ["Usa profilo per gioco", "Attivo"],
+  ["Risoluzione nel gioco", "{risoluzione}"],
+  ["Limite FPS", "{limite_fps}"],
+  ["TDP (watt), se c'è", "{tdp}"],
 ]
 
 [[chiusura]]

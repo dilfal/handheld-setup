@@ -1,19 +1,14 @@
 # STATO: Handheld Setup (repository unico `dilfal/handheld-setup`)
 
-Aggiornato il 14 novembre 2026. Bazzite alla radice (v0.7.0), utility Windows in `windows/` (v1.0.0).
+Aggiornato il 14 novembre 2026 (sera). Bazzite alla radice (v0.7.0), utility Windows in `windows/` (v1.0.0).
 
-## Fatto in questo blocco: voci reali di Winhanced nelle guide di ottimizzazione
-- **Fonte**: installer Winhanced 1.0.0.6 (beta dell'11 novembre 2026, `ota.winhanced.com`), aperto con 7-Zip **senza eseguirlo né installarlo**; 4834 testi dell'interfaccia in italiano. Installer e file estratti già cancellati; sul PC Winhanced non è mai stato installato.
-- **Decisione dell'utente**: niente installazione sul ThinkPad e niente schermate nelle guide (l'installazione metterebbe RTSS, il driver di kernel PawnIO, il servizio `WHService`, attività pianificate con privilegi alti e un certificato tra gli attendibili).
-- **Correzioni, solo variante Windows** (`data/giochi/_comune.toml`, `rdr2.toml`, `skyrim.toml`, `witcher3.toml`; sezioni 1 e «problemi» scritte a mano nelle due pagine `guide/ottimizzazione_*.html`):
-  - «pannello di Winhanced» → «HUD di Winhanced» (widget «Winhanced HUD» della Xbox Game Bar); si apre con Select + Start, Win+G resta come alternativa da tastiera; sul ROG Ally anche il tasto Armoury Crate, se è attiva la riassegnazione dei pulsanti hardware.
-  - «Limite dei fotogrammi» → «Limite FPS»; «Nessun limite» → «FPS illimitati»; «Potenza (TDP)» → «TDP (watt)»; «Risoluzione» → «Risoluzione nel gioco».
-  - Prima della potenza: «Attiva il controllo del dispositivo di Winhanced» (nelle impostazioni di Winhanced).
-  - Profili: interruttore «Usa profilo per gioco»; tre profili per gioco («Collegato», «Batteria», «eGPU»); i valori a caricatore vanno in «Collegato», quelli a batteria in «Batteria».
-  - RTSS: Winhanced lo installa e lo usa da sé, non va chiuso né disinstallato; se il «Limite FPS» non ha effetto si usa il limite del gioco.
-- **Controlli**: `genera_guide.py --verifica` 0; `python -m unittest discover -s tests` 191 test OK, 13 saltati (`python -m unittest` da solo trova 0 test); una revisione Opus fatta (quattro frasi riformulate, variante Bazzite intatta).
-
-- **Pubblicato** (con il sì dell'utente): commit `3124fac` qui; `python tools/pubblica_guide.py` (0, 7 pagine) e commit `4facbee` in `siti-web\guide.070293.xyz`; `python tools/pubblica_070293.py` (0) e commit `c554f45` in `siti-web\070293` (guide sia nella radice sia in `guide/`). I tre push sono andati a buon fine.
+## Fatto in questo blocco: Lossless Scaling sul OneXPlayer 1S con Windows
+- **Problema** (provato dall'utente con RDR2): in schermo intero a 1280×800 l'immagine resta piccola in basso a sinistra (pannello verticale girato da Windows). L'override DPI di Compatibilità **non** serve.
+- **Soluzione provata**: gioco in finestra a 1280×800; profilo di Lossless Scaling con filtro `RDR2.exe`, `RDR2`, `Red Dead Redemption 2` **più** il percorso completo dell'exe (con il solo nome non scattava); in «Modifica profilo» «Ridimensionamento automatico» attivo, ritardo 20 s.
+- **Guide**: passo comune in `_comune.toml` (prima della chiusura, `solo = ["onexplayer1s"]`, nuova chiave `bazzite = false` = solo Windows, gestita in `bhs/giochi.py`); ogni gioco dà `filtro_ls` ed `exe_ls` in `[parametri_windows.onexplayer1s]`. RDR2, Witcher 3 e Skyrim in finestra nelle tabelle Windows del OneXPlayer; «Risoluzione nel gioco» dell'HUD di Winhanced = 2560×1600 (dedotto, **non provato**).
+- **Non provati sul dispositivo**: Witcher 3 e Skyrim con Lossless Scaling (titoli delle finestre nel filtro presunti).
+- Commit `2254ffd`, `3da9824` qui; `895df5b` in `siti-web\guide.070293.xyz`; push fatti (token di `dilfal`).
+- Test: 192, 1 errore (`test_sincronizza_crea_i_rimandi`) dovuto alla modifica **non mia e non committata** di un'altra sessione a `tools/pubblica_070293.py` (tolti i rimandi `giochi-oxp`): il test va aggiornato da chi chiude quel lavoro. La guida (`nota_app` di RDR2) cita ancora `070293.xyz/giochi-oxp`.
 
 ## Da fare
 - Sul OneXPlayer 1S la regolazione della potenza da Winhanced resta «non provata»: nel codice c'è il riconoscimento «ONEXPLAYER», ma nessun testo dice che il TDP si regoli. Serve la prova sul dispositivo.

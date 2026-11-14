@@ -270,6 +270,15 @@ class TestGeneraGuide(unittest.TestCase):
                 self.assertIn(f"curl -L 070293.xyz/{corto} | sh -s -- --imposta-gioco {ident}", testo)
                 self.assertIn(f"curl -L 070293.xyz/{corto} | sh -s -- --ripristina-gioco {ident}", testo)
 
+    def test_passo_solo_windows(self):
+        """`bazzite = false`: il passo di Lossless Scaling c'è solo nella guida Windows di RDR2 per il OneXPlayer 1S."""
+        def titoli(profilo, sistema):
+            return [p.titolo for p in carica_guide(profilo, sistema)[0].passi]
+        self.assertTrue(any("Lossless Scaling" in t for t in titoli("onexplayer1s", "windows")))
+        for profilo, sistema in (("onexplayer1s", "bazzite"), ("rogallyz1x", "windows"), ("generico", "windows")):
+            with self.subTest(profilo=profilo, sistema=sistema):
+                self.assertFalse(any("Lossless Scaling" in t for t in titoli(profilo, sistema)))
+
     def test_dati_di_default_senza_sistema(self):
         """`carica_guide(profilo)` è la variante Bazzite di sempre: nessuna traccia di Winhanced e «Applica» presente."""
         for profilo in ("onexplayer1s", "rogallyz1x", "generico"):

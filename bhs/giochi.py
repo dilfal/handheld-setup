@@ -100,6 +100,8 @@ def _passo(d: dict, profilo: str, parametri: dict[str, str], sistema: str = "baz
     windows = sistema == "windows"
     if windows and d.get("windows", True) is False:
         return None
+    if not windows and d.get("bazzite", True) is False:
+        return None
 
     def scelto(chiave: str, base=None):
         """Su Windows vale `<chiave>_windows` se c'è; altrimenti il valore di base."""
@@ -137,8 +139,8 @@ def carica_guide(profilo: str, sistema: str = "bazzite", cartella: Path = CARTEL
     """Guide ordinate, con testi e valori già scelti per il profilo (quelli sconosciuti usano «generico»).
 
     `sistema="windows"` dà la variante per Winhanced: ai parametri si sovrappongono le tabelle `[parametri_windows…]`;
-    ogni passo può avere `titolo_windows`, `testo_windows`, `dove_windows`, `voci_windows` e `windows = false`
-    (il passo non compare). Con il sistema predefinito i dati sono quelli di sempre.
+    ogni passo può avere `titolo_windows`, `testo_windows`, `dove_windows`, `voci_windows`, `windows = false`
+    (il passo non compare) e `bazzite = false` (il passo compare solo su Windows). Con il sistema predefinito i dati sono quelli di sempre.
     """
     if sistema not in SISTEMI:
         raise ValueError(f"sistema sconosciuto: {sistema!r} (valori ammessi: {', '.join(SISTEMI)})")

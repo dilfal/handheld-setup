@@ -4,7 +4,8 @@
 # `sul_sito = false`: il passo non compare nelle pagine web, che lo spiegano già per esteso nella sezione 2.
 # Variante Windows (Winhanced), usata solo dalle pagine web: `[parametri_windows]` e `[parametri_windows.<profilo>]` si
 # sovrappongono ai parametri; ogni passo può avere `titolo_windows`, `testo_windows`, `dove_windows`, `voci_windows`
-# (stessa forma di `voci`) e `windows = false` (il passo non compare su Windows). Se mancano vale il valore di base.
+# (stessa forma di `voci`), `windows = false` (il passo non compare su Windows) e `bazzite = false` (compare solo su
+# Windows). Se mancano vale il valore di base.
 
 [parametri.onexplayer1s]
 menu_rapido = "il tasto **Turbo** (oppure **Home + B**; con una tastiera `Ctrl+2`)"

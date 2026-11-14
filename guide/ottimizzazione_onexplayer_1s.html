@@ -710,7 +710,8 @@
                     <tr><th>Voce</th><th>Valore</th></tr>
                 </thead>
                 <tbody>
-                    <tr><td>Tipo di schermo (Screen Type)</td><td>Schermo intero</td></tr>
+                    <tr><td>Tipo di schermo (Screen Type)</td><td>Finestra (Windowed): vedi il passo su Lossless Scaling</td></tr>
+                    <tr><td>Risoluzione (Resolution)</td><td>1280×800</td></tr>
                     <tr><td>Sincronia verticale (VSync)</td><td>No</td></tr>
                     <tr><td>FSR 2</td><td>No (solo se non tieni i 30 FPS: Qualità)</td></tr>
                     <tr><td>Qualità texture (Texture Quality)</td><td>Ultra</td></tr>
@@ -748,7 +749,17 @@
             </table>
         </div>
 
-        <h3>Passo 3.4 — HUD di Winhanced: fotogrammi e potenza <span class="dove">In Winhanced</span></h3>
+        <h3>Passo 3.4 — Lossless Scaling: immagine centrata e a tutto schermo <span class="dove">Su Windows</span></h3>
+        <p>Lo schermo del OneXPlayer 1S nasce in verticale e Windows lo gira: in <strong>Schermo intero</strong> a 1280×800 l'immagine resta piccola in basso a sinistra. Per questo Red Dead Redemption 2 va in <strong>Finestra</strong> a 1280×800 e a portarlo a tutto schermo ci pensa <strong>Lossless Scaling</strong> (si compra su Steam).</p>
+        <ol>
+            <li>Apri Lossless Scaling e crea un profilo per Red Dead Redemption 2, poi apri <strong>Modifica profilo</strong>.</li>
+            <li>Nel filtro scrivi tutte e quattro le voci: <code>RDR2.exe</code>, <code>RDR2</code>, <code>Red Dead Redemption 2</code> e il percorso completo di <code>RDR2.exe</code> (per trovarlo, in Steam: clic destro sul gioco → <strong>Gestisci → Sfoglia file locali</strong>).</li>
+            <li>Sempre in <strong>Modifica profilo</strong>, attiva <strong>Ridimensionamento automatico</strong> e porta il ritardo a <strong>20 secondi</strong>.</li>
+            <li>Prima di avviare il gioco apri Lossless Scaling (può restare ridotto a icona): 20 secondi dopo che compare la finestra di Red Dead Redemption 2, l'immagine si ingrandisce da sola.</li>
+        </ol>
+        <p>Se non succede, tocca una volta la finestra del gioco perché torni in primo piano; altrimenti premi <strong>Scala</strong> in Lossless Scaling e scegli la finestra del gioco a mano.</p>
+
+        <h3>Passo 3.5 — HUD di Winhanced: fotogrammi e potenza <span class="dove">In Winhanced</span></h3>
         <ol>
             <li>Avvia il gioco con <strong>Gioca in locale</strong>.</li>
             <li>Apri l'HUD di Winhanced premendo insieme <strong>Select + Start</strong>.</li>
@@ -763,14 +774,14 @@
                 </thead>
                 <tbody>
                     <tr><td>Usa profilo per gioco</td><td>Attivo</td></tr>
-                    <tr><td>Risoluzione nel gioco</td><td>1280×800</td></tr>
+                    <tr><td>Risoluzione nel gioco</td><td>2560×1600, cioè quella dello schermo (a ingrandire il gioco ci pensa Lossless Scaling)</td></tr>
                     <tr><td>Limite FPS</td><td>30</td></tr>
                     <tr><td>TDP (watt)</td><td>28 W nel profilo «Collegato»; 20 W nel profilo «Batteria»</td></tr>
                 </tbody>
             </table>
         </div>
 
-        <h3>Passo 3.5 — Controlla come gira e ritocca <span class="dove">Dentro il gioco</span></h3>
+        <h3>Passo 3.6 — Controlla come gira e ritocca <span class="dove">Dentro il gioco</span></h3>
         <ol>
             <li>Gioca cinque minuti in una zona impegnativa (Saint Denis, o Valentine con la pioggia) e guarda come va. Se vuoi vedere il numero esatto dei fotogrammi al secondo (FPS), usa un contatore di FPS a tua scelta.</li>
             <li>Quando hai finito, spegni il contatore.</li>

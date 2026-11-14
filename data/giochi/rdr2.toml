@@ -52,6 +52,9 @@ primo_avvio = "Avvia il gioco con **Gioca in locale**, aspetta il menu principal
 nota_origine = ""
 
 [parametri_windows.onexplayer1s]
+# Schermo intero a 1280×800 sul pannello verticale girato da Windows: immagine piccola in basso a sinistra (provato
+# il 14 novembre 2026). Il gioco va in finestra e lo ingrandisce Lossless Scaling, quindi lo schermo resta nativo.
+risoluzione = "2560×1600, cioè quella dello schermo (a ingrandire il gioco ci pensa Lossless Scaling)"
 tdp = "28 W nel profilo «Collegato»; 20 W nel profilo «Batteria»"
 se_scatta = "controlla di avere impostato 28 W nel profilo «Collegato»; se non basta, nel gioco attiva **FSR 2** su **Qualità** (l'immagine diventa un po' meno nitida), poi **Bilanciato**."
 
@@ -177,7 +180,8 @@ generico = "onexplayer1s"
 
 [passo.voci_windows]
 onexplayer1s = [
-  ["Tipo di schermo (Screen Type)", "Schermo intero"],
+  ["Tipo di schermo (Screen Type)", "Finestra (Windowed): vedi il passo su Lossless Scaling"],
+  ["Risoluzione (Resolution)", "1280×800"],
   ["Sincronia verticale (VSync)", "No"],
   ["FSR 2", "No (solo se non tieni i 30 FPS: Qualità)"],
   ["Qualità texture (Texture Quality)", "Ultra"],
@@ -247,6 +251,22 @@ rogallyz1x = [
   ["Tassellazione alberi (Tree Tessellation)", "No"],
 ]
 generico = "onexplayer1s"
+
+[[passo]]
+titolo = "Lossless Scaling: immagine centrata e a tutto schermo"
+solo = ["onexplayer1s"]
+bazzite = false
+dove = "windows"
+testo = """
+Lo schermo del OneXPlayer 1S nasce in verticale e Windows lo gira: in **Schermo intero** a 1280×800 l'immagine resta piccola in basso a sinistra. Per questo {nome} va in **Finestra** a 1280×800 e a portarlo a tutto schermo ci pensa **Lossless Scaling** (si compra su Steam).
+
+1. Apri Lossless Scaling e crea un profilo per {nome}, poi apri **Modifica profilo**.
+2. Nel filtro scrivi tutte e quattro le voci: `RDR2.exe`, `RDR2`, `Red Dead Redemption 2` e il percorso completo di `RDR2.exe` (per trovarlo, in Steam: clic destro sul gioco → **Gestisci → Sfoglia file locali**).
+3. Sempre in **Modifica profilo**, attiva **Ridimensionamento automatico** e porta il ritardo a **20 secondi**.
+4. Prima di avviare il gioco apri Lossless Scaling (può restare ridotto a icona): 20 secondi dopo che compare la finestra di {nome}, l'immagine si ingrandisce da sola.
+
+Se non succede, tocca una volta la finestra del gioco perché torni in primo piano; altrimenti premi **Scala** in Lossless Scaling e scegli la finestra del gioco a mano.
+"""
 
 [config]
 tipo = "xml"
